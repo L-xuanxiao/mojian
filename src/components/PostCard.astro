@@ -8,6 +8,7 @@ interface Props {
 }
 
 const { post } = Astro.props;
+const BASE = import.meta.env.BASE_URL;
 ---
 
 <article class:list={['post-card', { 'has-cover': post.data.cover }]}>
@@ -31,9 +32,9 @@ const { post } = Astro.props;
       <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
       <span>{post.data.category}</span>
     </div>
-    <h2><a href={`/posts/${post.id}/`}>{post.data.title}</a></h2>
+    <h2><a href={`${BASE}posts/${post.id}/`}>{post.data.title}</a></h2>
     <p>{post.data.description}</p>
-    <a class="read-more" href={`/posts/${post.id}/`} aria-label={`阅读《${post.data.title}》`}>
+    <a class="read-more" href={`${BASE}posts/${post.id}/`} aria-label={`阅读《${post.data.title}》`}>
       展卷阅读
     </a>
   </div>

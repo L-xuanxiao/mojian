@@ -1,18 +1,19 @@
 ---
+const BASE = import.meta.env.BASE_URL;
 const pathname = Astro.url.pathname;
 const navItems = [
-  { href: '/', label: '首页' },
-  { href: '/archive/', label: '归档' },
-  { href: '/about/', label: '关于' },
+  { href: BASE, label: '首页' },
+  { href: `${BASE}archive/`, label: '归档' },
+  { href: `${BASE}about/`, label: '关于' },
 ];
 
 const isActive = (href: string) =>
-  href === '/' ? pathname === '/' : pathname.startsWith(href);
+  href === BASE ? pathname === BASE : pathname.startsWith(href);
 ---
 
 <header class="site-header">
   <div class="page-shell header-inner">
-    <a class="brand" href="/" aria-label="墨笺首页">
+    <a class="brand" href={BASE} aria-label="墨笺首页">
       <span class="brand-name">墨笺</span>
       <span class="seal" aria-hidden="true"><i>墨</i><i>笺</i></span>
     </a>

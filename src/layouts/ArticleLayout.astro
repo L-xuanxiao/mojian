@@ -11,6 +11,7 @@ interface Props {
 }
 
 const { post, newerPost, olderPost } = Astro.props;
+const BASE = import.meta.env.BASE_URL;
 ---
 
 <BaseLayout title={post.data.title} description={post.data.description}>
@@ -43,13 +44,13 @@ const { post, newerPost, olderPost } = Astro.props;
       <slot />
     </div>
 
-    <a class="back-link" href="/#recent-posts">返回近日书写</a>
+    <a class="back-link" href={`${BASE}#recent-posts`}>返回近日书写</a>
 
     {(newerPost || olderPost) && (
       <nav class="post-nav" aria-label="文章翻页">
         <div>
           {olderPost && (
-            <a href={`/posts/${olderPost.id}/`}>
+            <a href={`${BASE}posts/${olderPost.id}/`}>
               <small>上一篇</small>
               <span>{olderPost.data.title}</span>
             </a>
@@ -57,7 +58,7 @@ const { post, newerPost, olderPost } = Astro.props;
         </div>
         <div>
           {newerPost && (
-            <a href={`/posts/${newerPost.id}/`}>
+            <a href={`${BASE}posts/${newerPost.id}/`}>
               <small>下一篇</small>
               <span>{newerPost.data.title}</span>
             </a>
