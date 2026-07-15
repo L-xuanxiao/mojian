@@ -1,114 +1,2375 @@
 ---
-import InkHero from '../components/InkHero.astro';
-import PostCard from '../components/PostCard.astro';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { getPublishedPosts } from '../lib/posts';
-
-const posts = await getPublishedPosts();
-const categories = [
-  { name: '日常', mark: '日', note: '寻常烟火' },
-  { name: '行旅', mark: '行', note: '山川远近' },
-  { name: '读书', mark: '书', note: '字里光阴' },
-  { name: '摄影', mark: '影', note: '留住片刻' },
-];
+const BASE = import.meta.env.BASE_URL;
 ---
 
-<BaseLayout>
-  <InkHero />
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="墨笺，一处记录日常、山川、旧书与生活片段的个人博客。" />
+  <link rel="icon" type="image/svg+xml" href={`${BASE}favicon.svg`} />
+  <title>墨笺｜个人博客</title>
+  <style>
+    /* =========================
+       设计变量与基础样式
+    ========================== */
+    :root {
+      --paper: #f2eee3;
+      --paper-light: #fbf9f3;
+      --paper-warm: #e8e0d1;
+      --paper-deep: #d8cdbc;
+      --ink: #292a27;
+      --ink-soft: #66665f;
+      --ink-faint: #929087;
+      --ink-wash: #4f5750;
+      --moss: #586258;
+      --moss-deep: #3f4841;
+      --cinnabar: #a44434;
+      --cinnabar-deep: #7f3026;
+      --line: rgba(83, 79, 70, 0.18);
+      --line-strong: rgba(83, 79, 70, 0.32);
+      --shadow: rgba(62, 54, 43, 0.12);
+      --page-width: 1220px;
+      --side-space: clamp(18px, 5vw, 72px);
+      --serif: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "SimSun", serif;
+      --sans: "MiSans", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
 
-  <section id="recent-posts" class="posts-section page-shell" aria-labelledby="recent-title">
-    <h2 id="recent-title" class="section-title">近日书写</h2>
-    <div class="post-list">
-      {posts.map((post) => <PostCard post={post} />)}
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--paper);
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255, 255, 255, 0.72), transparent 25%),
+        radial-gradient(circle at 88% 26%, rgba(255, 255, 255, 0.48), transparent 22%),
+        linear-gradient(180deg, var(--paper-light) 0%, var(--paper) 44%, #eee8dc 100%);
+      font-family: var(--sans);
+      line-height: 1.8;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+      opacity: 0.055;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.74'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      right: -12vw;
+      top: 16vh;
+      width: min(46vw, 700px);
+      aspect-ratio: 1;
+      z-index: -1;
+      pointer-events: none;
+      border-radius: 46% 54% 61% 39% / 40% 42% 58% 60%;
+      background:
+        radial-gradient(circle at 48% 52%, rgba(69, 78, 71, 0.08), transparent 52%),
+        radial-gradient(circle at 38% 40%, rgba(69, 78, 71, 0.07), transparent 34%);
+      filter: blur(22px);
+      transform: rotate(-12deg);
+    }
+
+    ::selection {
+      color: var(--paper-light);
+      background: var(--cinnabar);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    svg {
+      display: block;
+      max-width: 100%;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--cinnabar);
+      outline-offset: 5px;
+    }
+
+    .shell {
+      width: min(calc(100% - (var(--side-space) * 2)), var(--page-width));
+      margin-inline: auto;
+    }
+
+    .section {
+      position: relative;
+      scroll-margin-top: 76px;
+      padding: clamp(92px, 10vw, 150px) 0;
+    }
+
+    .section-heading {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.55fr);
+      align-items: end;
+      gap: 48px;
+      margin-bottom: clamp(48px, 6vw, 78px);
+    }
+
+    .section-kicker {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 13px;
+      color: var(--cinnabar);
+      font-family: var(--serif);
+      font-size: 0.76rem;
+      letter-spacing: 0.22em;
+    }
+
+    .section-kicker::before {
+      content: "";
+      width: 34px;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.72;
+    }
+
+    .section-title {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(2.45rem, 5vw, 4.25rem);
+      font-weight: 500;
+      line-height: 1.12;
+      letter-spacing: 0.1em;
+    }
+
+    .section-note {
+      margin: 0;
+      color: var(--ink-soft);
+      font-family: var(--serif);
+      font-size: clamp(1rem, 1.4vw, 1.13rem);
+      line-height: 2;
+    }
+
+    .brush-divider {
+      position: absolute;
+      left: 50%;
+      bottom: -14px;
+      width: min(74vw, 960px);
+      height: 42px;
+      transform: translateX(-50%);
+      opacity: 0.26;
+      pointer-events: none;
+    }
+
+    /* =========================
+       顶部导航
+    ========================== */
+    .site-header {
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 30;
+      border-bottom: 1px solid transparent;
+      transition:
+        background-color 320ms ease,
+        border-color 320ms ease,
+        box-shadow 320ms ease,
+        backdrop-filter 320ms ease;
+    }
+
+    .site-header.is-scrolled {
+      background: rgba(248, 246, 239, 0.82);
+      border-bottom-color: rgba(92, 87, 77, 0.16);
+      box-shadow: 0 12px 36px rgba(62, 54, 43, 0.04);
+      backdrop-filter: blur(16px) saturate(86%);
+      -webkit-backdrop-filter: blur(16px) saturate(86%);
+    }
+
+    .nav-inner {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      flex: 0 0 auto;
+      font-family: var(--serif);
+      font-size: 1.28rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+    }
+
+    .brand-seal {
+      position: relative;
+      width: 27px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      color: #f8eee4;
+      background: var(--cinnabar);
+      border: 1px solid var(--cinnabar-deep);
+      font-family: var(--serif);
+      font-size: 0.7rem;
+      line-height: 1;
+      transform: rotate(-4deg);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.14);
+    }
+
+    .brand-seal::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.38);
+    }
+
+    .nav-list {
+      display: flex;
+      align-items: center;
+      gap: clamp(18px, 3vw, 40px);
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: var(--ink-soft);
+      font-size: 0.94rem;
+    }
+
+    .nav-link {
+      position: relative;
+      display: inline-block;
+      padding: 8px 0;
+      transition: color 220ms ease;
+    }
+
+    .nav-link::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 2px;
+      height: 1px;
+      background: var(--cinnabar);
+      transform: scaleX(0);
+      transform-origin: right center;
+      transition: transform 280ms var(--ease);
+    }
+
+    .nav-link:hover,
+    .nav-link[aria-current="page"] {
+      color: var(--ink);
+    }
+
+    .nav-link:hover::after,
+    .nav-link[aria-current="page"]::after {
+      transform: scaleX(1);
+      transform-origin: left center;
+    }
+
+    /* =========================
+       首页主视觉：水墨远山
+    ========================== */
+    .hero {
+      position: relative;
+      min-height: min(920px, 100svh);
+      display: grid;
+      align-items: center;
+      padding: 132px 0 146px;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: min(44vw, 620px);
+      aspect-ratio: 1;
+      left: 2vw;
+      top: 12%;
+      z-index: -3;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.5), rgba(255,255,255,0.04) 58%, transparent 72%);
+      border: 1px solid rgba(84, 92, 84, 0.07);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 52%;
+      z-index: -2;
+      background: linear-gradient(180deg, transparent, rgba(236, 232, 221, 0.42));
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      position: relative;
+      z-index: 4;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      align-items: center;
+      gap: clamp(42px, 7vw, 110px);
+    }
+
+    .hero-content {
+      max-width: 760px;
+      padding-top: 26px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 15px;
+      margin: 0 0 24px;
+      color: var(--moss);
+      font-family: var(--serif);
+      font-size: 0.8rem;
+      letter-spacing: 0.28em;
+    }
+
+    .hero-eyebrow::before {
+      content: "";
+      width: 42px;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.58;
+    }
+
+    .hero-title {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(4.5rem, 9vw, 8.2rem);
+      font-weight: 500;
+      line-height: 0.98;
+      letter-spacing: 0.11em;
+      text-wrap: balance;
+    }
+
+    .hero-title .accent-dot {
+      color: var(--cinnabar);
+      font-size: 0.42em;
+      vertical-align: 0.14em;
+      margin-left: 0.08em;
+    }
+
+    .hero-subtitle {
+      margin: 28px 0 0;
+      color: var(--ink-soft);
+      font-family: var(--serif);
+      font-size: clamp(1.12rem, 2vw, 1.48rem);
+      letter-spacing: 0.12em;
+    }
+
+    .hero-intro {
+      max-width: 580px;
+      margin-top: 34px;
+      padding-left: 22px;
+      border-left: 1px solid rgba(164, 68, 52, 0.48);
+      color: var(--ink-soft);
+      font-size: 1rem;
+      line-height: 2.05;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      margin-top: 42px;
+    }
+
+    .action-primary,
+    .action-secondary {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      font-family: var(--serif);
+      letter-spacing: 0.12em;
+      transition: color 230ms ease, transform 230ms var(--ease), border-color 230ms ease;
+    }
+
+    .action-primary {
+      min-width: 126px;
+      padding: 8px 20px;
+      color: var(--paper-light);
+      background: var(--ink);
+      border: 1px solid var(--ink);
+    }
+
+    .action-primary::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .action-primary:hover {
+      transform: translateY(-2px);
+      background: var(--moss-deep);
+      border-color: var(--moss-deep);
+    }
+
+    .action-secondary {
+      padding: 8px 0 6px;
+      border-bottom: 1px solid var(--line-strong);
+    }
+
+    .action-secondary::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 1px;
+      background: var(--cinnabar);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 260ms var(--ease);
+    }
+
+    .action-secondary:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    .hero-side {
+      position: relative;
+      align-self: stretch;
+      min-height: 470px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .hero-vertical-copy {
+      position: absolute;
+      right: 4px;
+      top: 42px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      color: rgba(48, 50, 46, 0.68);
+      font-family: var(--serif);
+      font-size: 0.9rem;
+      letter-spacing: 0.28em;
+      writing-mode: vertical-rl;
+    }
+
+    .hero-vertical-copy::before {
+      content: "";
+      width: 1px;
+      height: 64px;
+      margin: 0 auto 12px;
+      background: linear-gradient(var(--moss), transparent);
+      opacity: 0.38;
+    }
+
+    .hero-note {
+      position: relative;
+      width: 286px;
+      margin-right: 46px;
+      padding: 28px 28px 26px;
+      color: var(--ink-soft);
+      background: rgba(249, 247, 240, 0.55);
+      border-top: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(5px);
+    }
+
+    .hero-note::before {
+      content: "";
+      position: absolute;
+      left: -30px;
+      top: 20px;
+      width: 52px;
+      height: 74px;
+      background:
+        radial-gradient(ellipse at 40% 55%, rgba(63, 72, 65, 0.22), transparent 58%),
+        radial-gradient(ellipse at 70% 35%, rgba(63, 72, 65, 0.12), transparent 48%);
+      filter: blur(3px);
+      transform: rotate(-14deg);
+    }
+
+    .hero-note-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 20px;
+      color: var(--ink);
+      font-family: var(--serif);
+    }
+
+    .hero-note-head strong {
+      font-size: 1.05rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+    }
+
+    .hero-note-head time {
+      color: var(--ink-faint);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+    }
+
+    .hero-note dl,
+    .hero-note dd {
+      margin: 0;
+    }
+
+    .hero-note dl {
+      display: grid;
+      gap: 17px;
+    }
+
+    .hero-note dl > div {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      gap: 12px;
+      padding-top: 15px;
+      border-top: 1px solid var(--line);
+    }
+
+    .hero-note dt {
+      color: var(--moss);
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+    }
+
+    .hero-note dd {
+      font-family: var(--serif);
+      font-size: 0.94rem;
+      line-height: 1.75;
+    }
+
+    .hero-landscape {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -2px;
+      z-index: 1;
+      height: min(48vw, 520px);
+      min-height: 310px;
+      pointer-events: none;
+    }
+
+    .hero-landscape svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .hero-sun {
+      position: absolute;
+      right: 23%;
+      bottom: 39%;
+      z-index: 0;
+      width: clamp(56px, 6vw, 90px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: rgba(164, 68, 52, 0.15);
+      box-shadow: 0 0 42px rgba(164, 68, 52, 0.06);
+    }
+
+    .scroll-hint {
+      position: absolute;
+      left: 50%;
+      bottom: 28px;
+      z-index: 5;
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      color: var(--ink-faint);
+      font-family: var(--serif);
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      transform: translateX(-50%);
+    }
+
+    .scroll-hint::after {
+      content: "";
+      width: 1px;
+      height: 30px;
+      background: linear-gradient(var(--ink-faint), transparent);
+    }
+
+    /* =========================
+       书斋目录
+    ========================== */
+    .study-index {
+      background:
+        linear-gradient(90deg, rgba(73, 81, 74, 0.025), transparent 30%, transparent 70%, rgba(73, 81, 74, 0.025)),
+        rgba(250, 248, 242, 0.45);
+      border-top: 1px solid rgba(82, 78, 69, 0.08);
+      border-bottom: 1px solid rgba(82, 78, 69, 0.08);
+    }
+
+    .study-grid {
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr);
+      gap: clamp(56px, 8vw, 112px);
+      align-items: start;
+    }
+
+    .study-intro {
+      position: sticky;
+      top: 118px;
+      padding-top: 12px;
+    }
+
+    .study-title {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(2.35rem, 4.7vw, 4rem);
+      font-weight: 500;
+      line-height: 1.15;
+      letter-spacing: 0.1em;
+    }
+
+    .study-intro > p:last-of-type {
+      margin: 26px 0 0;
+      color: var(--ink-soft);
+      font-family: var(--serif);
+      line-height: 2;
+    }
+
+    .study-mini-painting {
+      position: relative;
+      width: 100%;
+      height: 190px;
+      margin-top: 34px;
+      overflow: hidden;
+      border-top: 1px solid var(--line);
+    }
+
+    .study-mini-painting svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .index-list {
+      border-top: 1px solid var(--line-strong);
+    }
+
+    .index-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: 60px minmax(150px, 0.48fr) minmax(220px, 1fr) 70px;
+      align-items: center;
+      gap: 24px;
+      min-height: 118px;
+      border-bottom: 1px solid var(--line);
+      transition: color 240ms ease, transform 260ms var(--ease), background-color 240ms ease;
+    }
+
+    .index-item::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 0;
+      height: 1px;
+      background: var(--cinnabar);
+      transition: width 320ms var(--ease);
+    }
+
+    .index-item:hover {
+      color: var(--moss-deep);
+      background: linear-gradient(90deg, rgba(164, 68, 52, 0.035), transparent 42%);
+      transform: translateX(6px);
+    }
+
+    .index-item:hover::before {
+      width: 28px;
+    }
+
+    .index-number {
+      color: var(--cinnabar);
+      font-family: var(--serif);
+      font-size: 0.88rem;
+      letter-spacing: 0.12em;
+      transition: transform 260ms var(--ease);
+    }
+
+    .index-item:hover .index-number {
+      transform: translateX(32px);
+    }
+
+    .index-name {
+      font-family: var(--serif);
+      font-size: clamp(1.28rem, 2vw, 1.7rem);
+      letter-spacing: 0.08em;
+    }
+
+    .index-desc,
+    .index-count {
+      color: var(--ink-soft);
+      font-size: 0.88rem;
+    }
+
+    .index-count {
+      text-align: right;
+      font-family: var(--serif);
+    }
+
+    /* =========================
+       最新文章：水墨横卷
+    ========================== */
+    .latest {
+      background:
+        radial-gradient(ellipse at 100% 22%, rgba(73, 82, 74, 0.08), transparent 27%),
+        radial-gradient(ellipse at 0% 76%, rgba(73, 82, 74, 0.055), transparent 28%);
+    }
+
+    .scroll-list {
+      position: relative;
+      scroll-margin-top: 76px;
+      display: grid;
+      gap: clamp(40px, 5vw, 64px);
+    }
+
+    .scroll-list::before {
+      content: "";
+      position: absolute;
+      left: 5%;
+      right: 5%;
+      top: -22px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--line-strong), transparent);
+    }
+
+    .article-scroll {
+      position: relative;
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr) 30px;
+      min-height: 280px;
+      filter: drop-shadow(0 16px 24px rgba(63, 54, 41, 0.08));
+      transition: transform 300ms var(--ease), filter 300ms ease;
+    }
+
+    .article-scroll:nth-child(2) {
+      margin-left: clamp(0px, 4vw, 52px);
+      margin-right: clamp(0px, 1vw, 12px);
+    }
+
+    .article-scroll:nth-child(3) {
+      margin-left: clamp(0px, 1vw, 14px);
+      margin-right: clamp(0px, 4vw, 54px);
+    }
+
+    .article-scroll:hover {
+      transform: translateY(-5px);
+      filter: drop-shadow(0 20px 30px rgba(63, 54, 41, 0.12));
+    }
+
+    .scroll-axis {
+      position: relative;
+      z-index: 5;
+      margin: -10px 0;
+      background:
+        linear-gradient(90deg, rgba(68, 51, 34, 0.78), rgba(153, 111, 67, 0.76) 34%, rgba(84, 58, 36, 0.82) 74%, rgba(48, 37, 27, 0.9)),
+        #725037;
+      border: 1px solid rgba(54, 40, 28, 0.44);
+      box-shadow:
+        inset 4px 0 8px rgba(255,255,255,0.12),
+        inset -4px 0 8px rgba(21, 15, 10, 0.18),
+        0 8px 16px rgba(45, 33, 23, 0.12);
+    }
+
+    .scroll-axis::before,
+    .scroll-axis::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      width: 46px;
+      height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #967052, #523a28 72%);
+      border: 1px solid rgba(48, 35, 24, 0.45);
+      transform: translateX(-50%);
+      box-shadow: inset 0 2px 3px rgba(255,255,255,0.12);
+    }
+
+    .scroll-axis::before { top: -7px; }
+    .scroll-axis::after { bottom: -7px; }
+
+    .scroll-paper {
+      position: relative;
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr) 150px;
+      align-items: center;
+      gap: clamp(26px, 4vw, 58px);
+      padding: clamp(38px, 5vw, 66px) clamp(34px, 5vw, 72px);
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(103, 89, 68, 0.10), transparent 4%, transparent 96%, rgba(103, 89, 68, 0.10)),
+        radial-gradient(circle at 52% 48%, rgba(255,255,255,0.58), transparent 44%),
+        #efe7d8;
+      border-top: 1px solid rgba(118, 97, 68, 0.3);
+      border-bottom: 1px solid rgba(118, 97, 68, 0.28);
+      box-shadow:
+        inset 0 16px 24px rgba(255,255,255,0.18),
+        inset 0 -14px 22px rgba(100, 81, 56, 0.07);
+    }
+
+    .scroll-paper::before {
+      content: "";
+      position: absolute;
+      inset: 15px 18px;
+      z-index: 1;
+      pointer-events: none;
+      border: 1px solid rgba(112, 96, 73, 0.15);
+      clip-path: polygon(0 0, 98.5% 0, 100% 6%, 99.2% 100%, 1% 99.4%, 0 92%);
+    }
+
+    .scroll-paper::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.22;
+      background-image:
+        repeating-linear-gradient(90deg, transparent 0 46px, rgba(97, 80, 58, 0.06) 47px, transparent 48px),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 150 150' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.62' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='.34'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+    }
+
+    .scroll-paper > *:not(.scroll-ink) {
+      position: relative;
+      z-index: 3;
+    }
+
+    .scroll-ink {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.72;
+    }
+
+    .scroll-ink svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .scroll-seal {
+      position: absolute !important;
+      right: 28px;
+      top: 22px;
+      width: 42px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      color: rgba(249, 237, 226, 0.94);
+      background: rgba(164, 68, 52, 0.88);
+      border: 1px solid rgba(127, 48, 38, 0.7);
+      font-family: var(--serif);
+      font-size: 0.72rem;
+      line-height: 1.2;
+      text-align: center;
+      transform: rotate(-3deg);
+      box-shadow: inset 0 0 0 3px rgba(255,255,255,0.12);
+    }
+
+    .post-meta {
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 7px;
+      padding-right: 24px;
+      border-right: 1px solid rgba(74, 76, 69, 0.2);
+      color: var(--ink-soft);
+      font-size: 0.82rem;
+    }
+
+    .post-meta::before {
+      content: attr(data-index);
+      display: block;
+      margin-bottom: 6px;
+      color: var(--cinnabar);
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      letter-spacing: 0.16em;
+    }
+
+    .post-meta time {
+      font-family: var(--serif);
+      letter-spacing: 0.04em;
+    }
+
+    .post-meta .category {
+      margin-top: 8px;
+      color: var(--moss-deep);
+      font-family: var(--serif);
+      font-size: 0.98rem;
+      letter-spacing: 0.08em;
+    }
+
+    .reading-time {
+      color: var(--ink-faint);
+    }
+
+    .post-main {
+      min-width: 0;
+      padding-right: 18px;
+    }
+
+    .post-title {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(1.7rem, 3.1vw, 2.65rem);
+      font-weight: 500;
+      line-height: 1.4;
+      letter-spacing: 0.045em;
+      text-wrap: balance;
+    }
+
+    .post-title a {
+      background-image: linear-gradient(var(--cinnabar), var(--cinnabar));
+      background-repeat: no-repeat;
+      background-position: left 100%;
+      background-size: 0 1px;
+      transition: color 250ms ease, background-size 340ms var(--ease);
+    }
+
+    .article-scroll:hover .post-title a {
+      color: #1f2420;
+      background-size: 100% 1px;
+    }
+
+    .post-excerpt {
+      max-width: 650px;
+      margin: 22px 0 0;
+      color: var(--ink-soft);
+      font-family: var(--serif);
+      font-size: 1rem;
+      line-height: 1.95;
+    }
+
+    .post-tags {
+      align-self: center;
+      display: grid;
+      gap: 10px;
+      justify-items: end;
+      color: var(--ink-soft);
+      font-family: var(--serif);
+      font-size: 0.88rem;
+      letter-spacing: 0.08em;
+    }
+
+    .post-tags::before {
+      content: "题签";
+      margin-bottom: 4px;
+      color: var(--cinnabar);
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+    }
+
+    .post-tags span::before {
+      content: "「";
+      color: rgba(164, 68, 52, 0.62);
+    }
+
+    .post-tags span::after {
+      content: "」";
+      color: rgba(164, 68, 52, 0.62);
+    }
+
+    .all-posts {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 42px;
+    }
+
+    .all-posts a {
+      position: relative;
+      padding: 8px 30px 8px 0;
+      color: var(--ink-soft);
+      font-family: var(--serif);
+      letter-spacing: 0.12em;
+    }
+
+    .all-posts a::before {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 50%;
+      width: 20px;
+      height: 1px;
+      background: var(--cinnabar);
+      transition: width 260ms var(--ease);
+    }
+
+    .all-posts a:hover::before {
+      width: 28px;
+    }
+
+    /* =========================
+       案头近况：墨色过渡区
+    ========================== */
+    .desk {
+      position: relative;
+      color: rgba(248, 246, 239, 0.92);
+      background:
+        radial-gradient(ellipse at 18% 38%, rgba(255,255,255,0.045), transparent 33%),
+        radial-gradient(ellipse at 80% 12%, rgba(164,68,52,0.08), transparent 22%),
+        linear-gradient(135deg, #3d4540, #303531 60%, #3a403b);
+      overflow: hidden;
+    }
+
+    .desk::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.22;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='d'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.46' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23d)' opacity='.6'/%3E%3C/svg%3E");
+      mix-blend-mode: soft-light;
+    }
+
+    .desk::after {
+      content: "";
+      position: absolute;
+      right: -7%;
+      bottom: -22%;
+      width: min(50vw, 760px);
+      aspect-ratio: 1.4;
+      border-radius: 50%;
+      border: 1px solid rgba(235, 232, 222, 0.08);
+      box-shadow:
+        0 0 0 34px rgba(235,232,222,0.025),
+        0 0 0 82px rgba(235,232,222,0.015);
+      transform: rotate(-8deg);
+    }
+
+    .desk .section-kicker {
+      color: #ce8b7e;
+    }
+
+    .desk .section-title {
+      color: #f1eee6;
+    }
+
+    .desk .section-note {
+      color: rgba(242, 239, 230, 0.64);
+    }
+
+    .desk-grid {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.8fr);
+      gap: clamp(32px, 5vw, 70px);
+    }
+
+    .now-panel,
+    .fragment-panel {
+      position: relative;
+      min-width: 0;
+      border-top: 1px solid rgba(240, 236, 226, 0.28);
+      border-bottom: 1px solid rgba(240, 236, 226, 0.12);
+      background: rgba(255,255,255,0.025);
+    }
+
+    .now-panel {
+      padding: 30px 34px 18px;
+    }
+
+    .panel-mark {
+      position: absolute;
+      right: 26px;
+      top: -20px;
+      width: 42px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      color: rgba(248, 238, 229, 0.94);
+      background: var(--cinnabar);
+      border: 1px solid rgba(118, 42, 33, 0.8);
+      font-family: var(--serif);
+      transform: rotate(4deg);
+    }
+
+    .now-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 20px;
+      padding-bottom: 20px;
+      color: rgba(247,244,235,0.9);
+      font-family: var(--serif);
+    }
+
+    .now-head span {
+      font-size: 1.1rem;
+      letter-spacing: 0.15em;
+    }
+
+    .now-head time {
+      color: rgba(247,244,235,0.45);
+      font-size: 0.78rem;
+    }
+
+    .now-list {
+      border-top: 1px solid rgba(240, 236, 226, 0.12);
+    }
+
+    .now-row {
+      display: grid;
+      grid-template-columns: 78px minmax(0, 1fr) 64px;
+      gap: 20px;
+      align-items: center;
+      min-height: 92px;
+      border-bottom: 1px solid rgba(240, 236, 226, 0.11);
+    }
+
+    .now-label {
+      color: #d79a8d;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+    }
+
+    .now-row strong {
+      color: rgba(248,246,239,0.88);
+      font-family: var(--serif);
+      font-size: 1.02rem;
+      font-weight: 400;
+      line-height: 1.7;
+    }
+
+    .now-state {
+      justify-self: end;
+      color: rgba(248,246,239,0.43);
+      font-size: 0.74rem;
+    }
+
+    .fragment-panel {
+      display: grid;
+      grid-template-rows: 210px 1fr;
+      overflow: hidden;
+    }
+
+    .fragment-art {
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(240,236,226,0.12);
+    }
+
+    .fragment-art svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .fragment-copy {
+      padding: 26px 30px 30px;
+    }
+
+    .fragment-label {
+      margin: 0 0 12px;
+      color: #d79a8d;
+      font-family: var(--serif);
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+    }
+
+    .fragment-copy blockquote {
+      margin: 0;
+      color: rgba(248,246,239,0.88);
+      font-family: var(--serif);
+      font-size: clamp(1.1rem, 1.8vw, 1.35rem);
+      line-height: 1.9;
+    }
+
+    .fragment-source {
+      margin: 18px 0 0;
+      color: rgba(248,246,239,0.4);
+      font-size: 0.78rem;
+      text-align: right;
+    }
+
+    /* =========================
+       关于此间
+    ========================== */
+    .about {
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.28), transparent 48%),
+        var(--paper);
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.85fr) minmax(380px, 0.72fr);
+      gap: clamp(54px, 9vw, 130px);
+      align-items: center;
+    }
+
+    .about-text {
+      max-width: 650px;
+      margin-top: 34px;
+      color: var(--ink-soft);
+      font-family: var(--serif);
+      font-size: clamp(1rem, 1.4vw, 1.15rem);
+      line-height: 2.15;
+    }
+
+    .about-text p {
+      margin: 0 0 14px;
+    }
+
+    .about-signature {
+      display: inline-block;
+      margin-top: 28px;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(164,68,52,0.45);
+      color: var(--moss-deep);
+      font-family: var(--serif);
+      letter-spacing: 0.16em;
+    }
+
+    .about-topics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px 28px;
+      margin-top: 34px;
+      color: var(--ink-faint);
+      font-family: var(--serif);
+      font-size: 0.88rem;
+    }
+
+    .about-topics span::before {
+      content: "·";
+      margin-right: 8px;
+      color: var(--cinnabar);
+    }
+
+    .ink-orbit {
+      position: relative;
+      min-height: 510px;
+      display: grid;
+      place-items: center;
+    }
+
+    .ink-circle {
+      position: absolute;
+      width: min(38vw, 430px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 12px solid transparent;
+      background:
+        radial-gradient(circle at 51% 49%, var(--paper) 0 57%, transparent 58%),
+        conic-gradient(from 12deg,
+          rgba(44,48,44,0.82),
+          rgba(63,70,64,0.4) 12%,
+          rgba(44,48,44,0.78) 22%,
+          rgba(63,70,64,0.22) 36%,
+          rgba(44,48,44,0.72) 52%,
+          rgba(63,70,64,0.28) 66%,
+          rgba(44,48,44,0.84) 82%,
+          rgba(63,70,64,0.3));
+      filter: blur(0.35px);
+      opacity: 0.72;
+      transform: rotate(-12deg) scaleX(1.02);
+      -webkit-mask: radial-gradient(circle, transparent 0 56%, #000 57% 66%, transparent 67%);
+      mask: radial-gradient(circle, transparent 0 56%, #000 57% 66%, transparent 67%);
+    }
+
+    .ink-circle::before,
+    .ink-circle::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(46, 51, 47, 0.16);
+      filter: blur(4px);
+    }
+
+    .ink-circle::before {
+      width: 42px;
+      height: 20px;
+      left: -6px;
+      top: 52%;
+      transform: rotate(-20deg);
+    }
+
+    .ink-circle::after {
+      width: 30px;
+      height: 14px;
+      right: 8px;
+      bottom: 20%;
+      transform: rotate(18deg);
+    }
+
+    .bamboo {
+      position: relative;
+      z-index: 2;
+      width: min(31vw, 350px);
+      overflow: visible;
+    }
+
+    .about-seal {
+      position: absolute;
+      z-index: 4;
+      right: 11%;
+      bottom: 13%;
+      width: 58px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      color: #f8eee4;
+      background: rgba(164,68,52,0.9);
+      border: 1px solid var(--cinnabar-deep);
+      font-family: var(--serif);
+      font-size: 0.72rem;
+      line-height: 1.45;
+      text-align: center;
+      transform: rotate(4deg);
+      box-shadow: inset 0 0 0 4px rgba(255,255,255,0.13);
+    }
+
+    /* =========================
+       页尾
+    ========================== */
+    .site-footer {
+      position: relative;
+      padding: 112px 0 48px;
+      overflow: hidden;
+      color: rgba(245, 242, 234, 0.86);
+      background: #333935;
+    }
+
+    .footer-mountains {
+      position: absolute;
+      inset: 0 0 auto;
+      width: 100%;
+      height: 150px;
+      transform: translateY(-1px);
+      opacity: 0.34;
+    }
+
+    .footer-inner {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      justify-items: center;
+      text-align: center;
+    }
+
+    .footer-quote {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(1.45rem, 3vw, 2.15rem);
+      letter-spacing: 0.18em;
+    }
+
+    .footer-rule {
+      width: 72px;
+      height: 1px;
+      margin: 30px 0 24px;
+      background: rgba(215, 154, 141, 0.7);
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px 28px;
+      color: rgba(245,242,234,0.57);
+      font-size: 0.84rem;
+    }
+
+    .footer-links a {
+      position: relative;
+      transition: color 220ms ease;
+    }
+
+    .footer-links a:hover {
+      color: rgba(245,242,234,0.9);
+    }
+
+    .footer-meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px 24px;
+      margin-top: 44px;
+      color: rgba(245,242,234,0.34);
+      font-size: 0.74rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* =========================
+       动画
+    ========================== */
+    .hero-content {
+      animation: hero-in 760ms var(--ease) both;
+    }
+
+    .hero-note {
+      animation: note-in 720ms 120ms var(--ease) both;
+    }
+
+    .hero-landscape .drift-far {
+      animation: mountain-drift 8s ease-in-out infinite alternate;
+      transform-origin: center bottom;
+    }
+
+    .hero-landscape .drift-near {
+      animation: mountain-drift 7s 700ms ease-in-out infinite alternate-reverse;
+      transform-origin: center bottom;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 680ms ease, transform 680ms var(--ease);
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @keyframes hero-in {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes note-in {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes mountain-drift {
+      from { transform: translate3d(-4px, 0, 0) scaleX(1.003); }
+      to { transform: translate3d(5px, -2px, 0) scaleX(1); }
+    }
+
+    /* =========================
+       响应式布局
+    ========================== */
+    @media (max-width: 1080px) {
+      .hero-grid {
+        grid-template-columns: minmax(0, 1fr) 270px;
+        gap: 48px;
+      }
+
+      .hero-note {
+        width: 250px;
+        margin-right: 32px;
+        padding: 24px;
+      }
+
+      .study-grid {
+        grid-template-columns: 270px minmax(0, 1fr);
+        gap: 56px;
+      }
+
+      .index-item {
+        grid-template-columns: 46px minmax(130px, 0.55fr) minmax(170px, 1fr) 60px;
+        gap: 18px;
+      }
+
+      .scroll-paper {
+        grid-template-columns: 150px minmax(0, 1fr) 120px;
+        gap: 30px;
+        padding-inline: 46px;
+      }
+
+      .desk-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .fragment-panel {
+        grid-template-columns: minmax(300px, 0.85fr) minmax(0, 1fr);
+        grid-template-rows: auto;
+      }
+
+      .fragment-art {
+        min-height: 300px;
+        border-right: 1px solid rgba(240,236,226,0.12);
+        border-bottom: 0;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .section-heading {
+        grid-template-columns: 1fr;
+        align-items: start;
+        gap: 22px;
+      }
+
+      .section-note {
+        max-width: 620px;
+      }
+
+      .hero {
+        min-height: auto;
+        padding: 132px 0 310px;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-content {
+        max-width: 680px;
+      }
+
+      .hero-side {
+        min-height: 0;
+        display: block;
+      }
+
+      .hero-vertical-copy {
+        display: none;
+      }
+
+      .hero-note {
+        width: min(100%, 430px);
+        margin: 10px 0 0 auto;
+      }
+
+      .hero-landscape {
+        height: 340px;
+      }
+
+      .hero-sun {
+        right: 17%;
+        bottom: 28%;
+      }
+
+      .study-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .study-intro {
+        position: static;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 260px;
+        gap: 36px;
+      }
+
+      .study-mini-painting {
+        height: 180px;
+        margin-top: 0;
+      }
+
+      .index-item {
+        grid-template-columns: 42px minmax(150px, 0.7fr) minmax(180px, 1fr) 58px;
+      }
+
+      .article-scroll,
+      .article-scroll:nth-child(2),
+      .article-scroll:nth-child(3) {
+        margin-inline: 0;
+      }
+
+      .scroll-paper {
+        grid-template-columns: 130px minmax(0, 1fr);
+        padding: 52px 44px;
+      }
+
+      .post-tags {
+        grid-column: 2;
+        display: flex;
+        flex-wrap: wrap;
+        justify-items: start;
+        justify-content: flex-start;
+      }
+
+      .post-tags::before {
+        width: 100%;
+      }
+
+      .about-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .ink-orbit {
+        min-height: 420px;
+      }
+
+      .ink-circle {
+        width: min(62vw, 390px);
+      }
+
+      .bamboo {
+        width: min(48vw, 320px);
+      }
+    }
+
+    @media (max-width: 620px) {
+      :root {
+        --side-space: 18px;
+      }
+
+      .nav-inner {
+        min-height: 66px;
+        gap: 14px;
+      }
+
+      .brand {
+        gap: 7px;
+        font-size: 1.05rem;
+        letter-spacing: 0.08em;
+      }
+
+      .brand-seal {
+        width: 22px;
+        font-size: 0.6rem;
+      }
+
+      .nav-list {
+        gap: 13px;
+        font-size: 0.79rem;
+      }
+
+      .hero {
+        padding: 112px 0 254px;
+      }
+
+      .hero-title {
+        font-size: clamp(3.4rem, 18vw, 5.4rem);
+        letter-spacing: 0.07em;
+      }
+
+      .hero-subtitle {
+        margin-top: 22px;
+        font-size: 1rem;
+        letter-spacing: 0.08em;
+      }
+
+      .hero-intro {
+        margin-top: 26px;
+        font-size: 0.92rem;
+      }
+
+      .hero-actions {
+        gap: 22px;
+        margin-top: 32px;
+      }
+
+      .action-primary {
+        min-width: 112px;
+        padding-inline: 16px;
+      }
+
+      .hero-note {
+        padding: 22px 20px;
+      }
+
+      .hero-note dl > div {
+        grid-template-columns: 62px 1fr;
+      }
+
+      .hero-landscape {
+        height: 270px;
+        min-height: 270px;
+      }
+
+      .scroll-hint {
+        display: none;
+      }
+
+      .section {
+        padding: 82px 0;
+      }
+
+      .section-title,
+      .study-title {
+        font-size: clamp(2.2rem, 12vw, 3.2rem);
+      }
+
+      .study-intro {
+        display: block;
+      }
+
+      .study-mini-painting {
+        height: 150px;
+        margin-top: 30px;
+      }
+
+      .index-item {
+        grid-template-columns: 30px 1fr auto;
+        gap: 10px 14px;
+        min-height: 102px;
+        padding: 18px 0;
+      }
+
+      .index-name {
+        font-size: 1.28rem;
+      }
+
+      .index-desc {
+        grid-column: 2 / 4;
+        font-size: 0.8rem;
+      }
+
+      .index-count {
+        grid-column: 3;
+        grid-row: 1;
+      }
+
+      .index-item:hover {
+        transform: none;
+      }
+
+      .index-item:hover .index-number {
+        transform: none;
+      }
+
+      .article-scroll {
+        grid-template-columns: 18px minmax(0, 1fr) 18px;
+        min-height: 0;
+      }
+
+      .scroll-axis {
+        margin: -6px 0;
+      }
+
+      .scroll-axis::before,
+      .scroll-axis::after {
+        width: 31px;
+        height: 10px;
+      }
+
+      .scroll-axis::before { top: -5px; }
+      .scroll-axis::after { bottom: -5px; }
+
+      .scroll-paper {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 54px 26px 38px;
+      }
+
+      .scroll-paper::before {
+        inset: 12px 11px;
+      }
+
+      .scroll-seal {
+        right: 16px;
+        top: 15px;
+        width: 36px;
+        font-size: 0.64rem;
+      }
+
+      .post-meta {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 5px 16px;
+        padding: 0 0 16px;
+        border-right: 0;
+        border-bottom: 1px solid rgba(74,76,69,0.18);
+      }
+
+      .post-meta::before {
+        grid-column: 1 / -1;
+        margin-bottom: 0;
+      }
+
+      .post-meta .category {
+        margin-top: 0;
+      }
+
+      .reading-time {
+        text-align: right;
+      }
+
+      .post-main {
+        padding-right: 0;
+      }
+
+      .post-title {
+        font-size: clamp(1.55rem, 8.2vw, 2.08rem);
+      }
+
+      .post-excerpt {
+        margin-top: 15px;
+        font-size: 0.92rem;
+      }
+
+      .post-tags {
+        grid-column: 1;
+        gap: 8px 12px;
+        justify-content: flex-start;
+      }
+
+      .post-tags::before {
+        width: auto;
+        margin: 0 4px 0 0;
+      }
+
+      .now-panel {
+        padding: 26px 18px 12px;
+      }
+
+      .now-row {
+        grid-template-columns: 64px minmax(0, 1fr);
+        gap: 12px;
+        padding: 18px 0;
+      }
+
+      .now-state {
+        grid-column: 2;
+        justify-self: start;
+      }
+
+      .fragment-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .fragment-art {
+        min-height: 220px;
+        border-right: 0;
+        border-bottom: 1px solid rgba(240,236,226,0.12);
+      }
+
+      .fragment-copy {
+        padding: 24px 20px 28px;
+      }
+
+      .ink-orbit {
+        min-height: 340px;
+      }
+
+      .ink-circle {
+        width: min(84vw, 340px);
+      }
+
+      .bamboo {
+        width: min(65vw, 280px);
+      }
+
+      .about-seal {
+        right: 8%;
+        bottom: 8%;
+        width: 50px;
+      }
+
+      .site-footer {
+        padding-top: 96px;
+      }
+
+      .footer-quote {
+        font-size: 1.32rem;
+        letter-spacing: 0.1em;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      .reveal {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header" id="siteHeader">
+    <div class="shell nav-inner">
+      <a class="brand" href="#top" aria-label="墨笺首页">
+        <span>墨笺</span>
+        <span class="brand-seal" aria-hidden="true">笺</span>
+      </a>
+
+      <nav aria-label="主导航">
+        <ul class="nav-list">
+          <li><a class="nav-link" href="#top" aria-current="page">首页</a></li>
+          <li><a class="nav-link" href="#articles">文章</a></li>
+          <li><a class="nav-link" href="#archive">归档</a></li>
+          <li><a class="nav-link" href="#about">关于</a></li>
+        </ul>
+      </nav>
     </div>
-  </section>
+  </header>
 
-  <section class="category-section page-shell" aria-labelledby="category-title">
-    <h2 id="category-title" class="sr-only">文章分类</h2>
-    <ul>
-      {categories.map((category) => (
-        <li>
-          <span class="category-mark" aria-hidden="true">{category.mark}</span>
-          <strong>{category.name}</strong>
-          <small>{category.note}</small>
-        </li>
-      ))}
-    </ul>
-  </section>
-</BaseLayout>
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="shell hero-grid">
+        <div class="hero-content">
+          <p class="hero-eyebrow">一方墨笺 · 记于人间</p>
+          <h1 class="hero-title" id="hero-title">墨笺有余闲<span class="accent-dot">。</span></h1>
+          <p class="hero-subtitle">写日常，也写山川与旧书</p>
+          <div class="hero-intro">
+            这里收拢寻常日子里的微光。<br />
+            也留下山川、旧书与缓慢生长的心事。
+          </div>
+          <div class="hero-actions" aria-label="页面入口">
+            <a class="action-primary" href="#articles">阅览文章</a>
+            <a class="action-secondary" href="#about">关于此间</a>
+          </div>
+        </div>
 
-<style>
-  .posts-section {
-    padding-top: clamp(5rem, 10vw, 9rem);
-  }
+        <div class="hero-side">
+          <div class="hero-vertical-copy" aria-hidden="true">风来疏竹　雨过远山</div>
+          <aside class="hero-note" aria-label="案上近况">
+            <div class="hero-note-head">
+              <strong>案上</strong>
+              <time datetime="2026-07">季夏 · 二〇二六</time>
+            </div>
+            <dl>
+              <div>
+                <dt>正在搭建</dt>
+                <dd>继续打磨这座 Astro 个人博客</dd>
+              </div>
+              <div>
+                <dt>近日整理</dt>
+                <dd>山中一日、雨落窗前与旧书</dd>
+              </div>
+            </dl>
+          </aside>
+        </div>
+      </div>
 
-  .post-list {
-    display: grid;
-    gap: 1.35rem;
-    margin-top: 2.5rem;
-  }
+      <div class="hero-sun" aria-hidden="true"></div>
+      <div class="hero-landscape" aria-hidden="true">
+        <svg viewBox="0 0 1600 520" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="farWash" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#667068" stop-opacity="0.06" />
+              <stop offset="1" stop-color="#596159" stop-opacity="0.2" />
+            </linearGradient>
+            <linearGradient id="midWash" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#465048" stop-opacity="0.2" />
+              <stop offset="1" stop-color="#596159" stop-opacity="0.07" />
+            </linearGradient>
+            <filter id="softInk" x="-10%" y="-20%" width="120%" height="140%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.008 0.028" numOctaves="2" seed="8" result="noise" />
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="16" xChannelSelector="R" yChannelSelector="B" />
+              <feGaussianBlur stdDeviation="1.2" />
+            </filter>
+            <filter id="mistBlur">
+              <feGaussianBlur stdDeviation="8" />
+            </filter>
+          </defs>
 
-  .category-section {
-    margin-top: clamp(5rem, 10vw, 8rem);
-    border: 1px solid rgb(67 83 73 / 35%);
-  }
+          <g class="drift-far" filter="url(#softInk)">
+            <path d="M0 330C126 315 198 236 302 242C404 248 454 315 550 292C665 265 720 153 850 163C970 172 1012 282 1128 270C1244 257 1292 193 1400 211C1490 226 1543 290 1600 302V520H0Z" fill="url(#farWash)" />
+            <path d="M0 386C102 360 176 310 263 318C356 327 398 383 482 370C585 355 642 252 748 260C852 269 905 356 1005 347C1125 337 1182 253 1283 272C1392 292 1465 374 1600 355V520H0Z" fill="#596159" fill-opacity="0.08" />
+          </g>
 
-  ul {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
+          <g opacity="0.42" filter="url(#mistBlur)">
+            <path d="M80 346C332 320 503 348 704 330C905 312 1120 324 1510 294" fill="none" stroke="#f8f5ed" stroke-width="34" />
+            <path d="M0 412C254 390 470 420 728 392C980 365 1236 402 1600 370" fill="none" stroke="#f8f5ed" stroke-width="28" />
+          </g>
 
-  li {
-    display: flex;
-    min-height: 10rem;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.45rem;
-    text-align: center;
-  }
+          <g class="drift-near" filter="url(#softInk)">
+            <path d="M0 430C105 413 180 370 274 382C380 396 427 452 532 432C651 410 708 331 821 340C946 349 1008 427 1128 415C1244 403 1312 343 1418 362C1508 379 1552 418 1600 414V520H0Z" fill="url(#midWash)" />
+            <path d="M0 476C177 446 282 475 413 456C543 438 650 411 784 427C924 444 1017 482 1150 458C1300 430 1430 439 1600 470V520H0Z" fill="#2e342f" fill-opacity="0.09" />
+          </g>
 
-  li + li {
-    border-left: 1px solid rgb(67 83 73 / 25%);
-  }
+          <g fill="#2d332e" fill-opacity="0.18">
+            <path d="M1178 426l9-52 7 52z" />
+            <path d="M1190 426l7-39 6 39z" />
+            <path d="M1210 427l8-46 7 46z" />
+            <path d="M401 457l7-35 6 35z" />
+            <path d="M413 458l6-28 5 28z" />
+          </g>
 
-  .category-mark {
-    display: grid;
-    width: 2.7rem;
-    height: 2.7rem;
-    place-items: center;
-    margin-bottom: 0.3rem;
-    border: 1px solid rgb(67 83 73 / 28%);
-    color: var(--color-pine);
-    font-size: 1.25rem;
-    transform: rotate(-2deg);
-  }
+          <g fill="none" stroke="#343a35" stroke-linecap="round" stroke-opacity="0.25">
+            <path d="M1285 192c14-8 24-7 36 2" />
+            <path d="M1328 178c12-7 21-6 31 2" />
+          </g>
+        </svg>
+      </div>
+      <div class="scroll-hint" aria-hidden="true">向下</div>
+    </section>
 
-  strong {
-    font-weight: 500;
-    letter-spacing: 0.22em;
-  }
+    <section class="section study-index" aria-labelledby="study-title">
+      <div class="shell study-grid">
+        <div class="study-intro reveal">
+          <div>
+            <p class="section-kicker">THE STUDY INDEX</p>
+            <h2 class="study-title" id="study-title">书斋目录</h2>
+            <p>把日常与见闻，按四条线索慢慢归置。</p>
+          </div>
+          <div class="study-mini-painting" aria-hidden="true">
+            <svg viewBox="0 0 360 190" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <filter id="miniSoft"><feGaussianBlur stdDeviation="1.2" /></filter>
+              </defs>
+              <circle cx="286" cy="50" r="20" fill="#a44434" fill-opacity=".12" />
+              <path d="M0 140C63 120 87 86 138 96C184 105 196 137 241 125C281 115 312 86 360 82V190H0Z" fill="#586258" fill-opacity=".09" filter="url(#miniSoft)" />
+              <path d="M0 164C65 145 109 158 159 137C215 113 255 151 306 141C328 137 344 128 360 119V190H0Z" fill="#303631" fill-opacity=".1" />
+              <path d="M259 128l5-28 4 28zm10 1 4-22 3 22z" fill="#303631" fill-opacity=".2" />
+              <path d="M46 158c36-12 63-13 96-5" fill="none" stroke="#303631" stroke-opacity=".18" />
+            </svg>
+          </div>
+        </div>
 
-  small {
-    color: var(--color-ink-soft);
-    letter-spacing: 0.08em;
-  }
+        <nav class="index-list reveal" aria-label="内容分类">
+          <a class="index-item" href="#articles">
+            <span class="index-number">壹</span>
+            <span class="index-name">日常</span>
+            <span class="index-desc">寻常烟火与片刻心绪</span>
+            <span class="index-count">01 篇</span>
+          </a>
+          <a class="index-item" href="#articles">
+            <span class="index-number">贰</span>
+            <span class="index-name">行旅</span>
+            <span class="index-desc">山川远近与沿途所见</span>
+            <span class="index-count">01 篇</span>
+          </a>
+          <a class="index-item" href="#articles">
+            <span class="index-number">叁</span>
+            <span class="index-name">读书</span>
+            <span class="index-desc">旧书新页与字里光阴</span>
+            <span class="index-count">01 篇</span>
+          </a>
+          <a class="index-item" href="#about">
+            <span class="index-number">肆</span>
+            <span class="index-name">摄影</span>
+            <span class="index-desc">光影流转与留住片刻</span>
+            <span class="index-count">00 篇</span>
+          </a>
+        </nav>
+      </div>
+      <svg class="brush-divider" viewBox="0 0 960 42" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M10 23C132 19 228 26 346 21C470 15 592 28 726 20C814 15 888 20 950 17" fill="none" stroke="#485149" stroke-width="4" stroke-linecap="round" opacity=".42" />
+        <path d="M75 27C222 25 344 31 486 25C620 20 733 27 861 23" fill="none" stroke="#485149" stroke-width="1" opacity=".35" />
+      </svg>
+    </section>
 
-  @media (max-width: 720px) {
-    ul {
-      grid-template-columns: repeat(2, 1fr);
+    <section class="section latest" id="articles" aria-labelledby="latest-title">
+      <div class="shell">
+        <div class="section-heading reveal">
+          <div>
+            <p class="section-kicker">RECENT NOTES</p>
+            <h2 class="section-title" id="latest-title">近来所记</h2>
+          </div>
+          <p class="section-note">新札三卷，横陈案上。行旅、日常与旧书各成一卷，也把远山与墨痕留在纸面。</p>
+        </div>
+
+        <div class="scroll-list" id="archive">
+          <article class="article-scroll reveal">
+            <div class="scroll-axis" aria-hidden="true"></div>
+            <div class="scroll-paper">
+              <div class="scroll-ink" aria-hidden="true">
+                <svg viewBox="0 0 1100 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs><filter id="postSoft1"><feGaussianBlur stdDeviation="4" /></filter></defs>
+                  <circle cx="950" cy="82" r="32" fill="#a44434" fill-opacity=".08" />
+                  <path d="M690 228C760 184 804 197 854 157C900 120 936 147 977 177C1015 205 1054 183 1100 150V300H680Z" fill="#586258" fill-opacity=".09" filter="url(#postSoft1)" />
+                  <path d="M760 260C827 225 878 241 925 214C976 185 1022 221 1100 194V300H740Z" fill="#2f3530" fill-opacity=".07" />
+                  <path d="M80 70c72-18 121-10 180 10" fill="none" stroke="#454c46" stroke-opacity=".07" stroke-width="12" filter="url(#postSoft1)" />
+                </svg>
+              </div>
+              <span class="scroll-seal" aria-hidden="true">卷<br />壹</span>
+              <div class="post-meta" data-index="01">
+                <time datetime="2026-07-15">2026 年 7 月 15 日</time>
+                <span class="category">行旅</span>
+                <span class="reading-time">约 6 分钟</span>
+              </div>
+              <div class="post-main">
+                <h3 class="post-title"><a href={`${BASE}posts/shan-zhong-yi-ri/`} aria-label="阅读：山中一日">山中一日</a></h3>
+                <p class="post-excerpt">晨起入山，雾气未散。林间鸟鸣清越，时间也慢了下来。</p>
+              </div>
+              <div class="post-tags" aria-label="文章标签">
+                <span>山水</span>
+                <span>随记</span>
+              </div>
+            </div>
+            <div class="scroll-axis" aria-hidden="true"></div>
+          </article>
+
+          <article class="article-scroll reveal">
+            <div class="scroll-axis" aria-hidden="true"></div>
+            <div class="scroll-paper">
+              <div class="scroll-ink" aria-hidden="true">
+                <svg viewBox="0 0 1100 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs><filter id="postSoft2"><feGaussianBlur stdDeviation="4" /></filter></defs>
+                  <path d="M0 230C76 196 126 205 190 161C251 120 292 154 338 184C379 211 422 190 478 151V300H0Z" fill="#586258" fill-opacity=".075" filter="url(#postSoft2)" />
+                  <path d="M0 264C86 230 153 249 218 216C279 186 335 224 414 198V300H0Z" fill="#303631" fill-opacity=".06" />
+                  <path d="M928 88c35-18 71-18 110-2" fill="none" stroke="#495149" stroke-opacity=".08" stroke-width="14" filter="url(#postSoft2)" />
+                  <circle cx="134" cy="78" r="26" fill="#a44434" fill-opacity=".065" />
+                </svg>
+              </div>
+              <span class="scroll-seal" aria-hidden="true">卷<br />贰</span>
+              <div class="post-meta" data-index="02">
+                <time datetime="2026-06-28">2026 年 6 月 28 日</time>
+                <span class="category">日常</span>
+                <span class="reading-time">约 5 分钟</span>
+              </div>
+              <div class="post-main">
+                <h3 class="post-title"><a href={`${BASE}posts/yu-luo-chuang-qian/`} aria-label="阅读：雨落窗前">雨落窗前</a></h3>
+                <p class="post-excerpt">雨点敲打屋檐，落在窗前的瓦上，一本书、一盏茶，便是安静的时光。</p>
+              </div>
+              <div class="post-tags" aria-label="文章标签">
+                <span>雨天</span>
+                <span>日常</span>
+              </div>
+            </div>
+            <div class="scroll-axis" aria-hidden="true"></div>
+          </article>
+
+          <article class="article-scroll reveal">
+            <div class="scroll-axis" aria-hidden="true"></div>
+            <div class="scroll-paper">
+              <div class="scroll-ink" aria-hidden="true">
+                <svg viewBox="0 0 1100 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs><filter id="postSoft3"><feGaussianBlur stdDeviation="4" /></filter></defs>
+                  <path d="M650 244C723 211 777 224 834 190C895 154 937 192 986 209C1028 224 1064 213 1100 194V300H630Z" fill="#586258" fill-opacity=".08" filter="url(#postSoft3)" />
+                  <path d="M720 270C800 241 849 252 908 229C970 205 1017 238 1100 218V300H700Z" fill="#303631" fill-opacity=".055" />
+                  <path d="M128 84c64-22 121-17 185 3" fill="none" stroke="#4b534c" stroke-opacity=".08" stroke-width="15" filter="url(#postSoft3)" />
+                  <path d="M228 132c16-9 28-8 42 2m24-17c13-7 24-6 35 2" fill="none" stroke="#343a35" stroke-opacity=".14" stroke-linecap="round" />
+                </svg>
+              </div>
+              <span class="scroll-seal" aria-hidden="true">卷<br />叁</span>
+              <div class="post-meta" data-index="03">
+                <time datetime="2026-05-12">2026 年 5 月 12 日</time>
+                <span class="category">读书</span>
+                <span class="reading-time">约 3 分钟</span>
+              </div>
+              <div class="post-main">
+                <h3 class="post-title"><a href={`${BASE}posts/jiu-shu-yu-cha/`} aria-label="阅读：旧书与茶">旧书与茶</a></h3>
+                <p class="post-excerpt">翻开一本带着旧纸气味的书，也像重新遇见了从前的自己。</p>
+              </div>
+              <div class="post-tags" aria-label="文章标签">
+                <span>阅读</span>
+                <span>茶</span>
+              </div>
+            </div>
+            <div class="scroll-axis" aria-hidden="true"></div>
+          </article>
+        </div>
+
+        <div class="all-posts reveal">
+          <a href={`${BASE}archive/`}>查看全部文章</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section desk" aria-labelledby="desk-title">
+      <div class="shell">
+        <div class="section-heading reveal">
+          <div>
+            <p class="section-kicker">ON THE DESK</p>
+            <h2 class="section-title" id="desk-title">案头近况</h2>
+          </div>
+          <p class="section-note">不只保存已经写完的文章，也留下正在发生的过程。墨色稍深，像夜里案上的一盏灯。</p>
+        </div>
+
+        <div class="desk-grid">
+          <article class="now-panel reveal">
+            <div class="panel-mark" aria-hidden="true">今</div>
+            <div class="now-head">
+              <span>此刻</span>
+              <time datetime="2026-07-15">2026.07.15</time>
+            </div>
+            <div class="now-list">
+              <div class="now-row">
+                <span class="now-label">正在做</span>
+                <strong>继续打磨墨笺的视觉与内容</strong>
+                <span class="now-state">进行中</span>
+              </div>
+              <div class="now-row">
+                <span class="now-label">正在读</span>
+                <strong>山川、旧书与日常写作的零散笔记</strong>
+                <span class="now-state">缓慢读</span>
+              </div>
+              <div class="now-row">
+                <span class="now-label">正在学</span>
+                <strong>用更少的元素，建立更稳定的页面秩序</strong>
+                <span class="now-state">持续中</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="fragment-panel reveal">
+            <div class="fragment-art" aria-hidden="true">
+              <svg viewBox="0 0 540 310" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <filter id="deskSoft"><feGaussianBlur stdDeviation="3" /></filter>
+                  <linearGradient id="deskMist" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#eef0e9" stop-opacity=".05" />
+                    <stop offset="1" stop-color="#eef0e9" stop-opacity=".2" />
+                  </linearGradient>
+                </defs>
+                <circle cx="402" cy="74" r="34" fill="#bd6756" fill-opacity=".24" />
+                <path d="M0 205C82 165 144 182 211 135C276 91 326 130 377 159C427 187 471 159 540 119V310H0Z" fill="url(#deskMist)" filter="url(#deskSoft)" />
+                <path d="M0 252C92 215 164 236 233 198C302 161 356 206 410 226C452 241 497 223 540 202V310H0Z" fill="#eef0e9" fill-opacity=".075" />
+                <path d="M76 260C142 234 199 242 256 220C326 193 378 219 440 241C476 253 508 247 540 234" fill="none" stroke="#eef0e9" stroke-opacity=".17" />
+                <path d="M92 202V72M92 72H320M320 72V205" fill="none" stroke="#eef0e9" stroke-opacity=".2" stroke-width="2" />
+                <path d="M207 72V202" fill="none" stroke="#eef0e9" stroke-opacity=".12" />
+                <path d="M430 238l7-38 6 38zm12 1 5-29 5 29z" fill="#eef0e9" fill-opacity=".16" />
+              </svg>
+            </div>
+            <div class="fragment-copy">
+              <p class="fragment-label">一页小记</p>
+              <blockquote>写作并不总是为了给出答案。很多时候，它只是把走过的路重新照亮。</blockquote>
+              <p class="fragment-source">—— 记于墨笺之间</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section about" id="about" aria-labelledby="about-title">
+      <div class="shell about-grid">
+        <div class="about-copy reveal">
+          <p class="section-kicker">ABOUT THIS PLACE</p>
+          <h2 class="section-title" id="about-title">关于此间</h2>
+          <div class="about-text">
+            <p>我喜欢记录日常，也喜欢山川与旧书。</p>
+            <p>这个网站会保存沿途所见、读书所得，以及一些没有明确分类的想法。</p>
+          </div>
+          <div class="about-signature">愿每一页都有来处</div>
+          <div class="about-topics" aria-label="长期记录主题">
+            <span>代码</span>
+            <span>器物</span>
+            <span>光影</span>
+            <span>山川</span>
+          </div>
+        </div>
+
+        <div class="ink-orbit reveal" aria-hidden="true">
+          <div class="ink-circle"></div>
+          <svg class="bamboo" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg">
+            <g fill="none" stroke="#586258" stroke-linecap="round">
+              <path d="M108 294C131 236 151 177 173 78" stroke-width="5" opacity=".72" />
+              <path d="M170 93C204 111 228 135 250 168" stroke-width="2.7" opacity=".58" />
+              <path d="M148 170C114 153 90 132 70 101" stroke-width="2.5" opacity=".5" />
+              <path d="M129 226C160 218 187 221 215 236" stroke-width="2.4" opacity=".5" />
+              <path d="M116 267C92 254 74 237 59 214" stroke-width="2.1" opacity=".42" />
+            </g>
+            <g fill="#586258">
+              <ellipse cx="218" cy="125" rx="9" ry="32" transform="rotate(-42 218 125)" opacity=".44" />
+              <ellipse cx="246" cy="160" rx="8" ry="28" transform="rotate(-30 246 160)" opacity=".37" />
+              <ellipse cx="98" cy="132" rx="9" ry="33" transform="rotate(43 98 132)" opacity=".39" />
+              <ellipse cx="70" cy="101" rx="8" ry="28" transform="rotate(38 70 101)" opacity=".31" />
+              <ellipse cx="181" cy="224" rx="9" ry="33" transform="rotate(-74 181 224)" opacity=".39" />
+              <ellipse cx="212" cy="235" rx="8" ry="28" transform="rotate(-63 212 235)" opacity=".32" />
+              <ellipse cx="87" cy="252" rx="8" ry="28" transform="rotate(51 87 252)" opacity=".32" />
+              <ellipse cx="59" cy="215" rx="7" ry="25" transform="rotate(42 59 215)" opacity=".26" />
+            </g>
+            <g stroke="#f2eee3" stroke-width="1.6" opacity=".42">
+              <path d="M148 169l14 4" />
+              <path d="M160 126l14 4" />
+              <path d="M132 219l13 4" />
+            </g>
+          </svg>
+          <div class="about-seal">山窗<br />小记</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <svg class="footer-mountains" viewBox="0 0 1600 160" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 64C150 52 245 11 360 30C473 48 523 92 634 72C748 51 826 5 942 22C1056 39 1122 88 1245 67C1372 45 1474 39 1600 68V0H0Z" fill="#e8e5dc" fill-opacity=".12" />
+      <path d="M0 94C174 68 272 95 410 76C562 55 657 25 806 42C947 58 1050 101 1190 75C1340 48 1460 62 1600 92V0H0Z" fill="#e8e5dc" fill-opacity=".07" />
+    </svg>
+    <div class="shell footer-inner">
+      <p class="footer-quote">一纸闲墨，记人间朝暮。</p>
+      <div class="footer-rule" aria-hidden="true"></div>
+      <nav class="footer-links" aria-label="页尾导航">
+        <a href="#articles">文章</a>
+        <a href="#archive">归档</a>
+        <a href="#about">关于</a>
+        <span aria-hidden="true">RSS</span>
+      </nav>
+      <div class="footer-meta">
+        <span>© 2026 墨笺</span>
+        <span>由 Astro 构筑</span>
+        <span>写日常，也写山川与旧书</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // 页面滚动后，为导航栏加入轻微的纸张毛玻璃效果。
+    const header = document.getElementById("siteHeader");
+
+    const updateHeader = () => {
+      header?.classList.toggle("is-scrolled", window.scrollY > 18);
+    };
+
+    updateHeader();
+    window.addEventListener("scroll", updateHeader, { passive: true });
+
+    // 根据当前阅读位置更新导航状态。
+    const navLinks = [...document.querySelectorAll(".nav-link")];
+    const trackedSections = [
+      { id: "top", link: navLinks.find((link) => link.getAttribute("href") === "#top") },
+      { id: "articles", link: navLinks.find((link) => link.getAttribute("href") === "#articles") },
+      { id: "archive", link: navLinks.find((link) => link.getAttribute("href") === "#archive") },
+      { id: "about", link: navLinks.find((link) => link.getAttribute("href") === "#about") }
+    ].filter((item) => item.link && document.getElementById(item.id));
+
+    const updateActiveNav = () => {
+      const readingLine = window.scrollY + Math.min(window.innerHeight * 0.35, 280);
+      let current = trackedSections[0];
+
+      trackedSections.forEach((item) => {
+        const section = document.getElementById(item.id);
+        if (section && section.offsetTop <= readingLine) current = item;
+      });
+
+      navLinks.forEach((link) => link.removeAttribute("aria-current"));
+      current?.link?.setAttribute("aria-current", "page");
+    };
+
+    updateActiveNav();
+    window.addEventListener("scroll", updateActiveNav, { passive: true });
+
+    // 元素进入视口后淡入。系统关闭动画时，CSS 会直接显示内容。
+    const revealItems = document.querySelectorAll(".reveal");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (reduceMotion || !("IntersectionObserver" in window)) {
+      revealItems.forEach((item) => item.classList.add("is-visible"));
+    } else {
+      const observer = new IntersectionObserver(
+        (entries, currentObserver) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              currentObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.12, rootMargin: "0px 0px -7% 0px" }
+      );
+
+      revealItems.forEach((item) => observer.observe(item));
     }
-
-    li:nth-child(3) {
-      border-top: 1px solid rgb(67 83 73 / 25%);
-      border-left: 0;
-    }
-
-    li:nth-child(4) {
-      border-top: 1px solid rgb(67 83 73 / 25%);
-    }
-  }
-</style>
+  </script>
+</body>
+</html>
