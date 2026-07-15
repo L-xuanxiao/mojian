@@ -1,0 +1,31 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import { getPublishedPosts } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+
+  return posts.map((post, index) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      newerPost: posts[index - 1],
+      olderPost: posts[index + 1],
+    },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  newerPost?: CollectionEntry<'blog'>;
+  olderPost?: CollectionEntry<'blog'>;
+}
+
+const { post, newerPost, olderPost } = Astro.props;
+const { Content } = await render(post);
+---
+
+<ArticleLayout post={post} newerPost={newerPost} olderPost={olderPost}>
+  <Content />
+</ArticleLayout>

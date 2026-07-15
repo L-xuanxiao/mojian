@@ -1,0 +1,174 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { formatDate } from '../lib/posts';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+---
+
+<article class:list={['post-card', { 'has-cover': post.data.cover }]}>
+  <span class="binding" aria-hidden="true"></span>
+
+  {post.data.cover && (
+    <div class="cover" aria-hidden="true">
+      <Image
+        src={post.data.cover}
+        alt=""
+        width={520}
+        height={340}
+        format="webp"
+        quality={80}
+      />
+    </div>
+  )}
+
+  <div class="content">
+    <div class="meta">
+      <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+      <span>{post.data.category}</span>
+    </div>
+    <h2><a href={`/posts/${post.id}/`}>{post.data.title}</a></h2>
+    <p>{post.data.description}</p>
+    <a class="read-more" href={`/posts/${post.id}/`} aria-label={`阅读《${post.data.title}》`}>
+      展卷阅读
+    </a>
+  </div>
+</article>
+
+<style>
+  .post-card {
+    position: relative;
+    display: grid;
+    min-height: 14rem;
+    grid-template-columns: 1fr;
+    overflow: hidden;
+    border: 1px solid rgb(86 70 51 / 26%);
+    background: rgb(247 241 229 / 88%);
+    box-shadow:
+      7px 8px 0 rgb(67 83 73 / 9%),
+      0 16px 35px rgb(48 40 31 / 8%);
+    transition:
+      transform 320ms ease,
+      box-shadow 320ms ease;
+  }
+
+  .post-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      9px 11px 0 rgb(67 83 73 / 11%),
+      0 22px 45px rgb(48 40 31 / 12%);
+  }
+
+  .post-card.has-cover {
+    grid-template-columns: minmax(12rem, 30%) 1fr;
+  }
+
+  .binding {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 1.4rem;
+    z-index: 2;
+    width: 1px;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--color-bronze) 0 8px,
+      transparent 8px 18px
+    );
+    opacity: 0.7;
+  }
+
+  .cover {
+    min-height: 100%;
+    overflow: hidden;
+    border-right: 1px solid rgb(86 70 51 / 18%);
+  }
+
+  .cover :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.75) contrast(0.92);
+    transition: transform 600ms ease;
+  }
+
+  .post-card:hover .cover :global(img) {
+    transform: scale(1.025);
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(2rem, 5vw, 3.5rem) clamp(2.5rem, 6vw, 5rem);
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem 1.2rem;
+    color: var(--color-ink-soft);
+    font-size: 0.83rem;
+    letter-spacing: 0.1em;
+  }
+
+  .meta span::before {
+    margin-right: 1.2rem;
+    content: '·';
+  }
+
+  h2 {
+    margin: 0.9rem 0 0.65rem;
+    font-size: clamp(1.7rem, 3vw, 2.35rem);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+
+  h2 a {
+    text-decoration: none;
+  }
+
+  h2 a:hover {
+    color: var(--color-pine);
+  }
+
+  p {
+    max-width: 38rem;
+    margin: 0;
+    color: var(--color-ink-soft);
+    line-height: 1.9;
+    letter-spacing: 0.04em;
+  }
+
+  .read-more {
+    align-self: flex-start;
+    margin-top: 1.25rem;
+    color: var(--color-pine);
+    font-size: 0.9rem;
+    letter-spacing: 0.12em;
+  }
+
+  @media (max-width: 720px) {
+    .post-card.has-cover {
+      grid-template-columns: 1fr;
+    }
+
+    .cover {
+      height: 12rem;
+      border-right: 0;
+      border-bottom: 1px solid rgb(86 70 51 / 18%);
+    }
+
+    .content {
+      padding: 2rem 2rem 2rem 2.75rem;
+    }
+
+    .binding {
+      left: 1.1rem;
+    }
+  }
+</style>

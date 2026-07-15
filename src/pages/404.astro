@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="未寻得此页" description="你访问的页面不存在。">
+  <section class="not-found page-shell">
+    <p class="code">四〇四</p>
+    <h1>山径已隐，未寻得此页。</h1>
+    <p>也许它从未写下，或已随旧页远去。</p>
+    <a href="/">返回墨笺</a>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found {
+    display: grid;
+    min-height: 60vh;
+    place-content: center;
+    justify-items: center;
+    padding-block: 5rem;
+    text-align: center;
+  }
+
+  .code {
+    margin: 0;
+    color: var(--color-cinnabar);
+    font-size: 1rem;
+    letter-spacing: 0.5em;
+  }
+
+  h1 {
+    margin: 1.2rem 0;
+    font-size: clamp(2.1rem, 6vw, 4.5rem);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+
+  p {
+    color: var(--color-ink-soft);
+    line-height: 1.8;
+  }
+
+  a {
+    margin-top: 2rem;
+    color: var(--color-pine);
+    letter-spacing: 0.14em;
+  }
+</style>

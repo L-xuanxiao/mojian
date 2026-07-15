@@ -1,0 +1,131 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { formatDate, getPublishedPosts } from '../lib/posts';
+
+const posts = await getPublishedPosts();
+const years = new Map<number, typeof posts>();
+
+for (const post of posts) {
+  const year = post.data.pubDate.getFullYear();
+  const list = years.get(year) ?? [];
+  list.push(post);
+  years.set(year, list);
+}
+---
+
+<BaseLayout title="归档" description="墨笺的年月归档。">
+  <section class="archive page-shell">
+    <header>
+      <p>循时而记</p>
+      <h1>归档</h1>
+    </header>
+
+    <div class="year-list">
+      {[...years.entries()].map(([year, yearPosts]) => (
+        <section class="year" aria-labelledby={`year-${year}`}>
+          <h2 id={`year-${year}`}>{year}</h2>
+          <ol>
+            {yearPosts.map((post) => (
+              <li>
+                <time datetime={post.data.pubDate.toISOString()}>
+                  {formatDate(post.data.pubDate)}
+                </time>
+                <a href={`/posts/${post.id}/`}>{post.data.title}</a>
+                <span>{post.data.category}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .archive {
+    padding-top: clamp(4rem, 9vw, 8rem);
+  }
+
+  header {
+    text-align: center;
+  }
+
+  header p {
+    margin: 0 0 0.75rem;
+    color: var(--color-pine);
+    letter-spacing: 0.25em;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+  }
+
+  .year-list {
+    width: min(100%, 52rem);
+    margin: clamp(4rem, 9vw, 7rem) auto 0;
+  }
+
+  .year {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 2rem;
+    padding-block: 2rem;
+    border-top: 1px solid rgb(67 83 73 / 26%);
+  }
+
+  h2 {
+    margin: 0;
+    color: var(--color-pine);
+    font-size: 1.8rem;
+    font-weight: 500;
+  }
+
+  ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: 9rem 1fr auto;
+    align-items: baseline;
+    gap: 1.2rem;
+    padding-block: 0.8rem;
+  }
+
+  time,
+  li span {
+    color: var(--color-ink-soft);
+    font-size: 0.85rem;
+  }
+
+  a {
+    font-size: 1.15rem;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--color-pine);
+  }
+
+  @media (max-width: 640px) {
+    .year {
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+    }
+
+    li {
+      grid-template-columns: 1fr auto;
+      gap: 0.4rem 1rem;
+    }
+
+    time {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

@@ -1,0 +1,233 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import { formatDate } from '../lib/posts';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  newerPost?: CollectionEntry<'blog'>;
+  olderPost?: CollectionEntry<'blog'>;
+}
+
+const { post, newerPost, olderPost } = Astro.props;
+---
+
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <article class="article-page page-shell">
+    <header class="article-header rise-in">
+      <p class="meta">
+        <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+        <span>{post.data.category}</span>
+      </p>
+      <div class="title-row">
+        <h1>{post.data.title}</h1>
+        <span class="seal" aria-hidden="true">墨<br />记</span>
+      </div>
+      <p class="description">{post.data.description}</p>
+    </header>
+
+    {post.data.cover && (
+      <figure class="article-cover">
+        <Image
+          src={post.data.cover}
+          alt={`${post.data.title}题图`}
+          format="webp"
+          quality={84}
+        />
+        <figcaption>行到水穷处，坐看云起时。</figcaption>
+      </figure>
+    )}
+
+    <div class="prose-ink">
+      <slot />
+    </div>
+
+    <a class="back-link" href="/#recent-posts">返回近日书写</a>
+
+    {(newerPost || olderPost) && (
+      <nav class="post-nav" aria-label="文章翻页">
+        <div>
+          {olderPost && (
+            <a href={`/posts/${olderPost.id}/`}>
+              <small>上一篇</small>
+              <span>{olderPost.data.title}</span>
+            </a>
+          )}
+        </div>
+        <div>
+          {newerPost && (
+            <a href={`/posts/${newerPost.id}/`}>
+              <small>下一篇</small>
+              <span>{newerPost.data.title}</span>
+            </a>
+          )}
+        </div>
+      </nav>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .article-page {
+    position: relative;
+    padding-top: clamp(4rem, 9vw, 8rem);
+  }
+
+  .article-page::before {
+    position: absolute;
+    top: 2.5rem;
+    bottom: 0;
+    left: 0.8rem;
+    width: 4px;
+    content: '';
+    border-left: 1px solid rgb(67 83 73 / 35%);
+    border-right: 1px solid rgb(67 83 73 / 16%);
+  }
+
+  .article-header {
+    width: min(100%, 48rem);
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .meta {
+    margin: 0 0 1.2rem;
+    color: var(--color-ink-soft);
+    font-size: 0.9rem;
+    letter-spacing: 0.12em;
+  }
+
+  .meta span::before {
+    margin-inline: 0.8rem;
+    content: '·';
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.4rem;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2.6rem, 7vw, 5.2rem);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+  }
+
+  .seal {
+    display: grid;
+    width: 2.8rem;
+    height: 2.8rem;
+    place-items: center;
+    flex: 0 0 auto;
+    border: 2px solid var(--color-cinnabar);
+    color: var(--color-cinnabar);
+    font-size: 0.75rem;
+    line-height: 1.05;
+    transform: rotate(2deg);
+  }
+
+  .description {
+    margin: 1.8rem 0 0;
+    color: var(--color-ink-soft);
+    font-size: 1.08rem;
+    letter-spacing: 0.08em;
+    line-height: 1.8;
+  }
+
+  .article-cover {
+    position: relative;
+    width: min(100% - 3rem, 58rem);
+    margin: clamp(3.5rem, 8vw, 6rem) auto;
+    padding: clamp(0.65rem, 2vw, 1.2rem);
+    border: 1px solid rgb(86 70 51 / 23%);
+    background: rgb(247 241 229 / 65%);
+    box-shadow: 0 14px 30px rgb(48 40 31 / 10%);
+  }
+
+  .article-cover :global(img) {
+    width: 100%;
+    max-height: 35rem;
+    object-fit: cover;
+    filter: saturate(0.72) contrast(0.94);
+  }
+
+  figcaption {
+    position: absolute;
+    top: 50%;
+    left: -2.7rem;
+    color: var(--color-pine);
+    font-size: 0.86rem;
+    letter-spacing: 0.18em;
+    writing-mode: vertical-rl;
+    transform: translateY(-50%);
+  }
+
+  .back-link {
+    display: block;
+    width: max-content;
+    margin: 4.5rem auto 0;
+    color: var(--color-pine);
+    letter-spacing: 0.12em;
+  }
+
+  .post-nav {
+    display: grid;
+    width: min(100%, 52rem);
+    grid-template-columns: 1fr 1fr;
+    margin: 4rem auto 0;
+    border-top: 1px solid rgb(67 83 73 / 22%);
+    border-bottom: 1px solid rgb(67 83 73 / 22%);
+  }
+
+  .post-nav > div {
+    min-height: 7rem;
+    padding: 1.5rem 2rem;
+  }
+
+  .post-nav > div + div {
+    border-left: 1px solid rgb(67 83 73 / 22%);
+    text-align: right;
+  }
+
+  .post-nav a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    text-decoration: none;
+  }
+
+  .post-nav small {
+    color: var(--color-ink-soft);
+    letter-spacing: 0.14em;
+  }
+
+  .post-nav span {
+    font-size: 1.12rem;
+    letter-spacing: 0.08em;
+  }
+
+  @media (max-width: 720px) {
+    .article-page::before,
+    figcaption {
+      display: none;
+    }
+
+    .article-cover {
+      width: 100%;
+    }
+
+    .post-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .post-nav > div + div {
+      border-top: 1px solid rgb(67 83 73 / 22%);
+      border-left: 0;
+    }
+  }
+</style>

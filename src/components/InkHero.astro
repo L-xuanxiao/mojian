@@ -1,0 +1,148 @@
+---
+import { Image } from 'astro:assets';
+import inkMountains from '../assets/ink-mountains.png';
+---
+
+<section class="hero page-shell" aria-labelledby="hero-title">
+  <Image
+    class="hero-art"
+    src={inkMountains}
+    alt=""
+    format="webp"
+    quality={84}
+    loading="eager"
+  />
+
+  <div class="vertical-mark" aria-hidden="true">
+    <span>墨</span>
+    <span>笺</span>
+  </div>
+
+  <div class="hero-copy rise-in">
+    <h1 id="hero-title">一纸闲墨，记人间朝暮</h1>
+    <span class="ink-stroke" aria-hidden="true"></span>
+    <p>写日常，也写山川与旧书</p>
+  </div>
+
+  <div class="hero-seal" aria-hidden="true">闲<br />记</div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: min(42rem, calc(100vh - 7rem));
+    overflow: hidden;
+    border-right: 1px solid rgb(67 83 73 / 14%);
+    border-bottom: 1px solid rgb(67 83 73 / 18%);
+    border-left: 1px solid rgb(67 83 73 / 14%);
+    background: #eee5d2;
+    isolation: isolate;
+  }
+
+  .hero-art {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 56% center;
+    mask-image: linear-gradient(to bottom, #000 0 90%, transparent 100%);
+  }
+
+  .vertical-mark {
+    position: absolute;
+    top: clamp(2.5rem, 8vw, 5.5rem);
+    left: clamp(1.5rem, 6vw, 5.5rem);
+    display: flex;
+    flex-direction: column;
+    font-size: clamp(2.8rem, 7vw, 5.2rem);
+    font-weight: 600;
+    line-height: 0.95;
+    text-shadow: 0 1px 0 rgb(255 255 255 / 50%);
+  }
+
+  .hero-copy {
+    position: absolute;
+    top: 50%;
+    left: clamp(8rem, 26vw, 22rem);
+    max-width: 48rem;
+    transform: translateY(-35%);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2rem, 4.3vw, 3.7rem);
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    line-height: 1.45;
+    text-shadow: 0 1px 10px rgb(247 241 229 / 70%);
+  }
+
+  .ink-stroke {
+    display: block;
+    width: 4.5rem;
+    height: 1px;
+    margin-block: 1.65rem 1.25rem;
+    background: linear-gradient(to right, transparent, var(--color-ink), transparent);
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-ink-soft);
+    font-size: clamp(1rem, 1.7vw, 1.2rem);
+    letter-spacing: 0.18em;
+  }
+
+  .hero-seal {
+    position: absolute;
+    bottom: 2.5rem;
+    left: clamp(1.8rem, 7vw, 6rem);
+    display: grid;
+    width: 2.7rem;
+    height: 2.7rem;
+    place-items: center;
+    border: 2px solid var(--color-cinnabar);
+    color: var(--color-cinnabar);
+    font-size: 0.8rem;
+    line-height: 1.05;
+    text-align: center;
+    transform: rotate(-3deg);
+  }
+
+  @media (max-width: 720px) {
+    .hero {
+      min-height: 34rem;
+    }
+
+    .hero-art {
+      object-position: 65% center;
+      opacity: 0.78;
+    }
+
+    .vertical-mark {
+      top: 2rem;
+      left: 1.25rem;
+      font-size: 2.65rem;
+    }
+
+    .hero-copy {
+      top: auto;
+      right: 1.5rem;
+      bottom: 6rem;
+      left: 1.5rem;
+      transform: none;
+    }
+
+    h1 {
+      max-width: 9em;
+      font-size: clamp(2rem, 10vw, 3rem);
+      letter-spacing: 0.09em;
+    }
+
+    .hero-seal {
+      bottom: 1.4rem;
+      left: 1.5rem;
+    }
+  }
+</style>

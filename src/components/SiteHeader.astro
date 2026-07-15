@@ -1,0 +1,146 @@
+---
+const pathname = Astro.url.pathname;
+const navItems = [
+  { href: '/', label: '首页' },
+  { href: '/archive/', label: '归档' },
+  { href: '/about/', label: '关于' },
+];
+
+const isActive = (href: string) =>
+  href === '/' ? pathname === '/' : pathname.startsWith(href);
+---
+
+<header class="site-header">
+  <div class="page-shell header-inner">
+    <a class="brand" href="/" aria-label="墨笺首页">
+      <span class="brand-name">墨笺</span>
+      <span class="seal" aria-hidden="true"><i>墨</i><i>笺</i></span>
+    </a>
+
+    <nav aria-label="主导航">
+      <ul>
+        {navItems.map((item) => (
+          <li>
+            <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: relative;
+    z-index: 10;
+    border-top: 3px solid var(--color-pine);
+    border-bottom: 1px solid rgb(67 83 73 / 18%);
+    background: rgb(238 229 210 / 82%);
+    backdrop-filter: blur(10px);
+  }
+
+  .header-inner {
+    display: flex;
+    min-height: 5.5rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    text-decoration: none;
+  }
+
+  .brand-name {
+    font-size: 1.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+  }
+
+  .seal {
+    display: grid;
+    width: 1.8rem;
+    height: 1.8rem;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    border: 1px solid var(--color-cinnabar);
+    color: var(--color-cinnabar);
+    font-size: 0.56rem;
+    line-height: 1;
+    transform: rotate(-2deg);
+  }
+
+  .seal i {
+    font-style: normal;
+  }
+
+  ul {
+    display: flex;
+    align-items: center;
+    gap: clamp(1.1rem, 4vw, 3rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  nav a {
+    position: relative;
+    display: inline-block;
+    padding-block: 0.65rem;
+    color: var(--color-ink-soft);
+    text-decoration: none;
+    letter-spacing: 0.18em;
+  }
+
+  nav a::after {
+    position: absolute;
+    right: 0.15em;
+    bottom: 0.25rem;
+    left: 0;
+    height: 1px;
+    content: '';
+    background: var(--color-pine);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 220ms ease;
+  }
+
+  nav a:hover,
+  nav a[aria-current='page'] {
+    color: var(--color-ink);
+  }
+
+  nav a:hover::after,
+  nav a[aria-current='page']::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  @media (max-width: 560px) {
+    .header-inner {
+      min-height: 4.5rem;
+    }
+
+    .brand-name {
+      font-size: 1.35rem;
+    }
+
+    .seal {
+      display: none;
+    }
+
+    ul {
+      gap: 0.9rem;
+    }
+
+    nav a {
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+    }
+  }
+</style>

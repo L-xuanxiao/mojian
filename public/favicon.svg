@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="5" fill="#eee5d2"/>
+  <rect x="8" y="8" width="48" height="48" fill="none" stroke="#a33a2b" stroke-width="4"/>
+  <path d="M16 16h32v32H16z" fill="none" stroke="#a33a2b" stroke-width="1.5" stroke-dasharray="3 2"/>
+  <text x="32" y="43" fill="#a33a2b" font-family="serif" font-size="30" text-anchor="middle">墨</text>
+</svg>

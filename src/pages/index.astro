@@ -1,0 +1,114 @@
+---
+import InkHero from '../components/InkHero.astro';
+import PostCard from '../components/PostCard.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getPublishedPosts } from '../lib/posts';
+
+const posts = await getPublishedPosts();
+const categories = [
+  { name: '日常', mark: '日', note: '寻常烟火' },
+  { name: '行旅', mark: '行', note: '山川远近' },
+  { name: '读书', mark: '书', note: '字里光阴' },
+  { name: '摄影', mark: '影', note: '留住片刻' },
+];
+---
+
+<BaseLayout>
+  <InkHero />
+
+  <section id="recent-posts" class="posts-section page-shell" aria-labelledby="recent-title">
+    <h2 id="recent-title" class="section-title">近日书写</h2>
+    <div class="post-list">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+  </section>
+
+  <section class="category-section page-shell" aria-labelledby="category-title">
+    <h2 id="category-title" class="sr-only">文章分类</h2>
+    <ul>
+      {categories.map((category) => (
+        <li>
+          <span class="category-mark" aria-hidden="true">{category.mark}</span>
+          <strong>{category.name}</strong>
+          <small>{category.note}</small>
+        </li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .posts-section {
+    padding-top: clamp(5rem, 10vw, 9rem);
+  }
+
+  .post-list {
+    display: grid;
+    gap: 1.35rem;
+    margin-top: 2.5rem;
+  }
+
+  .category-section {
+    margin-top: clamp(5rem, 10vw, 8rem);
+    border: 1px solid rgb(67 83 73 / 35%);
+  }
+
+  ul {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    min-height: 10rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    text-align: center;
+  }
+
+  li + li {
+    border-left: 1px solid rgb(67 83 73 / 25%);
+  }
+
+  .category-mark {
+    display: grid;
+    width: 2.7rem;
+    height: 2.7rem;
+    place-items: center;
+    margin-bottom: 0.3rem;
+    border: 1px solid rgb(67 83 73 / 28%);
+    color: var(--color-pine);
+    font-size: 1.25rem;
+    transform: rotate(-2deg);
+  }
+
+  strong {
+    font-weight: 500;
+    letter-spacing: 0.22em;
+  }
+
+  small {
+    color: var(--color-ink-soft);
+    letter-spacing: 0.08em;
+  }
+
+  @media (max-width: 720px) {
+    ul {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    li:nth-child(3) {
+      border-top: 1px solid rgb(67 83 73 / 25%);
+      border-left: 0;
+    }
+
+    li:nth-child(4) {
+      border-top: 1px solid rgb(67 83 73 / 25%);
+    }
+  }
+</style>
