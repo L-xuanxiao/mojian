@@ -1440,6 +1440,143 @@ const BASE = import.meta.env.BASE_URL;
       to { opacity: 1; transform: translateX(0); }
     }
 
+    /* 借鉴 Firefly 的双侧栏骨架，仅在宽屏重排现有内容。 */
+    @media (min-width: 1181px) {
+      .home-layout {
+        position: relative;
+        z-index: 6;
+        width: min(calc(100% - (var(--side-space) * 2)), var(--page-width));
+        margin: -72px auto 0;
+        display: grid;
+        grid-template-columns: minmax(220px, 240px) minmax(0, 1fr) minmax(220px, 240px);
+        grid-template-areas:
+          "study latest desk"
+          "about latest desk";
+        align-items: start;
+        gap: 20px;
+      }
+
+      .home-layout > .study-index { grid-area: study; }
+      .home-layout > .latest { grid-area: latest; }
+      .home-layout > .desk { grid-area: desk; }
+      .home-layout > .about { grid-area: about; }
+
+      .home-layout > .section {
+        min-width: 0;
+        padding: 54px 0;
+      }
+
+      .home-layout .shell {
+        width: calc(100% - 48px);
+      }
+
+      .home-layout .section-heading,
+      .home-layout .study-grid,
+      .home-layout .about-grid,
+      .home-layout .desk-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .home-layout .section-heading {
+        gap: 18px;
+        margin-bottom: 38px;
+      }
+
+      .home-layout .study-grid,
+      .home-layout .about-grid,
+      .home-layout .desk-grid {
+        gap: 30px;
+      }
+
+      .home-layout .study-intro {
+        position: static;
+        padding-top: 0;
+      }
+
+      .home-layout .study-title,
+      .home-layout .desk .section-title,
+      .home-layout .about .section-title {
+        font-size: clamp(2rem, 2.8vw, 2.65rem);
+      }
+
+      .home-layout .index-item {
+        grid-template-columns: 30px minmax(0, 1fr) auto;
+        gap: 8px 12px;
+        min-height: 94px;
+        padding: 16px 0;
+      }
+
+      .home-layout .index-desc {
+        grid-column: 2 / 4;
+      }
+
+      .home-layout .index-count {
+        grid-column: 3;
+        grid-row: 1;
+      }
+
+      .home-layout .brush-divider {
+        width: 100%;
+      }
+
+      .home-layout .latest .article-scroll,
+      .home-layout .latest .article-scroll:nth-child(2),
+      .home-layout .latest .article-scroll:nth-child(3) {
+        margin-inline: 0;
+      }
+
+      .home-layout .latest .scroll-paper {
+        grid-template-columns: 130px minmax(0, 1fr);
+        gap: 28px;
+        padding: 46px 38px;
+      }
+
+      .home-layout .latest .post-tags {
+        grid-column: 2;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .home-layout .latest .post-tags::before {
+        width: 100%;
+      }
+
+      .home-layout .about .ink-orbit {
+        min-height: 300px;
+      }
+
+      .home-layout .about .ink-circle {
+        width: min(100%, 240px);
+      }
+
+      .home-layout .about .bamboo {
+        width: min(82%, 210px);
+      }
+
+      .home-layout .desk .now-panel {
+        padding: 26px 22px 16px;
+      }
+
+      .home-layout .desk .now-row {
+        grid-template-columns: 1fr;
+        gap: 5px;
+        padding: 18px 0;
+      }
+
+      .home-layout .desk .now-state {
+        justify-self: start;
+      }
+
+      .home-layout .desk .fragment-panel {
+        grid-template-rows: 160px 1fr;
+      }
+
+      .home-layout .desk .fragment-copy {
+        padding: 22px;
+      }
+    }
+
     /* =========================
        响应式布局
     ========================== */
@@ -1984,6 +2121,7 @@ const BASE = import.meta.env.BASE_URL;
       <div class="scroll-hint" aria-hidden="true">向下</div>
     </section>
 
+    <div class="home-layout">
     <section class="section study-index" aria-labelledby="study-title">
       <div class="shell study-grid">
         <div class="study-intro reveal">
@@ -2260,6 +2398,7 @@ const BASE = import.meta.env.BASE_URL;
         </div>
       </div>
     </section>
+    </div>
   </main>
 
   <footer class="site-footer">
