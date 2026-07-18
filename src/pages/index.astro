@@ -1144,20 +1144,16 @@ const BASE = import.meta.env.BASE_URL;
       to { opacity: 1; transform: translateX(0); }
     }
 
-    /* 借鉴 Firefly 的双侧栏骨架，仅在宽屏重排现有内容。 */
-    @media (min-width: 1181px) {
+    /* 借鉴 Firefly 的侧栏骨架，按宽度渐进重排现有内容。 */
+    @media (min-width: 821px) {
       .home-layout {
         position: relative;
         z-index: 6;
-        width: min(calc(100% - (var(--side-space) * 2)), var(--page-width));
+        width: min(calc(100% - (var(--side-space) * 2)), 1220px);
         margin: -72px auto 0;
         display: grid;
-        grid-template-columns: minmax(220px, 240px) minmax(0, 1fr) minmax(220px, 240px);
-        grid-template-areas:
-          "study latest desk"
-          "about latest desk";
         align-items: start;
-        gap: 20px;
+        gap: 24px;
       }
 
       .home-layout > .study-index { grid-area: study; }
@@ -1174,21 +1170,20 @@ const BASE = import.meta.env.BASE_URL;
         width: calc(100% - 48px);
       }
 
-      .home-layout .section-heading,
       .home-layout .study-grid,
-      .home-layout .about-grid,
-      .home-layout .desk-grid {
+      .home-layout .about-grid {
         grid-template-columns: 1fr;
       }
 
-      .home-layout .section-heading {
+      .home-layout .latest .section-heading,
+      .home-layout .about .section-heading {
+        grid-template-columns: 1fr;
         gap: 18px;
         margin-bottom: 38px;
       }
 
       .home-layout .study-grid,
-      .home-layout .about-grid,
-      .home-layout .desk-grid {
+      .home-layout .about-grid {
         gap: 30px;
       }
 
@@ -1198,7 +1193,6 @@ const BASE = import.meta.env.BASE_URL;
       }
 
       .home-layout .study-title,
-      .home-layout .desk .section-title,
       .home-layout .about .section-title {
         font-size: clamp(2rem, 2.8vw, 2.65rem);
       }
@@ -1211,7 +1205,8 @@ const BASE = import.meta.env.BASE_URL;
       }
 
       .home-layout .index-desc {
-        grid-column: 2 / 4;
+        grid-column: 1 / -1;
+        padding-left: 42px;
       }
 
       .home-layout .index-count {
@@ -1230,9 +1225,9 @@ const BASE = import.meta.env.BASE_URL;
       }
 
       .home-layout .latest .scroll-paper {
-        grid-template-columns: 130px minmax(0, 1fr);
-        gap: 28px;
-        padding: 46px 38px;
+        grid-template-columns: clamp(100px, 10vw, 130px) minmax(0, 1fr);
+        gap: clamp(20px, 2vw, 28px);
+        padding: clamp(32px, 3vw, 46px) clamp(24px, 2.5vw, 38px);
       }
 
       .home-layout .latest .post-tags {
@@ -1257,15 +1252,53 @@ const BASE = import.meta.env.BASE_URL;
       .home-layout .about .bamboo {
         width: min(82%, 210px);
       }
+    }
+
+    @media (min-width: 821px) and (max-width: 1359px) {
+      .home-layout {
+        grid-template-columns: clamp(210px, 22vw, 280px) minmax(0, 1fr);
+        grid-template-areas:
+          "study latest"
+          "about latest"
+          "desk desk";
+      }
+    }
+
+    @media (min-width: 1360px) {
+      .home-layout {
+        width: min(calc(100% - (var(--side-space) * 2)), 1480px);
+        grid-template-columns: clamp(240px, 18vw, 280px) minmax(620px, 1fr) clamp(260px, 19vw, 300px);
+        grid-template-areas:
+          "study latest desk"
+          "about latest desk";
+      }
+
+      .home-layout .desk .section-heading,
+      .home-layout .desk-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .home-layout .desk .section-heading {
+        gap: 16px;
+        margin-bottom: 30px;
+      }
+
+      .home-layout .desk-grid {
+        gap: 24px;
+      }
+
+      .home-layout .desk .section-title {
+        font-size: clamp(2rem, 2.8vw, 2.65rem);
+      }
 
       .home-layout .desk .now-panel {
-        padding: 26px 22px 16px;
+        padding: 24px 20px 14px;
       }
 
       .home-layout .desk .now-row {
         grid-template-columns: 1fr;
         gap: 5px;
-        padding: 18px 0;
+        padding: 15px 0;
       }
 
       .home-layout .desk .now-state {
@@ -1273,11 +1306,11 @@ const BASE = import.meta.env.BASE_URL;
       }
 
       .home-layout .desk .fragment-panel {
-        grid-template-rows: 160px 1fr;
+        grid-template-rows: 140px 1fr;
       }
 
       .home-layout .desk .fragment-copy {
-        padding: 22px;
+        padding: 20px;
       }
     }
 
