@@ -1,4 +1,8 @@
 ---
+import { Image } from "astro:assets";
+import { Icon } from "astro-icon/components";
+import inkMountains from "../assets/ink-mountains.png";
+
 const BASE = import.meta.env.BASE_URL;
 ---
 
@@ -175,27 +179,39 @@ const BASE = import.meta.env.BASE_URL;
     ========================== */
     .site-header {
       position: fixed;
-      inset: 0 0 auto;
+      top: 14px;
+      left: 50%;
+      width: min(calc(100% - 9vw), 1860px);
       z-index: 30;
-      border-bottom: 1px solid transparent;
+      transform: translateX(-50%);
       transition:
-        background-color 320ms ease,
-        border-color 320ms ease,
-        box-shadow 320ms ease;
+        top 240ms ease,
+        width 240ms ease;
     }
 
     .site-header.is-scrolled {
-      background: rgba(248, 246, 239, 0.82);
-      border-bottom-color: rgba(92, 87, 77, 0.16);
-      box-shadow: 0 12px 36px rgba(62, 54, 43, 0.04);
+      top: 8px;
+      width: min(calc(100% - 7vw), 1820px);
     }
 
     .nav-inner {
-      min-height: 76px;
+      min-height: 70px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 24px;
+      width: 100%;
+      padding: 0 18px;
+      border: 1px solid rgba(83, 79, 70, 0.16);
+      border-radius: 16px;
+      background: rgba(248, 246, 239, 0.92);
+      box-shadow: 0 12px 34px rgba(62, 54, 43, 0.1);
+      transition: box-shadow 240ms ease, background-color 240ms ease;
+    }
+
+    .site-header.is-scrolled .nav-inner {
+      background: rgba(248, 246, 239, 0.97);
+      box-shadow: 0 10px 28px rgba(62, 54, 43, 0.12);
     }
 
     .brand {
@@ -235,7 +251,7 @@ const BASE = import.meta.env.BASE_URL;
     .nav-list {
       display: flex;
       align-items: center;
-      gap: clamp(18px, 3vw, 40px);
+      gap: 4px;
       margin: 0;
       padding: 0;
       list-style: none;
@@ -244,34 +260,77 @@ const BASE = import.meta.env.BASE_URL;
     }
 
     .nav-link {
-      position: relative;
-      display: inline-block;
-      padding: 8px 0;
-      transition: color 220ms ease;
-    }
-
-    .nav-link::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 2px;
-      height: 1px;
-      background: var(--cinnabar);
-      transform: scaleX(0);
-      transform-origin: right center;
-      transition: transform 280ms var(--ease);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 42px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-family: var(--serif);
+      letter-spacing: 0.08em;
+      transition: color 200ms ease, background-color 200ms ease, transform 200ms var(--ease);
     }
 
     .nav-link:hover,
     .nav-link[aria-current="page"] {
       color: var(--ink);
+      background: rgba(164, 68, 52, 0.08);
     }
 
-    .nav-link:hover::after,
-    .nav-link[aria-current="page"]::after {
-      transform: scaleX(1);
-      transform-origin: left center;
+    .nav-link:hover {
+      transform: translateY(-1px);
+    }
+
+    .nav-icon {
+      width: 19px;
+      height: 19px;
+      color: var(--moss-deep);
+      flex: 0 0 auto;
+    }
+
+    .nav-mobile {
+      display: none;
+      position: relative;
+    }
+
+    .nav-mobile summary {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      color: var(--ink);
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .nav-mobile summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .nav-mobile[open] summary {
+      background: rgba(164, 68, 52, 0.08);
+    }
+
+    .nav-mobile-panel {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      width: min(250px, calc(100vw - 36px));
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(248, 246, 239, 0.98);
+      box-shadow: 0 18px 42px rgba(62, 54, 43, 0.14);
+    }
+
+    .nav-mobile-panel .nav-list {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .nav-mobile-panel .nav-link {
+      width: 100%;
     }
 
     /* =========================
@@ -279,10 +338,11 @@ const BASE = import.meta.env.BASE_URL;
     ========================== */
     .hero {
       position: relative;
-      min-height: min(920px, 100svh);
+      min-height: 600px;
+      height: clamp(600px, 68svh, 720px);
       display: grid;
       align-items: center;
-      padding: 132px 0 146px;
+      padding: 118px 0 76px;
       isolation: isolate;
       overflow: hidden;
     }
@@ -290,23 +350,17 @@ const BASE = import.meta.env.BASE_URL;
     .hero::before {
       content: "";
       position: absolute;
-      width: min(44vw, 620px);
-      aspect-ratio: 1;
-      left: 2vw;
-      top: 12%;
+      inset: 0;
       z-index: -3;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,255,255,0.5), rgba(255,255,255,0.04) 58%, transparent 72%);
-      border: 1px solid rgba(84, 92, 84, 0.07);
+      background: linear-gradient(90deg, rgba(250, 248, 242, 0.88) 0%, rgba(250, 248, 242, 0.7) 43%, rgba(250, 248, 242, 0.3) 72%, rgba(250, 248, 242, 0.5) 100%);
     }
 
     .hero::after {
       content: "";
       position: absolute;
-      inset: auto 0 0;
-      height: 52%;
+      inset: 0;
       z-index: -2;
-      background: linear-gradient(180deg, transparent, rgba(236, 232, 221, 0.42));
+      background: linear-gradient(180deg, rgba(247, 244, 235, 0.08), transparent 55%, rgba(242, 238, 227, 0.72));
       pointer-events: none;
     }
 
@@ -321,7 +375,7 @@ const BASE = import.meta.env.BASE_URL;
 
     .hero-content {
       max-width: 760px;
-      padding-top: 26px;
+      padding-top: 18px;
     }
 
     .hero-eyebrow {
@@ -346,7 +400,7 @@ const BASE = import.meta.env.BASE_URL;
     .hero-title {
       margin: 0;
       font-family: var(--serif);
-      font-size: clamp(4.5rem, 9vw, 8.2rem);
+      font-size: clamp(4.2rem, 7.4vw, 6.8rem);
       font-weight: 500;
       line-height: 0.98;
       letter-spacing: 0.11em;
@@ -444,7 +498,7 @@ const BASE = import.meta.env.BASE_URL;
     .hero-side {
       position: relative;
       align-self: stretch;
-      min-height: 470px;
+      min-height: 350px;
       display: flex;
       align-items: center;
       justify-content: flex-end;
@@ -479,10 +533,9 @@ const BASE = import.meta.env.BASE_URL;
       margin-right: 46px;
       padding: 28px 28px 26px;
       color: var(--ink-soft);
-      background: rgba(249, 247, 240, 0.55);
+      background: rgba(249, 247, 240, 0.72);
       border-top: 1px solid var(--line-strong);
       border-bottom: 1px solid var(--line);
-      backdrop-filter: blur(5px);
     }
 
     .hero-note::before {
@@ -553,30 +606,16 @@ const BASE = import.meta.env.BASE_URL;
 
     .hero-landscape {
       position: absolute;
-      left: 0;
-      right: 0;
-      bottom: -2px;
-      z-index: 1;
-      height: min(48vw, 520px);
-      min-height: 310px;
+      inset: 0;
+      z-index: -4;
       pointer-events: none;
     }
 
-    .hero-landscape svg {
+    .hero-landscape img {
       width: 100%;
       height: 100%;
-    }
-
-    .hero-sun {
-      position: absolute;
-      right: 23%;
-      bottom: 39%;
-      z-index: 0;
-      width: clamp(56px, 6vw, 90px);
-      aspect-ratio: 1;
-      border-radius: 50%;
-      background: rgba(164, 68, 52, 0.15);
-      box-shadow: 0 0 42px rgba(164, 68, 52, 0.06);
+      object-fit: cover;
+      object-position: center 56%;
     }
 
     .scroll-hint {
@@ -1625,6 +1664,14 @@ const BASE = import.meta.env.BASE_URL;
     }
 
     @media (max-width: 820px) {
+      .nav-desktop {
+        display: none;
+      }
+
+      .nav-mobile {
+        display: block;
+      }
+
       .section-heading {
         grid-template-columns: 1fr;
         align-items: start;
@@ -1636,8 +1683,9 @@ const BASE = import.meta.env.BASE_URL;
       }
 
       .hero {
-        min-height: auto;
-        padding: 132px 0 310px;
+        min-height: 620px;
+        height: auto;
+        padding: 126px 0 82px;
       }
 
       .hero-grid {
@@ -1649,8 +1697,7 @@ const BASE = import.meta.env.BASE_URL;
       }
 
       .hero-side {
-        min-height: 0;
-        display: block;
+        display: none;
       }
 
       .hero-vertical-copy {
@@ -1663,12 +1710,7 @@ const BASE = import.meta.env.BASE_URL;
       }
 
       .hero-landscape {
-        height: 340px;
-      }
-
-      .hero-sun {
-        right: 17%;
-        bottom: 28%;
+        height: 100%;
       }
 
       .study-grid {
@@ -1736,9 +1778,21 @@ const BASE = import.meta.env.BASE_URL;
         --side-space: 18px;
       }
 
+      .site-header {
+        top: 10px;
+        width: calc(100% - 20px);
+      }
+
+      .site-header.is-scrolled {
+        top: 6px;
+        width: calc(100% - 14px);
+      }
+
       .nav-inner {
-        min-height: 66px;
+        min-height: 60px;
         gap: 14px;
+        padding: 0 10px 0 14px;
+        border-radius: 14px;
       }
 
       .brand {
@@ -1753,12 +1807,13 @@ const BASE = import.meta.env.BASE_URL;
       }
 
       .nav-list {
-        gap: 13px;
-        font-size: 0.79rem;
+        gap: 4px;
+        font-size: 0.9rem;
       }
 
       .hero {
-        padding: 112px 0 254px;
+        min-height: 570px;
+        padding: 104px 0 62px;
       }
 
       .hero-title {
@@ -1796,8 +1851,8 @@ const BASE = import.meta.env.BASE_URL;
       }
 
       .hero-landscape {
-        height: 270px;
-        min-height: 270px;
+        height: 100%;
+        min-height: 0;
       }
 
       .scroll-hint {
@@ -2018,14 +2073,26 @@ const BASE = import.meta.env.BASE_URL;
         <span class="brand-seal" aria-hidden="true">笺</span>
       </a>
 
-      <nav aria-label="主导航">
+      <nav class="nav-desktop" aria-label="主导航">
         <ul class="nav-list">
-          <li><a class="nav-link" href="#top" aria-current="page">首页</a></li>
-          <li><a class="nav-link" href="#articles">文章</a></li>
-          <li><a class="nav-link" href="#archive">归档</a></li>
-          <li><a class="nav-link" href="#about">关于</a></li>
+          <li><a class="nav-link" href="#top" aria-current="page" aria-label="首页·墨庐"><Icon class="nav-icon" name="material-symbols:home-outline-rounded" />墨庐</a></li>
+          <li><a class="nav-link" href="#articles" aria-label="文章·笺录"><Icon class="nav-icon" name="material-symbols:article-outline-rounded" />笺录</a></li>
+          <li><a class="nav-link" href="#archive" aria-label="归档·卷藏"><Icon class="nav-icon" name="material-symbols:archive-outline-rounded" />卷藏</a></li>
+          <li><a class="nav-link" href="#about" aria-label="关于·此间"><Icon class="nav-icon" name="material-symbols:person-outline-rounded" />此间</a></li>
         </ul>
       </nav>
+
+      <details class="nav-mobile" id="navMenu">
+        <summary aria-label="展开导航"><Icon class="nav-icon" name="material-symbols:menu-rounded" /></summary>
+        <nav class="nav-mobile-panel" aria-label="移动端导航">
+          <ul class="nav-list">
+            <li><a class="nav-link" href="#top" aria-current="page"><Icon class="nav-icon" name="material-symbols:home-outline-rounded" />墨庐</a></li>
+            <li><a class="nav-link" href="#articles"><Icon class="nav-icon" name="material-symbols:article-outline-rounded" />笺录</a></li>
+            <li><a class="nav-link" href="#archive"><Icon class="nav-icon" name="material-symbols:archive-outline-rounded" />卷藏</a></li>
+            <li><a class="nav-link" href="#about"><Icon class="nav-icon" name="material-symbols:person-outline-rounded" />此间</a></li>
+          </ul>
+        </nav>
+      </details>
     </div>
   </header>
 
@@ -2067,56 +2134,15 @@ const BASE = import.meta.env.BASE_URL;
         </div>
       </div>
 
-      <div class="hero-sun" aria-hidden="true"></div>
       <div class="hero-landscape" aria-hidden="true">
-        <svg viewBox="0 0 1600 520" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="farWash" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#667068" stop-opacity="0.06" />
-              <stop offset="1" stop-color="#596159" stop-opacity="0.2" />
-            </linearGradient>
-            <linearGradient id="midWash" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#465048" stop-opacity="0.2" />
-              <stop offset="1" stop-color="#596159" stop-opacity="0.07" />
-            </linearGradient>
-            <filter id="softInk" x="-10%" y="-20%" width="120%" height="140%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.008 0.028" numOctaves="2" seed="8" result="noise" />
-              <feDisplacementMap in="SourceGraphic" in2="noise" scale="16" xChannelSelector="R" yChannelSelector="B" />
-              <feGaussianBlur stdDeviation="1.2" />
-            </filter>
-            <filter id="mistBlur">
-              <feGaussianBlur stdDeviation="8" />
-            </filter>
-          </defs>
-
-          <g class="drift-far" filter="url(#softInk)">
-            <path d="M0 330C126 315 198 236 302 242C404 248 454 315 550 292C665 265 720 153 850 163C970 172 1012 282 1128 270C1244 257 1292 193 1400 211C1490 226 1543 290 1600 302V520H0Z" fill="url(#farWash)" />
-            <path d="M0 386C102 360 176 310 263 318C356 327 398 383 482 370C585 355 642 252 748 260C852 269 905 356 1005 347C1125 337 1182 253 1283 272C1392 292 1465 374 1600 355V520H0Z" fill="#596159" fill-opacity="0.08" />
-          </g>
-
-          <g opacity="0.42" filter="url(#mistBlur)">
-            <path d="M80 346C332 320 503 348 704 330C905 312 1120 324 1510 294" fill="none" stroke="#f8f5ed" stroke-width="34" />
-            <path d="M0 412C254 390 470 420 728 392C980 365 1236 402 1600 370" fill="none" stroke="#f8f5ed" stroke-width="28" />
-          </g>
-
-          <g class="drift-near" filter="url(#softInk)">
-            <path d="M0 430C105 413 180 370 274 382C380 396 427 452 532 432C651 410 708 331 821 340C946 349 1008 427 1128 415C1244 403 1312 343 1418 362C1508 379 1552 418 1600 414V520H0Z" fill="url(#midWash)" />
-            <path d="M0 476C177 446 282 475 413 456C543 438 650 411 784 427C924 444 1017 482 1150 458C1300 430 1430 439 1600 470V520H0Z" fill="#2e342f" fill-opacity="0.09" />
-          </g>
-
-          <g fill="#2d332e" fill-opacity="0.18">
-            <path d="M1178 426l9-52 7 52z" />
-            <path d="M1190 426l7-39 6 39z" />
-            <path d="M1210 427l8-46 7 46z" />
-            <path d="M401 457l7-35 6 35z" />
-            <path d="M413 458l6-28 5 28z" />
-          </g>
-
-          <g fill="none" stroke="#343a35" stroke-linecap="round" stroke-opacity="0.25">
-            <path d="M1285 192c14-8 24-7 36 2" />
-            <path d="M1328 178c12-7 21-6 31 2" />
-          </g>
-        </svg>
+        <Image
+          src={inkMountains}
+          alt=""
+          widths={[960, 1280, 1672]}
+          sizes="100vw"
+          loading="eager"
+          fetchpriority="high"
+        />
       </div>
       <div class="scroll-hint" aria-hidden="true">向下</div>
     </section>
@@ -2424,7 +2450,7 @@ const BASE = import.meta.env.BASE_URL;
   </footer>
 
   <script>
-    // 页面滚动后，为导航栏加入轻微的纸张毛玻璃效果。
+    // 页面滚动后收紧悬浮导航。
     const header = document.getElementById("siteHeader");
 
     const updateHeader = () => {
@@ -2452,12 +2478,22 @@ const BASE = import.meta.env.BASE_URL;
         if (section && section.offsetTop <= readingLine) current = item;
       });
 
-      navLinks.forEach((link) => link.removeAttribute("aria-current"));
-      current?.link?.setAttribute("aria-current", "page");
+      const currentHref = current?.link?.getAttribute("href");
+      navLinks.forEach((link) => {
+        if (link.getAttribute("href") === currentHref) {
+          link.setAttribute("aria-current", "page");
+        } else {
+          link.removeAttribute("aria-current");
+        }
+      });
     };
 
     updateActiveNav();
     window.addEventListener("scroll", updateActiveNav, { passive: true });
+
+    document.querySelectorAll("#navMenu .nav-link").forEach((link) => {
+      link.addEventListener("click", () => document.getElementById("navMenu")?.removeAttribute("open"));
+    });
 
     // 元素进入视口后淡入。系统关闭动画时，CSS 会直接显示内容。
     const revealItems = document.querySelectorAll(".reveal");
