@@ -1,24 +1,43 @@
-## 每次回复我前必须加上：喵内が
+# 墨笺项目约定
 
-## Development
+## 沟通
 
-When starting the dev server, use background mode:
+- 每次回复以 `喵内が` 开头。
 
+## 技术与部署
+
+- Node.js 要求 `>=22.12.0`。项目为 Astro 7 静态站，使用 TypeScript 严格模式、Tailwind CSS 4、`astro-icon` 与 Material Symbols 图标集。
+- GitHub Pages 站点基路径为 `/mojian/`，路由使用尾斜杠。站内链接和静态资源路径需兼容 `import.meta.env.BASE_URL`。
+- 推送到 `main` 后由 GitHub Actions 构建并部署 Pages。
+
+## 目录
+
+- `src/pages/`：页面路由。首页 `index.astro` 独立实现；文章详情由 `posts/[slug].astro` 生成。
+- `src/content/blog/`：Markdown 文章；字段约束见 `src/content.config.ts`。
+- `src/components/`、`src/layouts/`：共享组件与内页布局。
+- `src/lib/posts.ts`：已发布文章过滤、排序和日期格式化。
+- `src/styles/global.css`：全局主题变量与基础样式；`src/assets/`：源码资源。
+- 视觉规则见 [docs/DESIGN.md](docs/DESIGN.md)。
+
+## 命令
+
+```bash
+npm install
+npm run dev
+npm run check
+npm run build
+npm run preview
 ```
-astro dev --background
-```
 
-Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
+需要长期启动开发服务时使用 `astro dev --background`；通过 `astro dev status`、`astro dev logs`、`astro dev stop` 管理。
 
-## Documentation
+## 验证
 
-Full documentation: https://docs.astro.build
+- 项目当前没有自动化测试命令或测试框架。
+- 源码改动至少运行 `npm run check` 和 `npm run build`。
+- 界面改动还需用 `npm run preview` 检查桌面端、移动端、控制台和站内链接。
 
-Consult these guides before working on related tasks:
+## 内容约定
 
-- [Adding pages, dynamic routes, or middleware](https://docs.astro.build/en/guides/routing/)
-- [Working with Astro components](https://docs.astro.build/en/basics/astro-components/)
-- [Using React, Vue, Svelte, or other framework components](https://docs.astro.build/en/guides/framework-components/)
-- [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
-- [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
-- [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)
+- 新文章放入 `src/content/blog/`，frontmatter 遵循 `src/content.config.ts`；分类仅限其中定义的枚举值。
+- 列表与静态文章路由复用 `getPublishedPosts()`，不展示 `draft: true` 的文章。
