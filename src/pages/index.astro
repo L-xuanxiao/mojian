@@ -195,6 +195,8 @@ const BASE = import.meta.env.BASE_URL;
     }
 
     .nav-inner {
+      position: relative;
+      isolation: isolate;
       min-height: 70px;
       display: flex;
       align-items: center;
@@ -202,16 +204,43 @@ const BASE = import.meta.env.BASE_URL;
       gap: 24px;
       width: 100%;
       padding: 0 18px;
-      border: 1px solid rgba(83, 79, 70, 0.16);
-      border-radius: 16px;
-      background: rgba(248, 246, 239, 0.92);
-      box-shadow: 0 12px 34px rgba(62, 54, 43, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.58);
+      border-radius: 999px;
+      background-color: rgba(248, 246, 239, 0.62);
+      background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(226, 220, 207, 0.12));
+      -webkit-backdrop-filter: blur(14px) saturate(145%);
+      backdrop-filter: blur(14px) saturate(145%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.74),
+        inset 0 -1px 0 rgba(83, 79, 70, 0.14),
+        0 12px 34px rgba(62, 54, 43, 0.12);
       transition: box-shadow 240ms ease, background-color 240ms ease;
     }
 
+    .nav-inner::before {
+      position: absolute;
+      z-index: 0;
+      inset: 1px;
+      border-radius: inherit;
+      content: "";
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 12% -140%, rgba(255, 255, 255, 0.9), transparent 46%),
+        linear-gradient(105deg, rgba(255, 255, 255, 0.22), transparent 28%, transparent 72%, rgba(255, 255, 255, 0.14));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+    }
+
+    .nav-inner > * {
+      position: relative;
+      z-index: 1;
+    }
+
     .site-header.is-scrolled .nav-inner {
-      background: rgba(248, 246, 239, 0.97);
-      box-shadow: 0 10px 28px rgba(62, 54, 43, 0.12);
+      background-color: rgba(248, 246, 239, 0.76);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        inset 0 -1px 0 rgba(83, 79, 70, 0.16),
+        0 10px 28px rgba(62, 54, 43, 0.14);
     }
 
     .brand {
@@ -265,16 +294,19 @@ const BASE = import.meta.env.BASE_URL;
       gap: 7px;
       min-height: 42px;
       padding: 8px 14px;
-      border-radius: 10px;
+      border-radius: 999px;
       font-family: var(--serif);
       letter-spacing: 0.08em;
-      transition: color 200ms ease, background-color 200ms ease, transform 200ms var(--ease);
+      transition: color 200ms ease, background-color 200ms ease, box-shadow 200ms ease, transform 200ms var(--ease);
     }
 
     .nav-link:hover,
     .nav-link[aria-current="page"] {
       color: var(--ink);
-      background: rgba(164, 68, 52, 0.08);
+      background: rgba(255, 255, 255, 0.38);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        inset 0 0 0 1px rgba(83, 79, 70, 0.08);
     }
 
     .nav-link:hover {
@@ -298,7 +330,7 @@ const BASE = import.meta.env.BASE_URL;
       height: 42px;
       display: grid;
       place-items: center;
-      border-radius: 10px;
+      border-radius: 999px;
       color: var(--ink);
       cursor: pointer;
       list-style: none;
@@ -309,7 +341,8 @@ const BASE = import.meta.env.BASE_URL;
     }
 
     .nav-mobile[open] summary {
-      background: rgba(164, 68, 52, 0.08);
+      background: rgba(255, 255, 255, 0.42);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
     }
 
     .nav-mobile-panel {
@@ -318,10 +351,16 @@ const BASE = import.meta.env.BASE_URL;
       right: 0;
       width: min(250px, calc(100vw - 36px));
       padding: 10px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: rgba(248, 246, 239, 0.98);
-      box-shadow: 0 18px 42px rgba(62, 54, 43, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.58);
+      border-radius: 22px;
+      background-color: rgba(248, 246, 239, 0.74);
+      background-image: linear-gradient(155deg, rgba(255, 255, 255, 0.32), rgba(226, 220, 207, 0.12));
+      -webkit-backdrop-filter: blur(14px) saturate(145%);
+      backdrop-filter: blur(14px) saturate(145%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.76),
+        inset 0 -1px 0 rgba(83, 79, 70, 0.14),
+        0 18px 42px rgba(62, 54, 43, 0.16);
     }
 
     .nav-mobile-panel .nav-list {
@@ -1792,7 +1831,7 @@ const BASE = import.meta.env.BASE_URL;
         min-height: 60px;
         gap: 14px;
         padding: 0 10px 0 14px;
-        border-radius: 14px;
+        border-radius: 999px;
       }
 
       .brand {
@@ -2041,6 +2080,39 @@ const BASE = import.meta.env.BASE_URL;
       .footer-quote {
         font-size: 1.32rem;
         letter-spacing: 0.1em;
+      }
+    }
+
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .nav-inner,
+      .nav-mobile-panel {
+        background-color: rgba(248, 246, 239, 0.97);
+      }
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      .nav-inner,
+      .site-header.is-scrolled .nav-inner,
+      .nav-mobile-panel {
+        background-color: rgba(248, 246, 239, 0.98);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+
+      .nav-inner::before {
+        opacity: 0.32;
+      }
+    }
+
+    @media (prefers-contrast: more) {
+      .nav-inner,
+      .nav-mobile-panel {
+        border-color: rgba(33, 31, 27, 0.5);
+        background-color: rgba(248, 246, 239, 0.96);
+      }
+
+      .nav-link[aria-current="page"] {
+        box-shadow: inset 0 0 0 1px currentColor;
       }
     }
 
@@ -2475,7 +2547,7 @@ const BASE = import.meta.env.BASE_URL;
 
       trackedSections.forEach((item) => {
         const section = document.getElementById(item.id);
-        if (section && section.offsetTop <= readingLine) current = item;
+        if (section && section.getBoundingClientRect().top + window.scrollY <= readingLine) current = item;
       });
 
       const currentHref = current?.link?.getAttribute("href");
