@@ -17,8 +17,8 @@ for (const post of posts) {
 <BaseLayout title="归档" description="墨笺的年月归档。">
   <section class="archive page-shell">
     <header>
-      <p>循时而记</p>
-      <h1>归档</h1>
+      <p class="page-kicker">循时而记</p>
+      <h1 class="page-display-title">卷藏</h1>
     </header>
 
     <div class="year-list">
@@ -44,29 +44,41 @@ for (const post of posts) {
 
 <style>
   .archive {
+    position: relative;
     padding-top: clamp(4rem, 9vw, 8rem);
   }
 
+  .archive::before {
+    position: absolute;
+    top: 3rem;
+    left: 50%;
+    width: min(72vw, 44rem);
+    aspect-ratio: 1;
+    border: 1px solid rgb(83 79 70 / 9%);
+    border-radius: 50%;
+    content: '';
+    pointer-events: none;
+    transform: translateX(-50%);
+  }
+
   header {
+    position: relative;
     text-align: center;
   }
 
-  header p {
-    margin: 0 0 0.75rem;
-    color: var(--color-pine);
-    letter-spacing: 0.25em;
-  }
-
-  h1 {
-    margin: 0;
-    font-size: clamp(3rem, 8vw, 6rem);
-    font-weight: 500;
+  .page-display-title {
     letter-spacing: 0.2em;
   }
 
   .year-list {
+    position: relative;
     width: min(100%, 52rem);
     margin: clamp(4rem, 9vw, 7rem) auto 0;
+    padding: clamp(1rem, 3vw, 2rem) clamp(1.2rem, 4vw, 3rem);
+    border-block: 1px solid var(--line-strong);
+    background:
+      repeating-linear-gradient(180deg, transparent 0 55px, rgb(83 79 70 / 6%) 55px 56px),
+      rgb(251 249 243 / 34%);
   }
 
   .year {
@@ -74,12 +86,17 @@ for (const post of posts) {
     grid-template-columns: 7rem 1fr;
     gap: 2rem;
     padding-block: 2rem;
-    border-top: 1px solid rgb(67 83 73 / 26%);
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .year:first-child {
+    border-top: 0;
   }
 
   h2 {
     margin: 0;
-    color: var(--color-pine);
+    color: var(--moss-deep);
+    font-family: var(--serif);
     font-size: 1.8rem;
     font-weight: 500;
   }
@@ -100,18 +117,19 @@ for (const post of posts) {
 
   time,
   li span {
-    color: var(--color-ink-soft);
+    color: var(--ink-faint);
     font-size: 0.85rem;
   }
 
   a {
+    font-family: var(--serif);
     font-size: 1.15rem;
     letter-spacing: 0.08em;
     text-decoration: none;
   }
 
   a:hover {
-    color: var(--color-pine);
+    color: var(--moss-deep);
   }
 
   @media (max-width: 640px) {

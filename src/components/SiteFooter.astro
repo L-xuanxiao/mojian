@@ -1,52 +1,112 @@
-<footer>
+---
+const BASE = import.meta.env.BASE_URL;
+---
+
+<footer class="site-footer">
+  <svg class="footer-mountains" viewBox="0 0 1600 160" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 64C150 52 245 11 360 30C473 48 523 92 634 72C748 51 826 5 942 22C1056 39 1122 88 1245 67C1372 45 1474 39 1600 68V0H0Z" fill="#e8e5dc" fill-opacity=".12" />
+    <path d="M0 94C174 68 272 95 410 76C562 55 657 25 806 42C947 58 1050 101 1190 75C1340 48 1460 62 1600 92V0H0Z" fill="#e8e5dc" fill-opacity=".07" />
+  </svg>
   <div class="page-shell footer-inner">
-    <span class="rule" aria-hidden="true"></span>
-    <p>墨笺 · 记于人间</p>
-    <span class="rule" aria-hidden="true"></span>
+    <p class="footer-quote">一纸闲墨，记人间朝暮。</p>
+    <div class="footer-rule" aria-hidden="true"></div>
+    <nav class="footer-links" aria-label="页尾导航">
+      <a href={`${BASE}#articles`}>文章</a>
+      <a href={`${BASE}archive/`}>归档</a>
+      <a href={`${BASE}about/`}>关于</a>
+      <span aria-hidden="true">RSS</span>
+    </nav>
+    <div class="footer-meta">
+      <span>© 2026 墨笺</span>
+      <span>由 Astro 构筑</span>
+      <span>写日常，也写山川与旧书</span>
+    </div>
   </div>
 </footer>
 
 <style>
-  footer {
-    margin-top: 6rem;
-    border-bottom: 10px solid var(--color-pine);
+  .site-footer {
+    position: relative;
+    margin-top: clamp(5rem, 9vw, 8rem);
+    padding: 112px 0 48px;
+    overflow: hidden;
+    color: rgb(245 242 234 / 86%);
+    background: #333935;
+  }
+
+  :global(.home-page) .site-footer {
+    margin-top: 0;
+  }
+
+  .footer-mountains {
+    position: absolute;
+    inset: 0 0 auto;
+    width: 100%;
+    height: 150px;
+    opacity: 0.34;
+    transform: translateY(-1px);
   }
 
   .footer-inner {
+    position: relative;
+    z-index: 2;
     display: grid;
-    min-height: 8rem;
-    grid-template-columns: minmax(2rem, 8rem) auto minmax(2rem, 8rem);
-    align-items: center;
-    justify-content: center;
-    gap: 1.2rem;
-    border-top: 1px solid rgb(67 83 73 / 20%);
+    justify-items: center;
+    text-align: center;
   }
 
-  p {
+  .footer-quote {
     margin: 0;
-    color: var(--color-ink-soft);
-    letter-spacing: 0.2em;
+    font-family: var(--serif);
+    font-size: clamp(1.45rem, 3vw, 2.15rem);
+    letter-spacing: 0.18em;
   }
 
-  .rule {
+  .footer-rule {
+    width: 72px;
     height: 1px;
-    background: rgb(67 83 73 / 25%);
+    margin: 30px 0 24px;
+    background: rgb(215 154 141 / 70%);
   }
 
-  @media (max-width: 560px) {
-    footer {
-      margin-top: 4rem;
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px 28px;
+    color: rgb(245 242 234 / 57%);
+    font-size: 0.84rem;
+  }
+
+  .footer-links a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 220ms ease;
+  }
+
+  .footer-links a:hover {
+    color: rgb(245 242 234 / 90%);
+  }
+
+  .footer-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 24px;
+    margin-top: 44px;
+    color: rgb(245 242 234 / 34%);
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+  }
+
+  @media (max-width: 620px) {
+    .site-footer {
+      padding-top: 96px;
     }
 
-    .footer-inner {
-      min-height: 6rem;
-      grid-template-columns: 2rem auto 2rem;
-      gap: 0.7rem;
-    }
-
-    p {
-      font-size: 0.9rem;
-      letter-spacing: 0.12em;
+    .footer-quote {
+      font-size: 1.32rem;
+      letter-spacing: 0.1em;
     }
   }
 </style>

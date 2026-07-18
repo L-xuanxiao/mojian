@@ -17,12 +17,12 @@ const BASE = import.meta.env.BASE_URL;
 <BaseLayout title={post.data.title} description={post.data.description}>
   <article class="article-page page-shell">
     <header class="article-header rise-in">
-      <p class="meta">
+      <p class="meta page-kicker">
         <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
         <span>{post.data.category}</span>
       </p>
       <div class="title-row">
-        <h1>{post.data.title}</h1>
+        <h1 class="page-display-title">{post.data.title}</h1>
         <span class="seal" aria-hidden="true">墨<br />记</span>
       </div>
       <p class="description">{post.data.description}</p>
@@ -44,7 +44,7 @@ const BASE = import.meta.env.BASE_URL;
       <slot />
     </div>
 
-    <a class="back-link" href={`${BASE}#recent-posts`}>返回近日书写</a>
+    <a class="back-link" href={`${BASE}#articles`}>返回笺录</a>
 
     {(newerPost || olderPost) && (
       <nav class="post-nav" aria-label="文章翻页">
@@ -82,8 +82,8 @@ const BASE = import.meta.env.BASE_URL;
     left: 0.8rem;
     width: 4px;
     content: '';
-    border-left: 1px solid rgb(67 83 73 / 35%);
-    border-right: 1px solid rgb(67 83 73 / 16%);
+    border-left: 1px solid rgb(83 79 70 / 35%);
+    border-right: 1px solid rgb(83 79 70 / 16%);
   }
 
   .article-header {
@@ -93,8 +93,8 @@ const BASE = import.meta.env.BASE_URL;
   }
 
   .meta {
-    margin: 0 0 1.2rem;
-    color: var(--color-ink-soft);
+    margin-bottom: 1.2rem;
+    color: var(--cinnabar);
     font-size: 0.9rem;
     letter-spacing: 0.12em;
   }
@@ -111,12 +111,9 @@ const BASE = import.meta.env.BASE_URL;
     gap: 1.4rem;
   }
 
-  h1 {
-    margin: 0;
+  .page-display-title {
     font-size: clamp(2.6rem, 7vw, 5.2rem);
-    font-weight: 500;
     letter-spacing: 0.12em;
-    line-height: 1.2;
   }
 
   .seal {
@@ -125,8 +122,8 @@ const BASE = import.meta.env.BASE_URL;
     height: 2.8rem;
     place-items: center;
     flex: 0 0 auto;
-    border: 2px solid var(--color-cinnabar);
-    color: var(--color-cinnabar);
+    border: 2px solid var(--cinnabar);
+    color: var(--cinnabar);
     font-size: 0.75rem;
     line-height: 1.05;
     transform: rotate(2deg);
@@ -134,7 +131,8 @@ const BASE = import.meta.env.BASE_URL;
 
   .description {
     margin: 1.8rem 0 0;
-    color: var(--color-ink-soft);
+    color: var(--ink-soft);
+    font-family: var(--serif);
     font-size: 1.08rem;
     letter-spacing: 0.08em;
     line-height: 1.8;
@@ -145,9 +143,9 @@ const BASE = import.meta.env.BASE_URL;
     width: min(100% - 3rem, 58rem);
     margin: clamp(3.5rem, 8vw, 6rem) auto;
     padding: clamp(0.65rem, 2vw, 1.2rem);
-    border: 1px solid rgb(86 70 51 / 23%);
-    background: rgb(247 241 229 / 65%);
-    box-shadow: 0 14px 30px rgb(48 40 31 / 10%);
+    border: 1px solid var(--line-strong);
+    background: rgb(251 249 243 / 50%);
+    box-shadow: 0 14px 30px var(--shadow);
   }
 
   .article-cover :global(img) {
@@ -161,7 +159,7 @@ const BASE = import.meta.env.BASE_URL;
     position: absolute;
     top: 50%;
     left: -2.7rem;
-    color: var(--color-pine);
+    color: var(--moss);
     font-size: 0.86rem;
     letter-spacing: 0.18em;
     writing-mode: vertical-rl;
@@ -172,7 +170,8 @@ const BASE = import.meta.env.BASE_URL;
     display: block;
     width: max-content;
     margin: 4.5rem auto 0;
-    color: var(--color-pine);
+    color: var(--moss-deep);
+    font-family: var(--serif);
     letter-spacing: 0.12em;
   }
 
@@ -181,8 +180,8 @@ const BASE = import.meta.env.BASE_URL;
     width: min(100%, 52rem);
     grid-template-columns: 1fr 1fr;
     margin: 4rem auto 0;
-    border-top: 1px solid rgb(67 83 73 / 22%);
-    border-bottom: 1px solid rgb(67 83 73 / 22%);
+    border-top: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-strong);
   }
 
   .post-nav > div {
@@ -191,7 +190,7 @@ const BASE = import.meta.env.BASE_URL;
   }
 
   .post-nav > div + div {
-    border-left: 1px solid rgb(67 83 73 / 22%);
+    border-left: 1px solid var(--line-strong);
     text-align: right;
   }
 
@@ -203,7 +202,7 @@ const BASE = import.meta.env.BASE_URL;
   }
 
   .post-nav small {
-    color: var(--color-ink-soft);
+    color: var(--ink-faint);
     letter-spacing: 0.14em;
   }
 
@@ -227,7 +226,7 @@ const BASE = import.meta.env.BASE_URL;
     }
 
     .post-nav > div + div {
-      border-top: 1px solid rgb(67 83 73 / 22%);
+      border-top: 1px solid var(--line-strong);
       border-left: 0;
     }
   }
