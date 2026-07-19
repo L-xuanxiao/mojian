@@ -362,52 +362,57 @@ const activeKey = isHome
 </style>
 
 <script>
-  const header = document.getElementById('siteHeader');
+  // 注意：Swup 换页会替换 #siteHeader 元素但不重跑本脚本，
+  // 因此所有 DOM 查询都在回调内即时进行，监听器只挂在 window/document 上。
+  const trackedIds = ['top', 'articles', 'archive', 'about'];
+  let frameRequested = false;
 
-  if (header) {
-    const navLinks = [...header.querySelectorAll<HTMLAnchorElement>('.nav-link')];
-    const isHomePage = header.dataset.home === 'true';
-    const trackedIds = ['top', 'articles', 'archive', 'about'];
-    let frameRequested = false;
+  const updateNavigation = () => {
+    const header = document.getElementById('siteHeader');
+    if (!header) return;
 
-    const updateNavigation = () => {
-      header.classList.toggle('is-scrolled', window.scrollY > 18);
+    header.classList.toggle('is-scrolled', window.scrollY > 18);
 
-      if (isHomePage) {
-        const readingLine = window.scrollY + Math.min(window.innerHeight * 0.35, 280);
-        let currentId = 'top';
+    if (header.dataset.home === 'true') {
+      const navLinks = [...header.querySelectorAll<HTMLAnchorElement>('.nav-link')];
+      const readingLine = window.scrollY + Math.min(window.innerHeight * 0.35, 280);
+      let currentId = 'top';
 
-        trackedIds.forEach((id) => {
-          const section = document.getElementById(id);
-          if (section && section.getBoundingClientRect().top + window.scrollY <= readingLine) {
-            currentId = id;
-          }
-        });
+      trackedIds.forEach((id) => {
+        const section = document.getElementById(id);
+        if (section && section.getBoundingClientRect().top + window.scrollY <= readingLine) {
+          currentId = id;
+        }
+      });
 
-        navLinks.forEach((link) => {
-          if (link.getAttribute('href') === `#${currentId}`) {
-            link.setAttribute('aria-current', 'page');
-          } else {
-            link.removeAttribute('aria-current');
-          }
-        });
-      }
+      navLinks.forEach((link) => {
+        if (link.getAttribute('href') === `#${currentId}`) {
+          link.setAttribute('aria-current', 'page');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      });
+    }
 
-      frameRequested = false;
-    };
+    frameRequested = false;
+  };
 
-    const requestNavigationUpdate = () => {
-      if (!frameRequested) {
-        frameRequested = true;
-        requestAnimationFrame(updateNavigation);
-      }
-    };
+  const requestNavigationUpdate = () => {
+    if (!frameRequested) {
+      frameRequested = true;
+      requestAnimationFrame(updateNavigation);
+    }
+  };
 
-    updateNavigation();
-    window.addEventListener('scroll', requestNavigationUpdate, { passive: true });
+  updateNavigation();
+  window.addEventListener('scroll', requestNavigationUpdate, { passive: true });
+  document.addEventListener('swup:page:view', requestNavigationUpdate);
 
-    header.querySelectorAll('#navMenu .nav-link').forEach((link) => {
-      link.addEventListener('click', () => header.querySelector('#navMenu')?.removeAttribute('open'));
-    });
-  }
+  // 移动端菜单：点击链接后收起（事件委托，兼容 Swup 替换 header）
+  document.addEventListener('click', (event) => {
+    const link = (event.target as Element).closest?.('#navMenu .nav-link');
+    if (link) {
+      document.getElementById('navMenu')?.removeAttribute('open');
+    }
+  });
 </script>

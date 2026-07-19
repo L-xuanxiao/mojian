@@ -1,4 +1,5 @@
 // @ts-check
+import swup from '@swup/astro';
 import { defineConfig } from 'astro/config';
 import icon from 'astro-icon';
 
@@ -14,6 +15,22 @@ export default defineConfig({
   base: REPO_BASE,
   trailingSlash: 'always',
   integrations: [
+    swup({
+      theme: false,
+      animationClass: 'transition-swup-',
+      containers: ['#main-content', '#siteHeader'],
+      smoothScrolling: false,
+      cache: true,
+      preload: true,
+      accessibility: true,
+      updateHead: true,
+      updateBodyClass: false,
+      globalInstance: true,
+      // 锚点链接交给浏览器原生处理。
+      // @ts-expect-error 选项透传给 swup 核心，@swup/astro 包装层类型未收录
+      skipPopStateHandling: (/** @type {{ state?: { url?: string } | null }} */ event) =>
+        event.state?.url?.includes('#'),
+    }),
     icon({
       include: {
         'material-symbols': [

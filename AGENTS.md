@@ -10,6 +10,7 @@
 - GitHub Pages 站点基路径为 `/mojian/`，路由使用尾斜杠。站内链接和静态资源路径需兼容 `import.meta.env.BASE_URL`。
 - 推送到 `main` 后由 GitHub Actions 构建并部署 Pages。
 - `npm run build` 会在 `astro build` 后自动执行 `pagefind --site dist` 生成搜索索引（`dist/pagefind/`）；`/search/` 寻墨页依赖该索引，仅构建后可用，dev 模式下搜索框不工作。
+- 页面切换由 Swup 无刷新驱动，交换容器为 `#main-content` 与 `#siteHeader`。换页时被换容器内的 `<script>` 不会重跑：需要跨页生效的逻辑放 `BaseLayout` 持久脚本并监听 `swup:page:view` 重放；DOM 查询在回调内即时进行，监听器只挂 window/document。入口链接加 `data-no-swup` 可退回整页加载（如寻墨页）。
 
 ## 目录
 
