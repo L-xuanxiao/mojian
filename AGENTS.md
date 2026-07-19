@@ -12,9 +12,9 @@
 
 ## 目录
 
-- `src/pages/`：页面路由。首页 `index.astro` 独立实现；文章详情由 `posts/[slug].astro` 生成。
+- `src/pages/`：页面路由。首页、归档、关于、404 与文章详情均使用 `BaseLayout`；文章详情由 `posts/[slug].astro` 生成。
 - `src/content/blog/`：Markdown 文章；字段约束见 `src/content.config.ts`。
-- `src/components/`、`src/layouts/`：共享组件与内页布局。
+- `src/components/`、`src/layouts/`：共享导航、页脚、文章组件与全站布局。
 - `src/lib/posts.ts`：已发布文章过滤、排序和日期格式化。
 - `src/styles/global.css`：全局主题变量与基础样式；`src/assets/`：源码资源。
 - 视觉规则见 [docs/DESIGN.md](docs/DESIGN.md)。
@@ -35,7 +35,7 @@ npm run preview
 
 - 项目当前没有自动化测试命令或测试框架。
 - 源码改动至少运行 `npm run check` 和 `npm run build`。
-- 界面改动还需用 `npm run preview` 检查桌面端、移动端、控制台和站内链接。
+- 界面改动还需优先使用内置浏览器检查桌面端、移动端、控制台和站内链接。
 
 ## 内容约定
 
