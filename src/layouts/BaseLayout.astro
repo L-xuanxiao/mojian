@@ -37,7 +37,7 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
   <body class:list={{ 'home-page': isHome, 'inner-page': !isHome }}>
     <a class="skip-link" href="#main-content">跳到正文</a>
     <SiteHeader />
-    <main id="main-content">
+    <main id="main-content" data-pagefind-body>
       <slot />
     </main>
     <SiteFooter />

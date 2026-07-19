@@ -9,6 +9,7 @@
 - Node.js 要求 `>=22.12.0`。项目为 Astro 7 静态站，使用 TypeScript 严格模式、Tailwind CSS 4、`astro-icon` 与 Material Symbols 图标集。
 - GitHub Pages 站点基路径为 `/mojian/`，路由使用尾斜杠。站内链接和静态资源路径需兼容 `import.meta.env.BASE_URL`。
 - 推送到 `main` 后由 GitHub Actions 构建并部署 Pages。
+- `npm run build` 会在 `astro build` 后自动执行 `pagefind --site dist` 生成搜索索引（`dist/pagefind/`）；`/search/` 寻墨页依赖该索引，仅构建后可用，dev 模式下搜索框不工作。
 
 ## 目录
 

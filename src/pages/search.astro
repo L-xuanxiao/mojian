@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const BASE = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title="寻墨" description="检索墨笺全部文字">
+  <section class="search-page page-shell" data-pagefind-ignore>
+    <header class="search-header">
+      <p class="page-kicker">SEARCH</p>
+      <h1 class="page-display-title">寻墨</h1>
+      <p class="search-note">旧稿新札，皆可按字索骥。</p>
+    </header>
+    <div id="search" class="search-box"></div>
+  </section>
+
+  <link href={`${BASE}pagefind/pagefind-ui.css`} rel="stylesheet" />
+  <script is:inline src={`${BASE}pagefind/pagefind-ui.js`}></script>
+  <script is:inline define:vars={{ bundlePath: `${BASE}pagefind/` }}>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof PagefindUI !== 'undefined') {
+        new PagefindUI({ element: '#search', bundlePath, showSubResults: true, showImages: false });
+      }
+    });
+  </script>
+</BaseLayout>
+
+<style>
+  .search-page {
+    padding-top: clamp(4rem, 9vw, 8rem);
+    min-height: 60vh;
+  }
+
+  .search-header {
+    margin-bottom: 2.5rem;
+    text-align: center;
+  }
+
+  .page-display-title {
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    letter-spacing: 0.14em;
+  }
+
+  .search-note {
+    margin-top: 1rem;
+    color: var(--ink-soft);
+    font-family: var(--serif);
+    letter-spacing: 0.1em;
+  }
+
+  .search-box {
+    width: min(100%, 44rem);
+    margin-inline: auto;
+  }
+
+  /* Pagefind 默认 UI 调色对齐墨色主题 */
+  .search-box {
+    --pagefind-ui-primary: var(--ink);
+    --pagefind-ui-text: var(--ink-soft);
+    --pagefind-ui-background: rgb(251 249 243 / 80%);
+    --pagefind-ui-border: var(--line-strong);
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 2px;
+    --pagefind-ui-font: var(--serif);
+  }
+</style>
