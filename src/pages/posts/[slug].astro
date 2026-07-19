@@ -23,9 +23,9 @@ interface Props {
 }
 
 const { post, newerPost, olderPost } = Astro.props;
-const { Content } = await render(post);
+const { Content, remarkPluginFrontmatter } = await render(post);
 ---
 
-<ArticleLayout post={post} newerPost={newerPost} olderPost={olderPost}>
+<ArticleLayout post={post} newerPost={newerPost} olderPost={olderPost} frontmatter={remarkPluginFrontmatter}>
   <Content />
 </ArticleLayout>

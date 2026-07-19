@@ -1,8 +1,9 @@
 ---
 // 首页「近来所记」手卷卡片。样式与 index.astro 抽取前保持一致（scoped 平移）。
 import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
 import { siteConfig } from '../../config/siteConfig';
-import { formatDate } from '../../lib/posts';
+import { formatDate, getExcerpt } from '../../lib/posts';
 
 interface Props {
   post: CollectionEntry<'blog'>;
@@ -17,9 +18,10 @@ const SEALS = ['壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'] as
 const seal = SEALS[index % SEALS.length];
 const indexLabel = String(index + 1).padStart(2, '0');
 
-// 中文阅读速度约 400 字/分钟
-const charCount = (post.body ?? '').replace(/\s/g, '').length;
-const minutes = Math.max(1, Math.round(charCount / 400));
+// 阅读时长与摘要兜底统一来自 remark 插件产出
+const { remarkPluginFrontmatter } = await render(post);
+const minutes = Number(remarkPluginFrontmatter.minutes) || 1;
+const excerpt = getExcerpt(post, remarkPluginFrontmatter);
 
 const tags = post.data.tags.slice(0, siteConfig.postList.tagsMax);
 const variant = index % 3;
@@ -66,7 +68,7 @@ const filterId = `postSoft${index}`;
     </div>
     <div class="post-main">
       <h3 class="post-title"><a href={`${BASE}posts/${post.id}/`} aria-label={`阅读：${post.data.title}`}>{post.data.title}</a></h3>
-      <p class="post-excerpt">{post.data.description}</p>
+      <p class="post-excerpt">{excerpt}</p>
     </div>
     <div class="post-tags" aria-label="文章标签">
       {tags.map((tag) => <span>{tag}</span>)}

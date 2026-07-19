@@ -3,6 +3,8 @@ import { defineConfig } from 'astro/config';
 import icon from 'astro-icon';
 
 import tailwindcss from '@tailwindcss/vite';
+import { remarkExcerpt } from './src/plugins/remark-excerpt.mjs';
+import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs';
 
 const REPO_BASE = '/mojian';
 
@@ -26,5 +28,8 @@ export default defineConfig({
   ],
   vite: {
     plugins: [tailwindcss()]
+  },
+  markdown: {
+    remarkPlugins: [remarkExcerpt, remarkReadingTime]
   }
 });

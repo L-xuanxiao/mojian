@@ -7,7 +7,8 @@ const blog = defineCollection({
   schema: ({ image }) =>
     z.object({
       title: z.string().min(1),
-      description: z.string().min(1),
+      // 可省略：由 remark-excerpt 自动取首段兜底（见 lib/posts.ts getExcerpt）
+      description: z.string().min(1).optional(),
       pubDate: z.coerce.date(),
       updatedDate: z.coerce.date().optional(),
       cover: image().optional(),

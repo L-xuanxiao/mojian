@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
+import { siteConfig } from '../../config/siteConfig';
 import { formatDate } from '../../lib/posts';
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 
 const { post } = Astro.props;
 const BASE = import.meta.env.BASE_URL;
+const descriptionLines = String(siteConfig.postList.descriptionLines);
 ---
 
 <article class:list={['post-card', { 'has-cover': post.data.cover }]}>
@@ -33,14 +35,14 @@ const BASE = import.meta.env.BASE_URL;
       <span>{post.data.category}</span>
     </div>
     <h2><a href={`${BASE}posts/${post.id}/`}>{post.data.title}</a></h2>
-    <p>{post.data.description}</p>
+    <p class="excerpt">{post.data.description}</p>
     <a class="read-more" href={`${BASE}posts/${post.id}/`} aria-label={`阅读《${post.data.title}》`}>
       展卷阅读
     </a>
   </div>
 </article>
 
-<style>
+<style define:vars={{ descriptionLines }}>
   .post-card {
     position: relative;
     display: grid;
@@ -137,9 +139,14 @@ const BASE = import.meta.env.BASE_URL;
     color: var(--color-pine);
   }
 
-  p {
+  .excerpt {
     max-width: 38rem;
     margin: 0;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--descriptionLines);
+    line-clamp: var(--descriptionLines);
     color: var(--color-ink-soft);
     line-height: 1.9;
     letter-spacing: 0.04em;

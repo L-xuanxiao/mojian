@@ -2,30 +2,38 @@
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
-import { formatDate } from '../lib/posts';
+import { formatDate, getExcerpt } from '../lib/posts';
 
 interface Props {
   post: CollectionEntry<'blog'>;
   newerPost?: CollectionEntry<'blog'>;
   olderPost?: CollectionEntry<'blog'>;
+  /** render() 产出的 remarkPluginFrontmatter（含插件注入的 excerpt/words/minutes） */
+  frontmatter?: Record<string, unknown>;
 }
 
-const { post, newerPost, olderPost } = Astro.props;
+const { post, newerPost, olderPost, frontmatter } = Astro.props;
 const BASE = import.meta.env.BASE_URL;
+
+const description = getExcerpt(post, frontmatter);
+const words = Number(frontmatter?.words) || 0;
+const minutes = Number(frontmatter?.minutes) || 0;
 ---
 
-<BaseLayout title={post.data.title} description={post.data.description}>
+<BaseLayout title={post.data.title} description={description || undefined}>
   <article class="article-page page-shell">
     <header class="article-header rise-in">
       <p class="meta page-kicker">
         <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
         <span>{post.data.category}</span>
+        {words > 0 && <span>凡 {words} 言</span>}
+        {minutes > 0 && <span>读之 {minutes} 分钟</span>}
       </p>
       <div class="title-row">
         <h1 class="page-display-title">{post.data.title}</h1>
         <span class="seal" aria-hidden="true">墨<br />记</span>
       </div>
-      <p class="description">{post.data.description}</p>
+      {description && <p class="description">{description}</p>}
     </header>
 
     {post.data.cover && (
