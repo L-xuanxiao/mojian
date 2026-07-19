@@ -14,10 +14,18 @@
 
 - `src/pages/`：页面路由。首页、归档、关于、404 与文章详情均使用 `BaseLayout`；文章详情由 `posts/[slug].astro` 生成。
 - `src/content/blog/`：Markdown 文章；字段约束见 `src/content.config.ts`。
-- `src/components/`、`src/layouts/`：共享导航、页脚、文章组件与全站布局。
-- `src/lib/posts.ts`：已发布文章过滤、排序和日期格式化。
-- `src/styles/global.css`：全局主题变量与基础样式；`src/assets/`：源码资源。
+- `src/config/siteConfig.ts`：站点集中配置（站名、导航、页脚、文章列表行为、页面开关），消费方不在组件内硬编码这些值。
+- `src/components/`：按职责分目录，清单与分类规则见 `src/components/README.md`。`layout/` 全站框架、`home/` 首页专属、`common/` 跨页复用。
+- `src/layouts/`：`BaseLayout`（导航+页脚+`<head>`）与 `ArticleLayout`（文章详情）。
+- `src/plugins/`：remark 插件（自动摘要、字数与阅读时长），产出写入 `remarkPluginFrontmatter`。
+- `src/lib/posts.ts`：已发布文章过滤、排序、日期格式化与摘要兜底 `getExcerpt()`。
+- `src/styles/global.css`：全局主题变量、基础样式与 `.reveal` 滚动显现工具类；`src/assets/`：源码资源。
 - 视觉规则见 [docs/DESIGN.md](docs/DESIGN.md)。
+
+## 提交规范
+
+- 使用 Conventional Commits：`feat:` / `fix:` / `refactor:` / `style:` / `docs:` / `chore:`。
+- 一个提交只做一件事；重构提交不夹带视觉改动。
 
 ## 命令
 
@@ -34,10 +42,12 @@ npm run preview
 ## 验证
 
 - 项目当前没有自动化测试命令或测试框架。
-- 源码改动至少运行 `npm run check` 和 `npm run build`。
-- 界面改动还需优先使用内置浏览器检查桌面端、移动端、控制台和站内链接。
+- 源码改动至少运行 `npm run check` 和 `npm run build`（`astro check` 已含类型诊断，无需另跑 tsc）。
+- 界面改动还需用浏览器实测：断点 1440 / 820 / 620 / 390，检查横向溢出、hover 与键盘焦点、控制台零报错；截图随 PR 附。
+- 本机可用 playwright-cli（须 `--browser=chrome`）做断点截图与交互回归；用后清理仓库内 `.playwright-cli/` 目录。
 
 ## 内容约定
 
 - 新文章放入 `src/content/blog/`，frontmatter 遵循 `src/content.config.ts`；分类仅限其中定义的枚举值。
+- `description` 可省略，摘要自动取首段（`remark-excerpt`），显式书写优先。
 - 列表与静态文章路由复用 `getPublishedPosts()`，不展示 `draft: true` 的文章。
