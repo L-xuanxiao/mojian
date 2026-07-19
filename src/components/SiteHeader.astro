@@ -1,40 +1,24 @@
 ---
 import { Icon } from 'astro-icon/components';
+import { siteConfig } from '../config/siteConfig';
 
 const BASE = import.meta.env.BASE_URL;
 const pathname = Astro.url.pathname;
 const isHome = pathname === BASE;
 
-const navItems = [
-  {
-    key: 'top',
-    href: isHome ? '#top' : BASE,
-    label: '墨庐',
-    ariaLabel: '首页·墨庐',
-    icon: 'material-symbols:home-outline-rounded',
-  },
-  {
-    key: 'articles',
-    href: isHome ? '#articles' : `${BASE}#articles`,
-    label: '笺录',
-    ariaLabel: '文章·笺录',
-    icon: 'material-symbols:article-outline-rounded',
-  },
-  {
-    key: 'archive',
-    href: isHome ? '#archive' : `${BASE}archive/`,
-    label: '卷藏',
-    ariaLabel: '归档·卷藏',
-    icon: 'material-symbols:archive-outline-rounded',
-  },
-  {
-    key: 'about',
-    href: isHome ? '#about' : `${BASE}about/`,
-    label: '此间',
-    ariaLabel: '关于·此间',
-    icon: 'material-symbols:person-outline-rounded',
-  },
-];
+// 首页指向锚点，内页指向独立路由（无独立路由的项回落到首页锚点）
+const navItems = siteConfig.nav
+  .filter((item) => !item.path || siteConfig.pages[item.key as 'archive' | 'about'])
+  .map((item) => ({
+    ...item,
+    href: isHome
+      ? `#${item.homeAnchor}`
+      : item.path
+        ? `${BASE}${item.path}`
+        : item.homeAnchor === 'top'
+          ? BASE
+          : `${BASE}#${item.homeAnchor}`,
+  }));
 
 const activeKey = isHome
   ? 'top'
@@ -49,9 +33,9 @@ const activeKey = isHome
 
 <header class="site-header" id="siteHeader" data-home={isHome ? 'true' : undefined}>
   <div class="nav-shell nav-inner">
-    <a class="brand" href={isHome ? '#top' : BASE} aria-label="墨笺首页">
-      <span>墨笺</span>
-      <span class="brand-seal" aria-hidden="true">笺</span>
+    <a class="brand" href={isHome ? '#top' : BASE} aria-label={`${siteConfig.name}首页`}>
+      <span>{siteConfig.name}</span>
+      <span class="brand-seal" aria-hidden="true">{siteConfig.seal}</span>
     </a>
 
     <nav class="nav-desktop" aria-label="主导航">

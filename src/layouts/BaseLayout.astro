@@ -1,6 +1,7 @@
 ---
 import SiteFooter from '../components/SiteFooter.astro';
 import SiteHeader from '../components/SiteHeader.astro';
+import { siteConfig } from '../config/siteConfig';
 import '../styles/global.css';
 
 interface Props {
@@ -9,14 +10,14 @@ interface Props {
 }
 
 const {
-  title = '墨笺',
-  description = '写日常，也写山川与旧书。',
+  title = siteConfig.name,
+  description = siteConfig.description,
 } = Astro.props;
 
-const pageTitle = title === '墨笺' ? title : `${title}｜墨笺`;
+const pageTitle = title === siteConfig.name ? title : `${title}${siteConfig.titleSeparator}${siteConfig.name}`;
 const BASE = import.meta.env.BASE_URL;
 const isHome = Astro.url.pathname === BASE;
-const documentTitle = isHome && title === '墨笺' ? '墨笺｜个人博客' : pageTitle;
+const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle : pageTitle;
 ---
 
 <!doctype html>

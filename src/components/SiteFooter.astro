@@ -1,5 +1,8 @@
 ---
+import { siteConfig } from '../config/siteConfig';
+
 const BASE = import.meta.env.BASE_URL;
+const { footer, name } = siteConfig;
 ---
 
 <footer class="site-footer">
@@ -8,7 +11,7 @@ const BASE = import.meta.env.BASE_URL;
     <path d="M0 94C174 68 272 95 410 76C562 55 657 25 806 42C947 58 1050 101 1190 75C1340 48 1460 62 1600 92V0H0Z" fill="#e8e5dc" fill-opacity=".07" />
   </svg>
   <div class="page-shell footer-inner">
-    <p class="footer-quote">一纸闲墨，记人间朝暮。</p>
+    <p class="footer-quote">{footer.quote}</p>
     <div class="footer-rule" aria-hidden="true"></div>
     <nav class="footer-links" aria-label="页尾导航">
       <a href={`${BASE}#articles`}>文章</a>
@@ -17,9 +20,9 @@ const BASE = import.meta.env.BASE_URL;
       <span aria-hidden="true">RSS</span>
     </nav>
     <div class="footer-meta">
-      <span>© 2026 墨笺</span>
-      <span>由 Astro 构筑</span>
-      <span>写日常，也写山川与旧书</span>
+      <span>© {footer.copyrightYear} {name}</span>
+      <span>{footer.builtWith}</span>
+      <span>{footer.tagline}</span>
     </div>
   </div>
 </footer>
