@@ -180,7 +180,7 @@
 
 - 首屏和滚动 reveal 动画约 `300ms`。
 - 首载 loader：整页宣纸遮罩，「墨」「笺」逐字显现加墨晕，`load` 后最短停留约 900ms 淡出并移除，`2.6s` 兜底；仅在 `.js` 环境渲染，不参与 Swup 交换。
-- 全局氛围动效集中在 `<canvas id="fx">`：花瓣飘落、鼠标洇墨（`hover: none` 设备不启用）、左键点击墨晕扩散（核心+洇层+聚边+溅点）；单一 `requestAnimationFrame` 驱动，主题色随昼夜变量轮询刷新，`prefers-reduced-motion` 时整体不启动。
+- 全局氛围动效集中在 `<canvas id="fx">`：花瓣飘落、鼠标洇墨（距离插值补点，`hover: none` 设备不启用）、左键点击墨渍扩散（不规则边缘、随机大小、附溅点）；单一 `requestAnimationFrame` 驱动，主题色随昼夜变量轮询刷新，`prefers-reduced-motion` 时整体不启动。
 - 滚动进度条与回顶按钮仅使用 `opacity`/`transform`，不参与布局。
 - 动画仅使用 `opacity` 与 `transform`。
 - reveal 隐藏态由 `.js` 根类门控：禁用 JavaScript 时内容默认可见，题图默认可靠显示。
