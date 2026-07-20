@@ -426,27 +426,66 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
         const petals = [];
         for (let i = 0; i < petalCount; i++) petals.push(makePetal(false));
 
-        // 鼠标墨点
+        // 鼠标洇墨
         const dots = [];
         let lastDotAt = 0;
         if (!window.matchMedia('(hover: none)').matches) {
           window.addEventListener('mousemove', (event) => {
             const now = Date.now();
-            if (now - lastDotAt < 50) return;
+            if (now - lastDotAt < 45) return;
             lastDotAt = now;
-            dots.push({ x: event.clientX, y: event.clientY, r: 2 + Math.random() * 3, life: 1 });
-            if (dots.length > 50) dots.shift();
+            dots.push({
+              x: event.clientX,
+              y: event.clientY,
+              r: 3 + Math.random() * 3.5,
+              sq: 0.7 + Math.random() * 0.3,
+              rot: Math.random() * Math.PI,
+              life: 1,
+            });
+            if (dots.length > 60) dots.shift();
           });
         }
 
-        // 点击墨晕（仅左键）
+        // 点击墨晕（仅左键）：核心+洇层+聚边，附甩墨溅点
         const blooms = [];
+        const spatters = [];
         window.addEventListener('pointerdown', (event) => {
           if (event.button !== 0) return;
-          blooms.push({ x: event.clientX, y: event.clientY, r: 4, life: 1 });
+          blooms.push({ x: event.clientX, y: event.clientY, r: 6, life: 1 });
+          for (let i = 0; i < 5; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 1.5 + Math.random() * 2;
+            spatters.push({
+              x: event.clientX,
+              y: event.clientY,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed - 0.4,
+              r: 1.5 + Math.random() * 1.5,
+              sq: 0.7 + Math.random() * 0.3,
+              rot: Math.random() * Math.PI,
+              life: 1,
+            });
+          }
         });
 
         const rgba = (rgb, alpha) => 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + alpha + ')';
+
+        // 洇墨斑点：墨芯保持点感，外晕半径随消散增大，似墨在纸上洇开
+        const drawInkSpot = (d) => {
+          const spread = 1 + (1 - d.life) * 2.2;
+          ctx.save();
+          ctx.translate(d.x, d.y);
+          ctx.rotate(d.rot);
+          ctx.fillStyle = rgba(colors.ink, Math.pow(d.life, 1.6) * 0.16);
+          ctx.beginPath();
+          ctx.ellipse(0, 0, d.r * spread, d.r * spread * d.sq, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = rgba(colors.ink, Math.pow(d.life, 1.2) * 0.4);
+          ctx.beginPath();
+          ctx.arc(0, 0, d.r * 0.62, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        };
 
         const draw = () => {
           ctx.clearRect(0, 0, width, height);
@@ -472,38 +511,60 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
 
           for (let i = dots.length - 1; i >= 0; i--) {
             const d = dots[i];
-            d.life -= 0.035;
+            d.life -= 0.02;
             if (d.life <= 0) {
               dots.splice(i, 1);
               continue;
             }
-            ctx.fillStyle = rgba(colors.ink, d.life * 0.26);
-            ctx.beginPath();
-            ctx.arc(d.x, d.y, d.r * d.life, 0, Math.PI * 2);
-            ctx.fill();
+            drawInkSpot(d);
+          }
+
+          for (let i = spatters.length - 1; i >= 0; i--) {
+            const s = spatters[i];
+            s.x += s.vx;
+            s.y += s.vy;
+            s.vy += 0.02;
+            s.life -= 0.03;
+            if (s.life <= 0) {
+              spatters.splice(i, 1);
+              continue;
+            }
+            drawInkSpot(s);
           }
 
           for (let i = blooms.length - 1; i >= 0; i--) {
             const b = blooms[i];
-            b.r += 2.4;
-            b.life -= 0.028;
+            b.r += 3.4;
+            b.life -= 0.015;
             if (b.life <= 0) {
               blooms.splice(i, 1);
               continue;
             }
+            // 洇层
             const gradient = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
-            gradient.addColorStop(0, rgba(colors.ink, 0.16 * b.life));
-            gradient.addColorStop(0.65, rgba(colors.ink, 0.07 * b.life));
+            gradient.addColorStop(0, rgba(colors.ink, 0.28 * b.life));
+            gradient.addColorStop(0.7, rgba(colors.ink, 0.1 * b.life));
             gradient.addColorStop(1, rgba(colors.ink, 0));
             ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
             ctx.fill();
-            ctx.strokeStyle = rgba(colors.ink, 0.1 * b.life);
+            // 聚边：墨液向边缘积聚
+            ctx.strokeStyle = rgba(colors.ink, 0.22 * b.life);
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.r * 0.86, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.strokeStyle = rgba(colors.ink, 0.12 * b.life);
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.arc(b.x, b.y, b.r * 0.72, 0, Math.PI * 2);
+            ctx.arc(b.x, b.y, b.r * 0.6, 0, Math.PI * 2);
             ctx.stroke();
+            // 核心：着纸点先浓后淡
+            ctx.fillStyle = rgba(colors.ink, 0.34 * b.life);
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.r * 0.14, 0, Math.PI * 2);
+            ctx.fill();
           }
 
           raf = requestAnimationFrame(draw);
