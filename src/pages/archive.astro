@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { siteConfig } from '../config/siteConfig';
 import { formatDate, getPublishedPosts } from '../lib/posts';
 
 const BASE = import.meta.env.BASE_URL;
@@ -12,6 +13,13 @@ for (const post of posts) {
   list.push(post);
   years.set(year, list);
 }
+
+// 干支纪年：1900 庚子起算的通行换算，(year-4) 对六十甲子取余
+const stems = '甲乙丙丁戊己庚辛壬癸';
+const branches = '子丑寅卯辰巳午未申酉戌亥';
+const ganzhi = (year: number) => stems[(year - 4) % 10] + branches[(year - 4) % 12];
+
+const categorySlug = new Map(siteConfig.categories.map((cat) => [cat.key, cat.slug]));
 ---
 
 <BaseLayout title="归档" description="墨笺的年月归档。">
@@ -21,18 +29,25 @@ for (const post of posts) {
       <h1 class="page-display-title">卷藏</h1>
     </header>
 
-    <div class="year-list">
+    <div class="timeline">
       {[...years.entries()].map(([year, yearPosts]) => (
-        <section class="year" aria-labelledby={`year-${year}`}>
-          <h2 id={`year-${year}`}>{year}</h2>
+        <section class="t-year" aria-labelledby={`year-${year}`}>
+          <div class="t-node" id={`year-${year}`}>
+            <span class="t-ganzhi">{ganzhi(year)}</span>
+            <span class="t-yearnum">{year}</span>
+          </div>
           <ol>
             {yearPosts.map((post) => (
-              <li>
+              <li class="t-item reveal">
                 <time datetime={post.data.pubDate.toISOString()}>
                   {formatDate(post.data.pubDate)}
                 </time>
-                <a href={`${BASE}posts/${post.id}/`}>{post.data.title}</a>
-                <span>{post.data.category}</span>
+                <h3>
+                  <a href={`${BASE}posts/${post.id}/`}>{post.data.title}</a>
+                </h3>
+                <a class="t-cat" href={`${BASE}category/${categorySlug.get(post.data.category)}/`}>
+                  {post.data.category}
+                </a>
               </li>
             ))}
           </ol>
@@ -61,6 +76,10 @@ for (const post of posts) {
     transform: translateX(-50%);
   }
 
+  :global(html[data-theme='night']) .archive::before {
+    border-color: rgb(233 226 208 / 8%);
+  }
+
   header {
     position: relative;
     text-align: center;
@@ -70,35 +89,64 @@ for (const post of posts) {
     letter-spacing: 0.2em;
   }
 
-  .year-list {
+  /* ============ 年谱时间线 ============ */
+  .timeline {
     position: relative;
-    width: min(100%, 52rem);
-    margin: clamp(4rem, 9vw, 7rem) auto 0;
-    padding: clamp(1rem, 3vw, 2rem) clamp(1.2rem, 4vw, 3rem);
-    border-block: 1px solid var(--line-strong);
-    background:
-      repeating-linear-gradient(180deg, transparent 0 55px, rgb(83 79 70 / 6%) 55px 56px),
-      rgb(251 249 243 / 34%);
+    width: min(100%, 54rem);
+    margin: clamp(3.5rem, 8vw, 6rem) auto 0;
   }
 
-  .year {
+  /* 中央虚线 */
+  .timeline::before {
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    left: 50%;
+    width: 2px;
+    content: '';
+    background: repeating-linear-gradient(var(--line-strong) 0 8px, transparent 8px 16px);
+    transform: translateX(-50%);
+  }
+
+  .t-year + .t-year {
+    margin-top: 1.6rem;
+  }
+
+  /* 干支圆章 */
+  .t-node {
+    position: relative;
+    z-index: 1;
     display: grid;
-    grid-template-columns: 7rem 1fr;
-    gap: 2rem;
-    padding-block: 2rem;
-    border-top: 1px solid var(--line-strong);
+    justify-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    margin: 0 auto 2.2rem;
   }
 
-  .year:first-child {
-    border-top: 0;
+  .t-ganzhi {
+    display: grid;
+    width: 62px;
+    aspect-ratio: 1;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--paper-light);
+    background: var(--cinnabar);
+    box-shadow:
+      inset 0 0 0 2px rgb(251 249 243 / 55%),
+      0 6px 14px -6px var(--shadow);
+    font-family: var(--font-cal);
+    font-size: 1.08rem;
+    letter-spacing: 0.06em;
+    line-height: 1.15;
+    text-align: center;
+    writing-mode: vertical-rl;
   }
 
-  h2 {
-    margin: 0;
-    color: var(--moss-deep);
-    font-family: var(--serif);
-    font-size: 1.8rem;
-    font-weight: 500;
+  .t-yearnum {
+    color: var(--ink-faint);
+    font-family: var(--font-hand);
+    font-size: 0.92rem;
+    letter-spacing: 0.24em;
   }
 
   ol {
@@ -107,44 +155,105 @@ for (const post of posts) {
     list-style: none;
   }
 
-  li {
-    display: grid;
-    grid-template-columns: 9rem 1fr auto;
-    align-items: baseline;
-    gap: 1.2rem;
-    padding-block: 0.8rem;
+  /* 条目左右交替 */
+  .t-item {
+    position: relative;
+    width: 50%;
+    padding: 0 2.6rem 2.4rem;
   }
 
-  time,
-  li span {
+  .t-item:nth-child(odd) {
+    margin-left: 0;
+    text-align: right;
+  }
+
+  .t-item:nth-child(even) {
+    margin-left: 50%;
+  }
+
+  /* 条目与主线相连的墨点 */
+  .t-item::before {
+    position: absolute;
+    top: 0.5em;
+    width: 9px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    content: '';
+    background: var(--cinnabar);
+    box-shadow: 0 0 0 3px var(--paper);
+  }
+
+  .t-item:nth-child(odd)::before {
+    right: -4.5px;
+  }
+
+  .t-item:nth-child(even)::before {
+    left: -4.5px;
+  }
+
+  time {
+    display: block;
+    margin-bottom: 0.3rem;
     color: var(--ink-faint);
-    font-size: 0.85rem;
+    font-family: var(--font-hand);
+    font-size: 0.92rem;
+    letter-spacing: 0.12em;
   }
 
-  a {
+  .t-item h3 {
+    margin: 0;
     font-family: var(--serif);
     font-size: 1.15rem;
+    font-weight: 500;
     letter-spacing: 0.08em;
-    text-decoration: none;
+    line-height: 1.6;
   }
 
-  a:hover {
+  .t-item h3 a {
+    text-decoration: none;
+    transition: color 200ms ease;
+  }
+
+  .t-item h3 a:hover {
     color: var(--moss-deep);
   }
 
-  @media (max-width: 640px) {
-    .year {
-      grid-template-columns: 1fr;
-      gap: 0.8rem;
+  .t-cat {
+    display: inline-block;
+    margin-top: 0.3rem;
+    color: var(--ink-faint);
+    font-size: 0.8rem;
+    letter-spacing: 0.14em;
+    text-decoration: none;
+    transition: color 200ms ease;
+  }
+
+  .t-cat:hover {
+    color: var(--cinnabar);
+  }
+
+  @media (max-width: 680px) {
+    .timeline::before {
+      left: 22px;
     }
 
-    li {
-      grid-template-columns: 1fr auto;
-      gap: 0.4rem 1rem;
+    .t-node {
+      margin: 0 0 2rem 22px;
+      transform: translateX(-50%);
     }
 
-    time {
-      grid-column: 1 / -1;
+    .t-item,
+    .t-item:nth-child(even) {
+      width: 100%;
+      margin-left: 0;
+      padding: 0 0 2.2rem 3.4rem;
+      text-align: left;
+    }
+
+    .t-item:nth-child(odd)::before,
+    .t-item:nth-child(even)::before {
+      right: auto;
+      left: 17.5px;
     }
   }
 </style>
