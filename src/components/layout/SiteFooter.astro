@@ -17,6 +17,7 @@ const { footer, name } = siteConfig;
       <a href={`${BASE}#articles`}>文章</a>
       <a href={`${BASE}archive/`}>归档</a>
       <a href={`${BASE}about/`}>关于</a>
+      <a href={`${BASE}guestbook/`} data-no-swup>留墨</a>
       <a href={`${BASE}search/`} data-no-swup>寻墨</a>
     </nav>
     <div class="footer-meta">
@@ -35,6 +36,10 @@ const { footer, name } = siteConfig;
     overflow: hidden;
     color: rgb(245 242 234 / 86%);
     background: #333935;
+  }
+
+  :global(html[data-theme='night']) .site-footer {
+    background: #101110;
   }
 
   :global(.home-page) .site-footer {
@@ -60,7 +65,8 @@ const { footer, name } = siteConfig;
 
   .footer-quote {
     margin: 0;
-    font-family: var(--serif);
+    font-family: var(--font-cal);
+    font-weight: 400;
     font-size: clamp(1.45rem, 3vw, 2.15rem);
     letter-spacing: 0.18em;
   }

@@ -44,6 +44,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     content: '';
   }
 
+  :global(html[data-theme='night']) .about::after {
+    border-color: rgb(233 226 208 / 9%);
+  }
+
   aside {
     justify-self: end;
     padding-top: 0.5rem;
@@ -81,6 +85,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     font-size: 1.05rem;
     line-height: 2;
     letter-spacing: 0.06em;
+  }
+
+  :global(html[data-theme='night']) .copy {
+    background:
+      repeating-linear-gradient(180deg, transparent 0 2.08em, rgb(233 226 208 / 6%) 2.08em calc(2.08em + 1px)),
+      rgb(233 226 208 / 5%);
   }
 
   blockquote {

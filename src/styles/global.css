@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --color-paper: #f2eee3;
-  --color-paper-light: #fbf9f3;
-  --color-ink: #292a27;
-  --color-ink-soft: #66665f;
-  --color-pine: #586258;
-  --color-cinnabar: #a44434;
+  --color-paper: var(--paper);
+  --color-paper-light: var(--paper-light);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-pine: var(--moss);
+  --color-cinnabar: var(--cinnabar);
   --color-bronze: #8b7355;
-  --font-serif-cn: "Source Han Serif SC", "Noto Serif SC", "Songti SC", SimSun, serif;
+  --font-serif-cn: "Noto Serif SC", "Source Han Serif SC", "Songti SC", SimSun, serif;
 }
 
 :root {
@@ -30,14 +30,39 @@
   --shadow: rgb(62 54 43 / 12%);
   --page-width: 1220px;
   --side-space: clamp(18px, 5vw, 72px);
-  --serif: "Source Han Serif SC", "Noto Serif SC", "Songti SC", SimSun, serif;
+  --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", SimSun, serif;
+  --font-cal: "Ma Shan Zheng", "Noto Serif SC", serif;
+  --font-hand: "Long Cang", "Noto Serif SC", serif;
   --sans: "MiSans", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* 花瓣颜色（rgb 三元组，供 canvas 拼透明度） */
+  --petal: 214 142 150;
   font-family: var(--sans);
   background: var(--paper);
   color: var(--ink);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+}
+
+/* 夜色：只覆盖语义变量，组件全部经变量取色即自动换装 */
+html[data-theme="night"] {
+  color-scheme: dark;
+  --paper: #191a16;
+  --paper-light: #21221d;
+  --paper-warm: #262720;
+  --paper-deep: #2f3028;
+  --ink: #e9e2d0;
+  --ink-soft: #b3ab97;
+  --ink-faint: #857d69;
+  --ink-wash: #a8b0a2;
+  --moss: #93a892;
+  --moss-deep: #b2c0ad;
+  --cinnabar: #d96b58;
+  --cinnabar-deep: #a23a2c;
+  --line: rgb(233 226 208 / 16%);
+  --line-strong: rgb(233 226 208 / 30%);
+  --shadow: rgb(0 0 0 / 45%);
+  --petal: 176 108 116;
 }
 
 *,
@@ -65,6 +90,14 @@ body {
   line-height: 1.8;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  transition: color 0.6s ease, background-color 0.6s ease;
+}
+
+html[data-theme="night"] body {
+  background:
+    radial-gradient(circle at 12% 8%, rgb(233 226 208 / 5%), transparent 25%),
+    radial-gradient(circle at 88% 26%, rgb(233 226 208 / 4%), transparent 22%),
+    linear-gradient(180deg, var(--paper-light) 0%, var(--paper) 44%, #131411 100%);
 }
 
 body::after {
@@ -82,6 +115,12 @@ body::after {
     radial-gradient(circle at 38% 40%, rgb(69 78 71 / 7%), transparent 34%);
   filter: blur(22px);
   transform: rotate(-12deg);
+}
+
+html[data-theme="night"] body::after {
+  background:
+    radial-gradient(circle at 48% 52%, rgb(233 226 208 / 5%), transparent 52%),
+    radial-gradient(circle at 38% 40%, rgb(233 226 208 / 4%), transparent 34%);
 }
 
 body.inner-page main {
@@ -143,8 +182,8 @@ button {
   gap: 12px;
   margin: 0 0 13px;
   color: var(--cinnabar);
-  font-family: var(--serif);
-  font-size: 0.76rem;
+  font-family: var(--font-hand);
+  font-size: 0.86rem;
   letter-spacing: 0.22em;
 }
 
@@ -159,18 +198,18 @@ button {
 
 .page-display-title {
   margin: 0;
-  font-family: var(--serif);
+  font-family: var(--font-cal);
   font-size: clamp(2.6rem, 7vw, 5.4rem);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.2;
   letter-spacing: 0.12em;
 }
 
 .section-title {
   margin: 0;
-  font-family: var(--serif);
+  font-family: var(--font-cal);
   font-size: clamp(2.45rem, 5vw, 4.25rem);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.12;
   letter-spacing: 0.1em;
 }
@@ -237,12 +276,20 @@ button {
   font-size: 0.9em;
 }
 
+html[data-theme="night"] .prose-ink code {
+  background: rgb(233 226 208 / 10%);
+}
+
 .prose-ink pre {
   overflow-x: auto;
   padding: 1.2rem;
   color: #eee8da;
   background: #333935;
   line-height: 1.7;
+}
+
+html[data-theme="night"] .prose-ink pre {
+  background: #101110;
 }
 
 .prose-ink pre code {

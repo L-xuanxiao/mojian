@@ -1,4 +1,9 @@
 ---
+import '@fontsource/noto-serif-sc/chinese-simplified-400.css';
+import '@fontsource/noto-serif-sc/chinese-simplified-500.css';
+import '@fontsource/noto-serif-sc/chinese-simplified-700.css';
+import '@fontsource/ma-shan-zheng/chinese-simplified-400.css';
+import '@fontsource/long-cang/chinese-simplified-400.css';
 import SiteFooter from '../components/layout/SiteFooter.astro';
 import SiteHeader from '../components/layout/SiteHeader.astro';
 import { siteConfig } from '../config/siteConfig';
@@ -25,8 +30,12 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
   <head>
     <meta charset="UTF-8" />
     <script is:inline>
-      // JS 可用标记：.reveal 隐藏与题图淡入仅在 .js 下生效，无 JS 时内容直接可见
+      // JS 可用标记 + 昼夜主题恢复（首绘前执行，防夜色闪烁与内容隐藏）
       document.documentElement.classList.add('js');
+      try {
+        const t = localStorage.getItem('mj-theme');
+        if (t === 'night' || t === 'day') document.documentElement.dataset.theme = t;
+      } catch {}
     </script>
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
@@ -39,6 +48,19 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
     <title>{documentTitle}</title>
   </head>
   <body class:list={{ 'home-page': isHome, 'inner-page': !isHome }} data-base={BASE}>
+    {/* 首载动画：仅完整加载出现一次，Swup 换页不重现；无 JS 时 CSS 隐藏 */}
+    <div id="loader" aria-hidden="true">
+      <div class="load-mark">
+        <div class="load-txt">
+          {[...siteConfig.name].map((ch) => <span>{ch}</span>)}
+        </div>
+        <p class="load-sub">{siteConfig.description}</p>
+      </div>
+    </div>
+
+    <canvas id="fx" aria-hidden="true"></canvas>
+    <div class="scroll-progress" aria-hidden="true"><i id="scrollBar"></i></div>
+
     <a class="skip-link" href="#main-content">跳到正文</a>
     <SiteHeader />
     <style>
@@ -51,11 +73,179 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
       html.is-animating .transition-swup-fade {
         opacity: 0;
       }
+
+      /* ============ 首载动画 ============ */
+      #loader {
+        position: fixed;
+        z-index: 2000;
+        inset: 0;
+        display: none;
+        place-items: center;
+        background: var(--paper);
+        transition: opacity 0.7s ease, visibility 0.7s;
+      }
+
+      :global(.js) #loader {
+        display: grid;
+      }
+
+      #loader.done {
+        visibility: hidden;
+        opacity: 0;
+      }
+
+      .load-mark {
+        position: relative;
+        display: grid;
+        place-items: center;
+        gap: 18px;
+      }
+
+      .load-mark::before {
+        position: absolute;
+        width: 190px;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        content: '';
+        background: radial-gradient(circle, rgb(38 36 31 / 10%), transparent 70%);
+        animation: inkBloom 1.3s ease-out forwards;
+      }
+
+      :global(html[data-theme='night']) .load-mark::before {
+        background: radial-gradient(circle, rgb(233 226 208 / 12%), transparent 70%);
+      }
+
+      @keyframes inkBloom {
+        from {
+          opacity: 0;
+          transform: scale(0.1);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1.4);
+        }
+      }
+
+      .load-txt {
+        display: flex;
+        gap: 0.1em;
+        color: var(--ink);
+        font-family: var(--font-cal);
+        font-size: 3rem;
+        letter-spacing: 0.3em;
+      }
+
+      .load-txt span {
+        opacity: 0;
+        animation: chIn 0.5s forwards;
+      }
+
+      .load-txt span:nth-child(1) {
+        animation-delay: 0.25s;
+      }
+
+      .load-txt span:nth-child(2) {
+        animation-delay: 0.5s;
+      }
+
+      .load-sub {
+        margin: 0;
+        color: var(--ink-faint);
+        font-family: var(--font-hand);
+        font-size: 0.95rem;
+        letter-spacing: 0.3em;
+        opacity: 0;
+        animation: chIn 0.6s 0.75s forwards;
+      }
+
+      @keyframes chIn {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      /* ============ 全局动效画布（花瓣/墨点/墨晕） ============ */
+      #fx {
+        position: fixed;
+        z-index: 20;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      /* ============ 顶部阅读进度 ============ */
+      .scroll-progress {
+        position: fixed;
+        z-index: 40;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 3px;
+        pointer-events: none;
+      }
+
+      .scroll-progress i {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, var(--cinnabar), var(--bronze, #8b7355));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.1s linear;
+      }
+
+      /* ============ 回到顶部 ============ */
+      .to-top {
+        position: fixed;
+        z-index: 40;
+        right: 22px;
+        bottom: 26px;
+        display: grid;
+        width: 46px;
+        height: 46px;
+        padding: 0;
+        place-items: center;
+        border: 1px solid var(--line-strong);
+        border-radius: 50%;
+        color: var(--cinnabar);
+        background: var(--paper-light);
+        box-shadow: 0 8px 20px -10px var(--shadow);
+        cursor: pointer;
+        font-family: var(--font-cal);
+        font-size: 1.2rem;
+        line-height: 1;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(16px);
+        transition: opacity 0.35s ease, transform 0.35s var(--ease), background 0.3s ease, color 0.3s ease;
+      }
+
+      .to-top.show {
+        opacity: 1;
+        pointer-events: auto;
+        transform: none;
+      }
+
+      .to-top:hover {
+        color: var(--paper-light);
+        background: var(--cinnabar);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #fx {
+          display: none;
+        }
+      }
     </style>
     <main id="main-content" class="transition-swup-fade" data-pagefind-body>
       <slot />
     </main>
     <SiteFooter />
+    <button id="toTop" class="to-top" aria-label="回到顶部" type="button">顶</button>
     <script is:inline>
       // 滚动显现：首页 .reveal 元素进入视口后淡入。
       // Swup 换页不触发脚本重执行，故在 swup:page:view 上重放；
@@ -118,6 +308,249 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
       }
 
       initSearch();
+
+      // 首载动画：完整加载且最短停留后淡出并移除节点；2.6s 兜底强制移除。
+      // body.loaded 供首页 hero 入场动画接力。
+      (function () {
+        const loader = document.getElementById('loader');
+        if (!loader) {
+          document.body.classList.add('loaded');
+          return;
+        }
+        const start = performance.now();
+        let finished = false;
+        const finish = () => {
+          if (finished) return;
+          finished = true;
+          const wait = Math.max(0, 900 - (performance.now() - start));
+          setTimeout(() => {
+            loader.classList.add('done');
+            document.body.classList.add('loaded');
+            setTimeout(() => loader.remove(), 800);
+          }, wait);
+        };
+        if (document.readyState === 'complete') {
+          finish();
+        } else {
+          window.addEventListener('load', finish, { once: true });
+        }
+        setTimeout(finish, 2600);
+      })();
+
+      // 昼夜切换：事件委托（按钮位于 Swup 交换的 header 内，委托到 document 不丢绑定）
+      document.addEventListener('click', (event) => {
+        const btn = event.target && event.target.closest ? event.target.closest('[data-theme-toggle]') : null;
+        if (!btn) return;
+        const next = document.documentElement.dataset.theme === 'night' ? 'day' : 'night';
+        document.documentElement.dataset.theme = next;
+        try {
+          localStorage.setItem('mj-theme', next);
+        } catch {}
+      });
+
+      // 顶部进度条 + 回到顶部（window 监听，Swup 换页后仍有效）
+      (function () {
+        const bar = document.getElementById('scrollBar');
+        const toTop = document.getElementById('toTop');
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const onScroll = () => {
+          const range = document.documentElement.scrollHeight - window.innerHeight;
+          const progress = range > 0 ? window.scrollY / range : 0;
+          if (bar) bar.style.transform = 'scaleX(' + progress + ')';
+          if (toTop) toTop.classList.toggle('show', window.scrollY > 600);
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        document.addEventListener('swup:page:view', onScroll);
+        if (toTop) {
+          toTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+          });
+        }
+      })();
+
+      // 全局动效：花瓣飘落 + 鼠标墨点 + 点击墨晕，单 rAF 统一管理。
+      // reduced-motion 不启动；hover:none 无墨点；监听器只挂 window/document。
+      (function () {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const canvas = document.getElementById('fx');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        let width = 0;
+        let height = 0;
+        let raf = 0;
+        const resize = () => {
+          width = canvas.width = window.innerWidth;
+          height = canvas.height = window.innerHeight;
+        };
+        resize();
+        window.addEventListener('resize', resize);
+
+        const toRgb = (value, fallback) => {
+          const c = (value || '').trim();
+          if (c.startsWith('#')) {
+            const n = parseInt(c.slice(1), 16);
+            return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+          }
+          const m = c.match(/[\d.]+/g);
+          return m && m.length >= 3 ? m.slice(0, 3).map(Number) : fallback;
+        };
+        const readColors = () => {
+          const style = getComputedStyle(document.documentElement);
+          return {
+            petal: toRgb(style.getPropertyValue('--petal'), [214, 142, 150]),
+            ink: toRgb(style.getPropertyValue('--ink'), [41, 42, 39]),
+          };
+        };
+        let colors = readColors();
+        // 主题切换后颜色延迟刷新，避免监听 MutationObserver 的开销
+        setInterval(() => {
+          colors = readColors();
+        }, 1500);
+
+        // 花瓣
+        const petalCount = window.innerWidth < 700 ? 10 : 18;
+        const makePetal = (fromTop) => ({
+          x: Math.random() * width,
+          y: fromTop ? -20 : Math.random() * height,
+          r: 3.5 + Math.random() * 5,
+          rot: Math.random() * Math.PI,
+          vr: (Math.random() - 0.5) * 0.02,
+          vy: 0.35 + Math.random() * 0.7,
+          phase: Math.random() * Math.PI * 2,
+          amp: 0.5 + Math.random() * 1,
+          a: 0.28 + Math.random() * 0.32,
+        });
+        const petals = [];
+        for (let i = 0; i < petalCount; i++) petals.push(makePetal(false));
+
+        // 鼠标墨点
+        const dots = [];
+        let lastDotAt = 0;
+        if (!window.matchMedia('(hover: none)').matches) {
+          window.addEventListener('mousemove', (event) => {
+            const now = Date.now();
+            if (now - lastDotAt < 50) return;
+            lastDotAt = now;
+            dots.push({ x: event.clientX, y: event.clientY, r: 2 + Math.random() * 3, life: 1 });
+            if (dots.length > 50) dots.shift();
+          });
+        }
+
+        // 点击墨晕（仅左键）
+        const blooms = [];
+        window.addEventListener('pointerdown', (event) => {
+          if (event.button !== 0) return;
+          blooms.push({ x: event.clientX, y: event.clientY, r: 4, life: 1 });
+        });
+
+        const rgba = (rgb, alpha) => 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + alpha + ')';
+
+        const draw = () => {
+          ctx.clearRect(0, 0, width, height);
+
+          for (const p of petals) {
+            p.y += p.vy;
+            p.phase += 0.01;
+            p.x += Math.sin(p.phase) * p.amp;
+            p.rot += p.vr;
+            if (p.y > height + 20) {
+              Object.assign(p, makePetal(true));
+              p.x = Math.random() * width;
+            }
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rot);
+            ctx.fillStyle = rgba(colors.petal, p.a);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, p.r, p.r * 0.55, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+
+          for (let i = dots.length - 1; i >= 0; i--) {
+            const d = dots[i];
+            d.life -= 0.035;
+            if (d.life <= 0) {
+              dots.splice(i, 1);
+              continue;
+            }
+            ctx.fillStyle = rgba(colors.ink, d.life * 0.26);
+            ctx.beginPath();
+            ctx.arc(d.x, d.y, d.r * d.life, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          for (let i = blooms.length - 1; i >= 0; i--) {
+            const b = blooms[i];
+            b.r += 2.4;
+            b.life -= 0.028;
+            if (b.life <= 0) {
+              blooms.splice(i, 1);
+              continue;
+            }
+            const gradient = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+            gradient.addColorStop(0, rgba(colors.ink, 0.16 * b.life));
+            gradient.addColorStop(0.65, rgba(colors.ink, 0.07 * b.life));
+            gradient.addColorStop(1, rgba(colors.ink, 0));
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = rgba(colors.ink, 0.1 * b.life);
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.r * 0.72, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+
+          raf = requestAnimationFrame(draw);
+        };
+
+        draw();
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            cancelAnimationFrame(raf);
+          } else {
+            draw();
+          }
+        });
+      })();
+
+      // 留墨表单：document 级 submit 委托（盖印 → mailto 草稿），
+      // 委托挂 document 使 Swup 缓存恢复留墨页后仍然生效。
+      document.addEventListener('submit', (event) => {
+        const form = event.target && event.target.closest ? event.target.closest('#inkForm') : null;
+        if (!form) return;
+        event.preventDefault();
+        const email = form.dataset.email || '';
+        const whoField = form.querySelector('[name="who"]');
+        const msgField = form.querySelector('[name="msg"]');
+        const who = whoField && whoField.value ? whoField.value.trim() : '';
+        const msg = msgField && msgField.value ? msgField.value.trim() : '';
+        if (!who || !msg) return;
+        const subject = encodeURIComponent('【墨笺留墨】' + who);
+        const body = encodeURIComponent(msg + '\n\n—— ' + who);
+        const toast = document.getElementById('inkToast');
+        form.classList.remove('stamped');
+        void form.offsetWidth;
+        form.classList.add('stamped');
+        if (toast) {
+          toast.textContent = '书信已备好，交由你的信使递出。';
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 2600);
+        }
+        setTimeout(() => {
+          window.location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
+        }, 650);
+        setTimeout(() => {
+          form.reset();
+          form.classList.remove('stamped');
+        }, 1800);
+      });
+
       document.addEventListener('swup:page:view', () => {
         initReveal();
         initCovers();

@@ -86,6 +86,12 @@ const BASE = import.meta.env.BASE_URL;
     list-style: none;
   }
 
+  :global(html[data-theme='night']) .post-list {
+    background:
+      repeating-linear-gradient(180deg, transparent 0 55px, rgb(233 226 208 / 7%) 55px 56px),
+      rgb(233 226 208 / 5%);
+  }
+
   li {
     display: grid;
     grid-template-columns: 9rem 1fr auto;

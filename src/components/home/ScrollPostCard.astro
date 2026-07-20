@@ -615,6 +615,99 @@ const filterId = `postSoft${index}`;
     }
   }
 
+  /* 标题与印章字换书法体 */
+  .post-title {
+    font-family: var(--font-cal);
+    font-weight: 400;
+  }
+
+  .scroll-seal {
+    font-family: var(--font-cal);
+  }
+
+  /* ============ 夜色：宣纸变夜笺 ============ */
+  :global(html[data-theme='night']) .article-scroll {
+    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
+  }
+
+  :global(html[data-theme='night']) .article-scroll:hover,
+  :global(html[data-theme='night']) .article-scroll:focus-within {
+    filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.45));
+  }
+
+  :global(html[data-theme='night']) .scroll-paper {
+    background-color: #26271f;
+    background-image:
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.52' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='.15'/%3E%3C/svg%3E"),
+      radial-gradient(ellipse at 20% 22%, rgba(233, 226, 208, 0.04), transparent 32%),
+      radial-gradient(ellipse at 50% 42%, rgba(233, 226, 208, 0.09), transparent 62%),
+      linear-gradient(180deg, transparent 0 6px, rgba(233, 226, 208, 0.09) 6px 7px, transparent 7px calc(100% - 7px), rgba(233, 226, 208, 0.08) calc(100% - 7px) calc(100% - 6px), transparent calc(100% - 6px)),
+      linear-gradient(180deg, rgba(233, 226, 208, 0.07), transparent 22%, transparent 78%, rgba(0, 0, 0, 0.2)),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.26), transparent 8%, transparent 92%, rgba(0, 0, 0, 0.22));
+    border-top-color: rgba(233, 226, 208, 0.14);
+    border-bottom-color: rgba(233, 226, 208, 0.12);
+    box-shadow:
+      inset 22px 0 22px -8px rgba(0, 0, 0, 0.28),
+      inset -22px 0 22px -8px rgba(0, 0, 0, 0.26),
+      inset 0 8px 12px rgba(233, 226, 208, 0.05),
+      inset 0 -8px 13px rgba(0, 0, 0, 0.22);
+  }
+
+  :global(html[data-theme='night']) .article-scroll:hover .scroll-paper,
+  :global(html[data-theme='night']) .article-scroll:focus-within .scroll-paper {
+    box-shadow:
+      inset 16px 0 18px -8px rgba(0, 0, 0, 0.2),
+      inset -16px 0 18px -8px rgba(0, 0, 0, 0.18),
+      inset 0 7px 11px rgba(233, 226, 208, 0.05),
+      inset 0 -7px 12px rgba(0, 0, 0, 0.18);
+  }
+
+  :global(html[data-theme='night']) .scroll-paper::before {
+    background:
+      repeating-linear-gradient(90deg, transparent 0 7px, rgba(233, 226, 208, 0.04) 7px 8px),
+      linear-gradient(90deg, rgba(10, 10, 9, 0.4), rgba(64, 63, 52, 0.95) 18%, rgba(88, 86, 70, 0.95) 38%, rgba(52, 51, 42, 0.9) 55%, rgba(20, 20, 17, 0.25) 76%, rgba(20, 20, 17, 0.08) 88%, transparent);
+    box-shadow: inset 6px 0 8px -2px rgba(0, 0, 0, 0.3), inset -4px 0 6px -2px rgba(233, 226, 208, 0.12), 6px 0 10px -2px rgba(0, 0, 0, 0.2);
+  }
+
+  :global(html[data-theme='night']) .scroll-paper::after {
+    background:
+      repeating-linear-gradient(90deg, transparent 0 7px, rgba(233, 226, 208, 0.04) 7px 8px),
+      linear-gradient(270deg, rgba(10, 10, 9, 0.4), rgba(64, 63, 52, 0.95) 18%, rgba(88, 86, 70, 0.95) 38%, rgba(52, 51, 42, 0.9) 55%, rgba(20, 20, 17, 0.25) 76%, rgba(20, 20, 17, 0.08) 88%, transparent);
+    box-shadow: inset -6px 0 8px -2px rgba(0, 0, 0, 0.3), inset 4px 0 6px -2px rgba(233, 226, 208, 0.12), -6px 0 10px -2px rgba(0, 0, 0, 0.2);
+  }
+
+  :global(html[data-theme='night']) .article-scroll:hover .scroll-paper::before,
+  :global(html[data-theme='night']) .article-scroll:focus-within .scroll-paper::before,
+  :global(html[data-theme='night']) .article-scroll:hover .scroll-paper::after,
+  :global(html[data-theme='night']) .article-scroll:focus-within .scroll-paper::after {
+    box-shadow: inset 3px 0 5px rgba(0, 0, 0, 0.2);
+  }
+
+  :global(html[data-theme='night']) .scroll-ink {
+    filter: brightness(1.75);
+  }
+
+  :global(html[data-theme='night']) .scroll-seal {
+    color: #f8eee4;
+    background: rgba(207, 84, 66, 0.85);
+    mix-blend-mode: normal;
+  }
+
+  :global(html[data-theme='night']) .article-scroll:hover .post-title-text,
+  :global(html[data-theme='night']) .article-scroll:focus-within .post-title-text {
+    color: #ece5d2;
+  }
+
+  :global(html[data-theme='night']) .post-meta::after {
+    background: linear-gradient(180deg, transparent, rgba(233, 226, 208, 0.16) 18%, rgba(233, 226, 208, 0.16) 82%, transparent);
+  }
+
+  @media (max-width: 620px) {
+    :global(html[data-theme='night']) .post-meta::after {
+      background: linear-gradient(90deg, transparent, rgba(233, 226, 208, 0.16) 14%, rgba(233, 226, 208, 0.16) 86%, transparent);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .article-scroll,
     .article-scroll .scroll-axis,

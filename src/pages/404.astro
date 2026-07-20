@@ -37,6 +37,10 @@ const BASE = import.meta.env.BASE_URL;
     transform: translate(-50%, -50%);
   }
 
+  :global(html[data-theme='night']) .not-found::before {
+    border-color: rgb(233 226 208 / 10%);
+  }
+
   .code {
     letter-spacing: 0.5em;
   }
