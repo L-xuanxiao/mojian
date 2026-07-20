@@ -16,13 +16,7 @@ const BASE = import.meta.env.BASE_URL;
 
   <link href={`${BASE}pagefind/pagefind-ui.css`} rel="stylesheet" />
   <script is:inline src={`${BASE}pagefind/pagefind-ui.js`}></script>
-  <script is:inline define:vars={{ bundlePath: `${BASE}pagefind/` }}>
-    window.addEventListener('DOMContentLoaded', () => {
-      if (typeof PagefindUI !== 'undefined') {
-        new PagefindUI({ element: '#search', bundlePath, showSubResults: true, showImages: false });
-      }
-    });
-  </script>
+  <!-- PagefindUI 初始化在 BaseLayout 持久脚本中（含 Swup 回退重放） -->
 </BaseLayout>
 
 <style>

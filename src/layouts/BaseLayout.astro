@@ -24,6 +24,10 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
+    <script is:inline>
+      // JS 可用标记：.reveal 隐藏与题图淡入仅在 .js 下生效，无 JS 时内容直接可见
+      document.documentElement.classList.add('js');
+    </script>
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
@@ -34,7 +38,7 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
     <link rel="icon" type="image/svg+xml" href={`${BASE}favicon.svg`} />
     <title>{documentTitle}</title>
   </head>
-  <body class:list={{ 'home-page': isHome, 'inner-page': !isHome }}>
+  <body class:list={{ 'home-page': isHome, 'inner-page': !isHome }} data-base={BASE}>
     <a class="skip-link" href="#main-content">跳到正文</a>
     <SiteHeader />
     <style>
@@ -81,7 +85,44 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
       }
 
       initReveal();
-      document.addEventListener('swup:page:view', initReveal);
+
+      // 文章题图：JS 下默认透明，加载完成（或缓存命中）后淡入。
+      // 与 reveal 同理，在 swup:page:view 上重放以覆盖换页进入的文章页。
+      function initCovers() {
+        document.querySelectorAll('.article-cover img:not(.is-loaded)').forEach((img) => {
+          if (img.dataset.coverBound) return;
+          img.dataset.coverBound = '1';
+          if (img.complete && img.naturalWidth > 0) {
+            img.classList.add('is-loaded');
+          } else {
+            img.addEventListener('load', () => img.classList.add('is-loaded'), { once: true });
+          }
+        });
+      }
+
+      initCovers();
+
+      // 寻墨页：pagefind-ui.js 只在整页加载时执行一次，但 PagefindUI 全局会留在内存。
+      // Swup 后退/换页回到搜索页时容器内的初始化脚本不会重跑，故在此兜底重建。
+      function initSearch() {
+        const el = document.getElementById('search');
+        if (el && typeof PagefindUI !== 'undefined' && !el.dataset.pagefindReady) {
+          el.dataset.pagefindReady = '1';
+          new PagefindUI({
+            element: '#search',
+            bundlePath: `${document.body.dataset.base}pagefind/`,
+            showSubResults: true,
+            showImages: false,
+          });
+        }
+      }
+
+      initSearch();
+      document.addEventListener('swup:page:view', () => {
+        initReveal();
+        initCovers();
+        initSearch();
+      });
     </script>
   </body>
 </html>

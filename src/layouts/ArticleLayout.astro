@@ -48,8 +48,6 @@ const lqip = post.data.cover
           alt={`${post.data.title}题图`}
           format="webp"
           quality={84}
-          style="opacity: 0; transition: opacity 480ms ease;"
-          onload="this.style.opacity = 1"
         />
         <figcaption>行到水穷处，坐看云起时。</figcaption>
       </figure>
@@ -168,6 +166,17 @@ const lqip = post.data.cover
     max-height: 35rem;
     object-fit: cover;
     filter: saturate(0.72) contrast(0.94);
+    opacity: 1;
+  }
+
+  /* LQIP 淡入仅 JS 可用时启用；无 JS 时大图直接可见（见 BaseLayout 持久脚本） */
+  :global(.js) .article-cover :global(img) {
+    opacity: 0;
+    transition: opacity 480ms ease;
+  }
+
+  :global(.js) .article-cover :global(img.is-loaded) {
+    opacity: 1;
   }
 
   figcaption {

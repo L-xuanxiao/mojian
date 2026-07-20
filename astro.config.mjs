@@ -24,7 +24,8 @@ export default defineConfig({
       preload: true,
       accessibility: true,
       updateHead: true,
-      updateBodyClass: false,
+      // 换页时同步 body 类名（home-page / inner-page 决定顶部间距）
+      updateBodyClass: true,
       globalInstance: true,
       // 锚点链接交给浏览器原生处理。
       // @ts-expect-error 选项透传给 swup 核心，@swup/astro 包装层类型未收录
