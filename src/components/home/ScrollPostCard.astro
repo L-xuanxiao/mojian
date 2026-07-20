@@ -3,7 +3,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { render } from 'astro:content';
 import { siteConfig } from '../../config/siteConfig';
-import { formatDate, getExcerpt } from '../../lib/posts';
+import { formatDateShort, getExcerpt } from '../../lib/posts';
 
 interface Props {
   post: CollectionEntry<'blog'>;
@@ -63,7 +63,7 @@ const filterId = `postSoft${index}`;
       </div>
       <span class="scroll-seal" aria-hidden="true">卷<br />{seal}</span>
       <div class="post-meta" data-index={indexLabel}>
-        <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+        <time datetime={post.data.pubDate.toISOString()}>{formatDateShort(post.data.pubDate)}</time>
         <span class="category">{post.data.category}</span>
         <span class="reading-time">约 {minutes} 分钟</span>
       </div>
@@ -323,6 +323,7 @@ const filterId = `postSoft${index}`;
   .post-meta time {
     font-family: var(--serif);
     letter-spacing: 0.04em;
+    white-space: nowrap;
   }
 
   .post-meta .category {
