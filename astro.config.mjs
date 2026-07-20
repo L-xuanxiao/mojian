@@ -39,6 +39,7 @@ export default defineConfig({
           'article-outline-rounded',
           'archive-outline-rounded',
           'person-outline-rounded',
+          'edit-note-outline-rounded',
           'menu-rounded'
         ]
       }

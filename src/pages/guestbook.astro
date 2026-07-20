@@ -1,0 +1,243 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { siteConfig } from '../config/siteConfig';
+
+const { contactEmail, giscus } = siteConfig;
+const giscusReady = Boolean(giscus.repoId && giscus.categoryId);
+---
+
+<BaseLayout title="留墨" description="给墨笺递个话，或在此留下公开墨迹。">
+  <section class="guestbook page-shell">
+    <header class="guestbook-head reveal">
+      <p class="page-kicker">来者可留</p>
+      <h1 class="page-display-title">留墨</h1>
+      <p class="guestbook-lead">不必拘礼，写一句想说的话。私下递话用左匣盖印，公开留墨待墙开。</p>
+    </header>
+
+    <form id="inkForm" class="guest-card reveal" data-email={contactEmail} novalidate={false}>
+      <h2>来者留名</h2>
+      <p class="lead">写一句你想说的话即可，我会慢慢回。</p>
+      <div class="field">
+        <label for="inkWho">如何称呼你</label>
+        <input id="inkWho" name="who" type="text" placeholder="例如：过路人 / 听琴客" required />
+      </div>
+      <div class="field">
+        <label for="inkMsg">想说的话</label>
+        <textarea id="inkMsg" name="msg" placeholder="落笔处，皆是缘。" required></textarea>
+      </div>
+      <button class="btn-seal" type="submit">盖印 · 递出</button>
+      <div class="stamp" aria-hidden="true">已收到</div>
+    </form>
+
+    {/* 留墨墙未启用时整段不渲染。启用：仓库开 Discussions → 装 giscus app →
+        把 https://giscus.app/zh-CN 给出的 repoId / categoryId 填进
+        src/config/siteConfig.ts 的 giscus 字段即可。 */}
+    {
+      giscusReady && (
+        <section class="ink-wall reveal" aria-labelledby="ink-wall-title">
+          <h2 id="ink-wall-title">留墨墙</h2>
+          <p class="lead">公开的墨迹都晾在这面墙上。</p>
+          <script
+            is:inline
+            src="https://giscus.app/client.js"
+            data-repo={giscus.repo}
+            data-repo-id={giscus.repoId}
+            data-category={giscus.category}
+            data-category-id={giscus.categoryId}
+            data-mapping={giscus.mapping}
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="preferred_color_scheme"
+            data-lang="zh-CN"
+            crossorigin="anonymous"
+            async
+          />
+        </section>
+      )
+    }
+  </section>
+  <div id="inkToast" class="ink-toast" role="status" aria-live="polite"></div>
+</BaseLayout>
+
+<style>
+  .guestbook {
+    padding-top: clamp(4rem, 9vw, 8rem);
+  }
+
+  .guestbook-head {
+    text-align: center;
+  }
+
+  .guestbook-lead {
+    margin: 1.2rem auto 0;
+    max-width: 34ch;
+    color: var(--ink-soft);
+    font-family: var(--serif);
+    font-size: 0.98rem;
+    line-height: 2;
+  }
+
+  .guest-card {
+    position: relative;
+    width: min(100%, 680px);
+    margin: clamp(2.6rem, 6vw, 4rem) auto 0;
+    padding: clamp(1.6rem, 4vw, 2.6rem);
+    border: 1px solid var(--line);
+    border-left: 5px solid var(--cinnabar);
+    background: var(--paper-light);
+    box-shadow: 0 18px 42px -26px var(--shadow);
+  }
+
+  .guest-card h2,
+  .ink-wall h2 {
+    margin: 0 0 0.4rem;
+    font-family: var(--font-cal);
+    font-size: 1.65rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+  }
+
+  .guest-card .lead,
+  .ink-wall .lead {
+    margin: 0 0 1.4rem;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+  }
+
+  .field {
+    margin-bottom: 1.1rem;
+  }
+
+  .field label {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: var(--ink-faint);
+    font-size: 0.8rem;
+    letter-spacing: 0.16em;
+  }
+
+  .field input,
+  .field textarea {
+    width: 100%;
+    padding: 0.5rem 0.2rem;
+    border: none;
+    border-bottom: 1px solid var(--line-strong);
+    color: var(--ink);
+    background: transparent;
+    font-family: var(--serif);
+    font-size: 1rem;
+    transition: border-color 0.3s;
+  }
+
+  .field textarea {
+    min-height: 110px;
+    padding: 0.6rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    resize: vertical;
+    line-height: 1.9;
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    border-color: var(--cinnabar);
+    outline: none;
+  }
+
+  .btn-seal {
+    position: relative;
+    overflow: hidden;
+    padding: 0.7rem 1.8rem;
+    border: none;
+    border-radius: 4px;
+    color: var(--paper-light);
+    background: var(--cinnabar);
+    cursor: pointer;
+    font-family: var(--font-cal);
+    font-size: 1.2rem;
+    letter-spacing: 0.2em;
+    transition: background 0.3s;
+  }
+
+  .btn-seal:hover {
+    background: var(--cinnabar-deep);
+  }
+
+  .btn-seal::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    background: radial-gradient(circle at center, rgb(251 249 243 / 30%), transparent 60%);
+    transform: scale(0);
+    transition: transform 0.5s;
+  }
+
+  .btn-seal:active::after {
+    transform: scale(2.2);
+  }
+
+  /* 盖印：提交后「已收到」压下 */
+  .stamp {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    padding: 0.3rem 0.7rem;
+    border: 4px double var(--cinnabar);
+    border-radius: 6px;
+    color: var(--cinnabar);
+    font-family: var(--font-cal);
+    font-size: 2.4rem;
+    letter-spacing: 0.1em;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) rotate(-14deg) scale(2.2);
+  }
+
+  .guest-card.stamped .stamp {
+    animation: stampIn 0.55s cubic-bezier(0.2, 1.5, 0.4, 1) forwards;
+  }
+
+  @keyframes stampIn {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) rotate(-14deg) scale(2.4);
+    }
+    60% {
+      opacity: 0.95;
+    }
+    100% {
+      opacity: 0.9;
+      transform: translate(-50%, -50%) rotate(-14deg) scale(1);
+    }
+  }
+
+  .ink-wall {
+    width: min(100%, 760px);
+    margin: clamp(3rem, 7vw, 5rem) auto 0;
+  }
+
+  .ink-toast {
+    position: fixed;
+    z-index: 1500;
+    bottom: 34px;
+    left: 50%;
+    padding: 0.7rem 1.4rem;
+    border-radius: 4px;
+    color: var(--paper-light);
+    background: var(--ink);
+    box-shadow: 0 10px 30px -10px var(--shadow);
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+    transition: opacity 0.4s, transform 0.4s var(--ease);
+    pointer-events: none;
+  }
+
+  .ink-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>

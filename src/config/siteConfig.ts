@@ -3,14 +3,14 @@
 
 export interface NavItem {
   /** 用于 active 状态判断 */
-  key: 'top' | 'articles' | 'archive' | 'about';
+  key: 'top' | 'articles' | 'archive' | 'about' | 'guest';
   label: string;
   ariaLabel: string;
   icon: string;
   /** 首页内锚点 id */
   homeAnchor: string;
   /** 独立页面路径（相对 BASE，尾斜杠）；空串表示仅首页锚点 */
-  path: '' | 'archive/' | 'about/';
+  path: '' | 'archive/' | 'about/' | 'guestbook/';
 }
 
 export interface CategoryDef {
@@ -66,12 +66,33 @@ export const siteConfig = {
       homeAnchor: 'about',
       path: 'about/',
     },
+    {
+      key: 'guest',
+      label: '留墨',
+      ariaLabel: '留言·留墨',
+      icon: 'material-symbols:edit-note-outline-rounded',
+      homeAnchor: '',
+      path: 'guestbook/',
+    },
   ] satisfies NavItem[],
 
   /** 页面开关：false 时导航中隐藏对应项（预留，页面本身仍需手动处理） */
   pages: {
     archive: true,
     about: true,
+    guestbook: true,
+  },
+
+  /** 留墨页：mailto 收件人（为空时唤起邮件客户端但不预填收件人） */
+  contactEmail: '',
+
+  /** 留墨墙 giscus：repoId / categoryId 填好后自动启用；获取见 https://giscus.app/zh-CN */
+  giscus: {
+    repo: 'L-xuanxiao/mojian',
+    repoId: '',
+    category: 'General',
+    categoryId: '',
+    mapping: 'pathname',
   },
 
   footer: {
