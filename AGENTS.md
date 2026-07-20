@@ -14,9 +14,9 @@
 
 ## 目录
 
-- `src/pages/`：页面路由。首页、归档、关于、404 与文章详情均使用 `BaseLayout`；文章详情由 `posts/[slug].astro` 生成。
+- `src/pages/`：页面路由。首页、归档、关于、404 与文章详情均使用 `BaseLayout`；文章详情由 `posts/[slug].astro` 生成；分类文章列表由 `category/[category].astro` 生成（slug 映射见 `siteConfig.categories`）。
 - `src/content/blog/`：Markdown 文章；字段约束见 `src/content.config.ts`。
-- `src/config/siteConfig.ts`：站点集中配置（站名、导航、页脚、文章列表行为、页面开关），消费方不在组件内硬编码这些值。
+- `src/config/siteConfig.ts`：站点集中配置（站名、导航、页脚、分类、文章列表行为、页面开关），消费方不在组件内硬编码这些值。
 - `src/components/`：按职责分目录，清单与分类规则见 `src/components/README.md`。`layout/` 全站框架、`home/` 首页专属、`common/` 跨页复用。
 - `src/layouts/`：`BaseLayout`（导航+页脚+`<head>`）与 `ArticleLayout`（文章详情）。
 - `src/plugins/`：remark 插件（自动摘要、字数与阅读时长），产出写入 `remarkPluginFrontmatter`。
