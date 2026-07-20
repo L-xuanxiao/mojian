@@ -4,18 +4,27 @@ import inkMountains from "../assets/ink-mountains.png";
 import ScrollPostCard from "../components/home/ScrollPostCard.astro";
 import { siteConfig } from "../config/siteConfig";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { getPublishedPosts } from "../lib/posts";
+import { formatDate, getPublishedPosts } from "../lib/posts";
 
 const BASE = import.meta.env.BASE_URL;
-const recentPosts = (await getPublishedPosts()).slice(0, siteConfig.postList.recentCount);
+const allPosts = await getPublishedPosts();
+const recentPosts = allPosts.slice(0, siteConfig.postList.recentCount);
+const latestPost = recentPosts[0];
+// 书斋目录各分类篇数：随已发布文章自动变化，draft 不计
+const categoryCounts = new Map(
+  siteConfig.categories.map((cat) => [
+    cat.key,
+    allPosts.filter((post) => post.data.category === cat.key).length,
+  ]),
+);
 ---
 
 <style>
 
     .section {
       position: relative;
-      scroll-margin-top: 76px;
-      padding: clamp(92px, 10vw, 150px) 0;
+      scroll-margin-top: 92px;
+      padding: clamp(76px, 8.5vw, 120px) 0;
     }
 
     .section-heading {
@@ -78,11 +87,11 @@ const recentPosts = (await getPublishedPosts()).slice(0, siteConfig.postList.rec
     ========================== */
     .hero {
       position: relative;
-      min-height: 600px;
-      height: clamp(600px, 68svh, 720px);
+      min-height: 560px;
+      height: clamp(560px, 62svh, 660px);
       display: grid;
       align-items: center;
-      padding: 118px 0 76px;
+      padding: 108px 0 64px;
       isolation: isolate;
       overflow: hidden;
     }
@@ -297,7 +306,7 @@ const recentPosts = (await getPublishedPosts()).slice(0, siteConfig.postList.rec
       align-items: baseline;
       justify-content: space-between;
       gap: 18px;
-      margin-bottom: 20px;
+      margin-bottom: 14px;
       color: var(--ink);
       font-family: var(--serif);
     }
@@ -314,34 +323,27 @@ const recentPosts = (await getPublishedPosts()).slice(0, siteConfig.postList.rec
       letter-spacing: 0.08em;
     }
 
-    .hero-note dl,
-    .hero-note dd {
-      margin: 0;
-    }
-
-    .hero-note dl {
-      display: grid;
-      gap: 17px;
-    }
-
-    .hero-note dl > div {
-      display: grid;
-      grid-template-columns: 70px 1fr;
-      gap: 12px;
-      padding-top: 15px;
+    .hero-note-post {
+      display: block;
+      padding-top: 14px;
       border-top: 1px solid var(--line);
-    }
-
-    .hero-note dt {
-      color: var(--moss);
-      font-size: 0.74rem;
-      letter-spacing: 0.08em;
-    }
-
-    .hero-note dd {
+      color: var(--ink);
       font-family: var(--serif);
-      font-size: 0.94rem;
-      line-height: 1.75;
+      font-size: 1.02rem;
+      line-height: 1.7;
+      letter-spacing: 0.06em;
+      text-decoration: none;
+    }
+
+    .hero-note-post:hover {
+      color: var(--moss-deep);
+    }
+
+    .hero-note-meta {
+      margin: 8px 0 0;
+      color: var(--ink-faint);
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
     }
 
     .hero-landscape {
@@ -511,7 +513,7 @@ const recentPosts = (await getPublishedPosts()).slice(0, siteConfig.postList.rec
 
     .scroll-list {
       position: relative;
-      scroll-margin-top: 76px;
+      scroll-margin-top: 92px;
       display: grid;
       gap: clamp(24px, 2.4vw, 30px);
     }
@@ -918,7 +920,7 @@ const recentPosts = (await getPublishedPosts()).slice(0, siteConfig.postList.rec
 
       .home-layout > .section {
         min-width: 0;
-        padding: 54px 0;
+        padding: 48px 0;
         border-radius: 16px;
       }
 
@@ -932,7 +934,8 @@ const recentPosts = (await getPublishedPosts()).slice(0, siteConfig.postList.rec
       }
 
       .home-layout .latest .section-heading,
-      .home-layout .about .section-heading {
+      .home-layout .about .section-heading,
+      .home-layout .desk .section-heading {
         grid-template-columns: 1fr;
         gap: 18px;
         margin-bottom: 38px;
@@ -948,9 +951,9 @@ const recentPosts = (await getPublishedPosts()).slice(0, siteConfig.postList.rec
         padding-top: 0;
       }
 
-      .home-layout .study-title,
-      .home-layout .about .section-title {
-        font-size: clamp(2rem, 2.8vw, 2.65rem);
+      .home-layout .section-title,
+      .home-layout .study-title {
+        font-size: clamp(2.25rem, 3.1vw, 3.2rem);
       }
 
       .home-layout .index-item {
@@ -988,7 +991,7 @@ const recentPosts = (await getPublishedPosts()).slice(0, siteConfig.postList.rec
       }
     }
 
-    @media (min-width: 821px) and (max-width: 1359px) {
+    @media (min-width: 821px) and (max-width: 1439px) {
       .home-layout {
         grid-template-columns: clamp(210px, 22vw, 280px) minmax(0, 1fr);
         grid-template-areas:
@@ -998,7 +1001,7 @@ const recentPosts = (await getPublishedPosts()).slice(0, siteConfig.postList.rec
       }
     }
 
-    @media (min-width: 1360px) {
+    @media (min-width: 1440px) {
       .home-layout {
         width: min(calc(100% - (var(--side-space) * 2)), 1480px);
         grid-template-columns: clamp(240px, 18vw, 280px) minmax(620px, 1fr) clamp(260px, 19vw, 300px);
@@ -1205,10 +1208,6 @@ const recentPosts = (await getPublishedPosts()).slice(0, siteConfig.postList.rec
         padding: 22px 20px;
       }
 
-      .hero-note dl > div {
-        grid-template-columns: 62px 1fr;
-      }
-
       .hero-landscape {
         height: 100%;
         min-height: 0;
@@ -1337,21 +1336,13 @@ const recentPosts = (await getPublishedPosts()).slice(0, siteConfig.postList.rec
 
         <div class="hero-side">
           <div class="hero-vertical-copy" aria-hidden="true">风来疏竹　雨过远山</div>
-          <aside class="hero-note" aria-label="案上近况">
+          <aside class="hero-note" aria-label="最新文章">
             <div class="hero-note-head">
-              <strong>案上</strong>
-              <time datetime="2026-07">季夏 · 二〇二六</time>
+              <strong>新札</strong>
+              <time datetime={latestPost.data.pubDate.toISOString()}>{formatDate(latestPost.data.pubDate)}</time>
             </div>
-            <dl>
-              <div>
-                <dt>正在搭建</dt>
-                <dd>继续打磨这座 Astro 个人博客</dd>
-              </div>
-              <div>
-                <dt>近日整理</dt>
-                <dd>山中一日、雨落窗前与旧书</dd>
-              </div>
-            </dl>
+            <a class="hero-note-post" href={`${BASE}posts/${latestPost.id}/`}>{latestPost.data.title}</a>
+            <p class="hero-note-meta">{latestPost.data.category} · 新卷初展</p>
           </aside>
         </div>
       </div>
@@ -1393,30 +1384,14 @@ const recentPosts = (await getPublishedPosts()).slice(0, siteConfig.postList.rec
         </div>
 
         <nav class="index-list reveal" aria-label="内容分类">
-          <a class="index-item" href="#articles">
-            <span class="index-number">壹</span>
-            <span class="index-name">日常</span>
-            <span class="index-desc">寻常烟火与片刻心绪</span>
-            <span class="index-count">01 篇</span>
-          </a>
-          <a class="index-item" href="#articles">
-            <span class="index-number">贰</span>
-            <span class="index-name">行旅</span>
-            <span class="index-desc">山川远近与沿途所见</span>
-            <span class="index-count">01 篇</span>
-          </a>
-          <a class="index-item" href="#articles">
-            <span class="index-number">叁</span>
-            <span class="index-name">读书</span>
-            <span class="index-desc">旧书新页与字里光阴</span>
-            <span class="index-count">01 篇</span>
-          </a>
-          <a class="index-item" href="#about">
-            <span class="index-number">肆</span>
-            <span class="index-name">摄影</span>
-            <span class="index-desc">光影流转与留住片刻</span>
-            <span class="index-count">00 篇</span>
-          </a>
+          {siteConfig.categories.map((cat) => (
+            <a class="index-item" href={`${BASE}category/${cat.slug}/`}>
+              <span class="index-number">{cat.number}</span>
+              <span class="index-name">{cat.key}</span>
+              <span class="index-desc">{cat.description}</span>
+              <span class="index-count">{String(categoryCounts.get(cat.key) ?? 0).padStart(2, '0')} 篇</span>
+            </a>
+          ))}
         </nav>
       </div>
       <svg class="brush-divider" viewBox="0 0 960 42" preserveAspectRatio="none" aria-hidden="true">

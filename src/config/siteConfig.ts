@@ -13,6 +13,16 @@ export interface NavItem {
   path: '' | 'archive/' | 'about/';
 }
 
+export interface CategoryDef {
+  /** 与 src/content.config.ts 的分类枚举一致 */
+  key: '日常' | '行旅' | '读书' | '摄影';
+  /** 分类页英文路由 slug（category/[slug]/） */
+  slug: 'daily' | 'travel' | 'reading' | 'photography';
+  /** 首页书斋目录序号字 */
+  number: string;
+  description: string;
+}
+
 export const siteConfig = {
   name: '墨笺',
   /** 页首印章字 */
@@ -70,6 +80,14 @@ export const siteConfig = {
     builtWith: '由 Astro 构筑',
     copyrightYear: '2026',
   },
+
+  /** 书斋目录：分类定义；slug 与中文枚举的唯一映射处，篇数由文章数据动态统计 */
+  categories: [
+    { key: '日常', slug: 'daily', number: '壹', description: '寻常烟火与片刻心绪' },
+    { key: '行旅', slug: 'travel', number: '贰', description: '山川远近与沿途所见' },
+    { key: '读书', slug: 'reading', number: '叁', description: '旧书新页与字里光阴' },
+    { key: '摄影', slug: 'photography', number: '肆', description: '光影流转与留住片刻' },
+  ] satisfies CategoryDef[],
 
   postList: {
     /** 首页「近来所记」展示篇数 */

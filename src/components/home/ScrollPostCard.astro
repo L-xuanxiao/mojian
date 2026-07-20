@@ -29,9 +29,10 @@ const filterId = `postSoft${index}`;
 ---
 
 <article class="article-scroll reveal">
-  <div class="scroll-axis" aria-hidden="true"></div>
-  <div class="scroll-paper">
-    <div class="scroll-ink" aria-hidden="true">
+  <a class="scroll-link" href={`${BASE}posts/${post.id}/`} aria-label={`阅读：${post.data.title}`}>
+    <div class="scroll-axis" aria-hidden="true"></div>
+    <div class="scroll-paper">
+      <div class="scroll-ink" aria-hidden="true">
       {variant === 0 && (
         <svg viewBox="0 0 1100 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
           <defs><filter id={filterId}><feGaussianBlur stdDeviation="4" /></filter></defs>
@@ -59,22 +60,23 @@ const filterId = `postSoft${index}`;
           <path d="M228 132c16-9 28-8 42 2m24-17c13-7 24-6 35 2" fill="none" stroke="#343a35" stroke-opacity=".14" stroke-linecap="round" />
         </svg>
       )}
+      </div>
+      <span class="scroll-seal" aria-hidden="true">卷<br />{seal}</span>
+      <div class="post-meta" data-index={indexLabel}>
+        <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+        <span class="category">{post.data.category}</span>
+        <span class="reading-time">约 {minutes} 分钟</span>
+      </div>
+      <div class="post-main">
+        <h3 class="post-title"><span class="post-title-text">{post.data.title}</span></h3>
+        <p class="post-excerpt">{excerpt}</p>
+      </div>
+      <div class="post-tags" aria-label="文章标签">
+        {tags.map((tag) => <span>{tag}</span>)}
+      </div>
     </div>
-    <span class="scroll-seal" aria-hidden="true">卷<br />{seal}</span>
-    <div class="post-meta" data-index={indexLabel}>
-      <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
-      <span class="category">{post.data.category}</span>
-      <span class="reading-time">约 {minutes} 分钟</span>
-    </div>
-    <div class="post-main">
-      <h3 class="post-title"><a href={`${BASE}posts/${post.id}/`} aria-label={`阅读：${post.data.title}`}>{post.data.title}</a></h3>
-      <p class="post-excerpt">{excerpt}</p>
-    </div>
-    <div class="post-tags" aria-label="文章标签">
-      {tags.map((tag) => <span>{tag}</span>)}
-    </div>
-  </div>
-  <div class="scroll-axis" aria-hidden="true"></div>
+    <div class="scroll-axis" aria-hidden="true"></div>
+  </a>
 </article>
 
 <style>
@@ -82,12 +84,20 @@ const filterId = `postSoft${index}`;
     --scroll-motion: 520ms cubic-bezier(0.22, 1, 0.36, 1);
     position: relative;
     isolation: isolate;
-    display: grid;
-    grid-template-columns: 12px minmax(0, 1fr) 12px;
     height: 180px;
     min-height: 0;
     filter: drop-shadow(0 10px 18px rgba(63, 54, 41, 0.09));
     transition: filter var(--scroll-motion);
+  }
+
+  /* 整卷皆为链接：grid 结构移到 <a> 上，卡片任意处可点击、可键盘聚焦 */
+  .scroll-link {
+    display: grid;
+    grid-template-columns: 12px minmax(0, 1fr) 12px;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+    border-radius: 6px;
   }
 
   .article-scroll:nth-child(2) {
@@ -114,7 +124,7 @@ const filterId = `postSoft${index}`;
       repeating-linear-gradient(180deg, transparent 0 17px, rgba(58, 42, 30, 0.05) 18px, transparent 19px),
       linear-gradient(90deg, #57453a, #79614e 30%, #8a7060 50%, #6d584a 72%, #524239);
     border: 1px solid rgba(72, 58, 46, 0.22);
-    transform: translateX(7px);
+    transform: translateX(9px);
     box-shadow:
       inset 2px 0 4px rgba(255,255,255,0.1),
       inset -2px 0 4px rgba(30, 24, 19, 0.1),
@@ -124,7 +134,7 @@ const filterId = `postSoft${index}`;
   }
 
   .scroll-axis:last-child {
-    transform: translateX(-7px);
+    transform: translateX(-9px);
   }
 
   .article-scroll:hover .scroll-axis,
@@ -163,7 +173,7 @@ const filterId = `postSoft${index}`;
     padding: 20px 26px 16px;
     overflow: hidden;
     clip-path: polygon(6px 1%, 18% 0, 41% 1.1%, 64% 0.2%, 84% 1.2%, calc(100% - 6px) 0.5%, calc(100% - 5px) 99%, 78% 98.7%, 55% 100%, 31% 98.8%, 7px 100%);
-    transform: scaleX(0.985);
+    transform: scaleX(0.978);
     transform-origin: center;
     background-color: #f1ead9;
     background-image:
@@ -234,7 +244,7 @@ const filterId = `postSoft${index}`;
   .article-scroll:focus-within .scroll-paper::before,
   .article-scroll:hover .scroll-paper::after,
   .article-scroll:focus-within .scroll-paper::after {
-    transform: scaleX(0.66);
+    transform: scaleX(0.6);
     opacity: 0.76;
     box-shadow: inset 3px 0 5px rgba(102, 72, 41, 0.08);
   }
@@ -287,7 +297,7 @@ const filterId = `postSoft${index}`;
     gap: 2px;
     padding-right: 15px;
     color: var(--ink-soft);
-    font-size: 0.72rem;
+    font-size: 0.78rem;
   }
 
   .post-meta::after {
@@ -330,7 +340,6 @@ const filterId = `postSoft${index}`;
   .post-main {
     min-width: 0;
     padding-right: 30px;
-    opacity: 0.92;
     transform: translateY(2px);
     transition: opacity var(--scroll-motion), transform var(--scroll-motion);
   }
@@ -349,7 +358,7 @@ const filterId = `postSoft${index}`;
     text-wrap: balance;
   }
 
-  .post-title a {
+  .post-title-text {
     background-image: linear-gradient(var(--cinnabar), var(--cinnabar));
     background-repeat: no-repeat;
     background-position: left 100%;
@@ -357,8 +366,8 @@ const filterId = `postSoft${index}`;
     transition: color var(--scroll-motion), background-size var(--scroll-motion);
   }
 
-  .article-scroll:hover .post-title a,
-  .article-scroll:focus-within .post-title a {
+  .article-scroll:hover .post-title-text,
+  .article-scroll:focus-within .post-title-text {
     color: #1f2420;
     background-size: 100% 1px;
   }
@@ -372,7 +381,7 @@ const filterId = `postSoft${index}`;
     -webkit-line-clamp: 2;
     color: var(--ink-soft);
     font-family: var(--serif);
-    font-size: 0.84rem;
+    font-size: 0.88rem;
     line-height: 1.6;
   }
 
@@ -387,9 +396,9 @@ const filterId = `postSoft${index}`;
     white-space: nowrap;
     color: var(--ink-soft);
     font-family: var(--serif);
-    font-size: 0.72rem;
+    font-size: 0.74rem;
     letter-spacing: 0.08em;
-    opacity: 0.92;
+    opacity: 0.96;
     transform: translateY(2px);
     transition: opacity var(--scroll-motion), transform var(--scroll-motion);
   }
@@ -470,9 +479,12 @@ const filterId = `postSoft${index}`;
 
   @media (max-width: 620px) {
     .article-scroll {
-      grid-template-columns: 10px minmax(0, 1fr) 10px;
       height: auto;
       min-height: 0;
+    }
+
+    .scroll-link {
+      grid-template-columns: 10px minmax(0, 1fr) 10px;
     }
 
     .scroll-axis {
@@ -591,7 +603,7 @@ const filterId = `postSoft${index}`;
 
     .article-scroll .scroll-paper::before,
     .article-scroll .scroll-paper::after {
-      transform: scaleX(0.66);
+      transform: scaleX(0.6);
       opacity: 0.76;
     }
 
@@ -610,7 +622,7 @@ const filterId = `postSoft${index}`;
     .article-scroll .scroll-paper::after,
     .article-scroll .post-main,
     .article-scroll .post-tags,
-    .article-scroll .post-title a {
+    .article-scroll .post-title-text {
       transition: none;
     }
 
@@ -626,7 +638,7 @@ const filterId = `postSoft${index}`;
 
     .article-scroll .scroll-paper::before,
     .article-scroll .scroll-paper::after {
-      transform: scaleX(0.66);
+      transform: scaleX(0.6);
       opacity: 0.76;
     }
 

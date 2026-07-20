@@ -1,0 +1,137 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { siteConfig, type CategoryDef } from '../../config/siteConfig';
+import { formatDate, getPublishedPosts } from '../../lib/posts';
+import type { CollectionEntry } from 'astro:content';
+
+// 每个合法分类生成一个静态页；0 篇分类同样生成并展示空状态
+export async function getStaticPaths() {
+  const allPosts = await getPublishedPosts();
+
+  return siteConfig.categories.map((category) => ({
+    params: { category: category.slug },
+    props: {
+      category,
+      posts: allPosts.filter((post) => post.data.category === category.key),
+    },
+  }));
+}
+
+interface Props {
+  category: CategoryDef;
+  posts: CollectionEntry<'blog'>[];
+}
+
+const { category, posts } = Astro.props;
+const BASE = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title={category.key} description={`墨笺「${category.key}」分类：${category.description}。`}>
+  <section class="category-page page-shell">
+    <header>
+      <p class="page-kicker">书斋目录 · {category.number}</p>
+      <h1 class="page-display-title">{category.key}</h1>
+      <p class="category-desc">{category.description}</p>
+    </header>
+
+    {posts.length > 0 ? (
+      <ol class="post-list">
+        {posts.map((post) => (
+          <li>
+            <time datetime={post.data.pubDate.toISOString()}>
+              {formatDate(post.data.pubDate)}
+            </time>
+            <a href={`${BASE}posts/${post.id}/`}>{post.data.title}</a>
+            <span class="tags">{post.data.tags.join('、')}</span>
+          </li>
+        ))}
+      </ol>
+    ) : (
+      <p class="empty-state">此卷尚空，容后补齐。</p>
+    )}
+
+    <a class="back-link" href={`${BASE}archive/`}>返回卷藏</a>
+  </section>
+</BaseLayout>
+
+<style>
+  .category-page {
+    position: relative;
+    padding-top: clamp(4rem, 9vw, 8rem);
+  }
+
+  header {
+    text-align: center;
+  }
+
+  .page-display-title {
+    letter-spacing: 0.2em;
+  }
+
+  .category-desc {
+    margin: 1.2rem 0 0;
+    color: var(--ink-soft);
+    font-family: var(--serif);
+    letter-spacing: 0.1em;
+  }
+
+  .post-list {
+    width: min(100%, 52rem);
+    margin: clamp(3rem, 7vw, 5rem) auto 0;
+    padding: clamp(1rem, 3vw, 2rem) clamp(1.2rem, 4vw, 3rem);
+    border-block: 1px solid var(--line-strong);
+    background:
+      repeating-linear-gradient(180deg, transparent 0 55px, rgb(83 79 70 / 6%) 55px 56px),
+      rgb(251 249 243 / 34%);
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: 9rem 1fr auto;
+    align-items: baseline;
+    gap: 1.2rem;
+    padding-block: 0.8rem;
+  }
+
+  time,
+  .tags {
+    color: var(--ink-faint);
+    font-size: 0.85rem;
+  }
+
+  li a {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+  }
+
+  li a:hover {
+    color: var(--moss-deep);
+  }
+
+  .empty-state {
+    margin: clamp(3rem, 7vw, 5rem) auto 0;
+    color: var(--ink-faint);
+    font-family: var(--serif);
+    letter-spacing: 0.14em;
+    text-align: center;
+  }
+
+  .back-link {
+    display: block;
+    width: max-content;
+    margin: 3rem auto 0;
+    color: var(--moss-deep);
+    font-family: var(--serif);
+    letter-spacing: 0.12em;
+  }
+
+  @media (max-width: 640px) {
+    li {
+      grid-template-columns: 1fr;
+      gap: 0.2rem 1rem;
+    }
+  }
+</style>

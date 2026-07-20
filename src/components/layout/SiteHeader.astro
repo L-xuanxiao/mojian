@@ -22,7 +22,7 @@ const navItems = siteConfig.nav
 
 const activeKey = isHome
   ? 'top'
-  : pathname.startsWith(`${BASE}posts/`)
+  : pathname.startsWith(`${BASE}posts/`) || pathname.startsWith(`${BASE}category/`)
     ? 'articles'
     : pathname.startsWith(`${BASE}archive/`)
       ? 'archive'
