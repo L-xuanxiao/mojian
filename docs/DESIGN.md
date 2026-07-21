@@ -94,10 +94,10 @@
 
 ### 字体
 
-- 文学性标题与正文：Noto Serif SC（`@fontsource/noto-serif-sc` 自托管、简体中文子集），宋体回退。
+- 文学性标题与正文：Noto Serif SC（`@fontsource/noto-serif-sc` 自托管、简体中文子集），宋体回退；`body` 默认即此，未点名元素一律继承，`--sans`（MiSans 系）仅作备用 token 不默认引用。
 - 展示级书法标题（页面大标题、区块标题、手卷标题、印章文字、归档干支章）：Ma Shan Zheng（`@fontsource/ma-shan-zheng`），字重保持 400。
 - 手写小字（kicker、眉批）：Long Cang（`@fontsource/long-cang`）。
-- 导航与界面信息：MiSans、`Microsoft YaHei`、系统无衬线回退。
+- 字体分配唯一出处为 `src/styles/typography.css`（body 默认、表单控件继承、全局文字角色）；组件内仅保留各自的书法/手写特化，不再重复声明 serif。
 - 大标题保持较松字距和紧凑行高；正文保持约 `1.8–2.15` 行高。
 - 字体全部经 fontsource 自托管并子集化，不依赖运行时字体 CDN；不为布局参考更换字体或改变字体性格。
 

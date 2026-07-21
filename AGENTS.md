@@ -25,7 +25,7 @@
 - `src/layouts/`：`BaseLayout`（导航+页脚+`<head>`）与 `ArticleLayout`（文章详情）。
 - `src/plugins/`：remark 插件（自动摘要、字数与阅读时长），产出写入 `remarkPluginFrontmatter`。
 - `src/lib/posts.ts`：已发布文章过滤、排序、日期格式化与摘要兜底 `getExcerpt()`。
-- `src/styles/global.css`：全局主题变量、基础样式与 `.reveal` 滚动显现工具类；`src/assets/`：源码资源。
+- `src/styles/global.css`：全局主题变量、基础样式与 `.reveal` 滚动显现工具类；`src/styles/typography.css`：全站字体分配唯一出处（body 默认 serif、表单继承、文字角色）；`src/assets/`：源码资源。
 - 视觉规则见 [docs/DESIGN.md](docs/DESIGN.md)。
 
 ## 提交规范

@@ -1,0 +1,24 @@
+/* 全站字体分配唯一出处。token 定义在 global.css，此处只决定"谁用什么字体"。
+   覆盖策略：body 默认 serif 全包，组件内仅保留各自书法/手写特化（随标记共存）。
+   新增全局文字角色时在此登记，不要在页面里补 font-family。 */
+
+body {
+  font-family: var(--serif);
+}
+
+/* 表单控件浏览器默认系统字体，必须显式继承 */
+input,
+textarea,
+select,
+button {
+  font: inherit;
+}
+
+.page-kicker {
+  font-family: var(--font-hand);
+}
+
+.page-display-title,
+.section-title {
+  font-family: var(--font-cal);
+}

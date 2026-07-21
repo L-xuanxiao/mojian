@@ -37,7 +37,6 @@
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   /* 花瓣颜色（rgb 三元组，供 canvas 拼透明度） */
   --petal: 214 142 150;
-  font-family: var(--sans);
   background: var(--paper);
   color: var(--ink);
   font-synthesis: none;
@@ -86,7 +85,6 @@ body {
     radial-gradient(circle at 12% 8%, rgb(255 255 255 / 72%), transparent 25%),
     radial-gradient(circle at 88% 26%, rgb(255 255 255 / 48%), transparent 22%),
     linear-gradient(180deg, var(--paper-light) 0%, var(--paper) 44%, #eee8dc 100%);
-  font-family: var(--sans);
   line-height: 1.8;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -182,7 +180,6 @@ button {
   gap: 12px;
   margin: 0 0 13px;
   color: var(--cinnabar);
-  font-family: var(--font-hand);
   font-size: 0.86rem;
   letter-spacing: 0.22em;
 }
@@ -198,7 +195,6 @@ button {
 
 .page-display-title {
   margin: 0;
-  font-family: var(--font-cal);
   font-size: clamp(2.6rem, 7vw, 5.4rem);
   font-weight: 400;
   line-height: 1.2;
@@ -207,7 +203,6 @@ button {
 
 .section-title {
   margin: 0;
-  font-family: var(--font-cal);
   font-size: clamp(2.45rem, 5vw, 4.25rem);
   font-weight: 400;
   line-height: 1.12;
@@ -218,7 +213,6 @@ button {
   width: min(100%, 46rem);
   margin-inline: auto;
   color: var(--ink-soft);
-  font-family: var(--serif);
   font-size: 1.08rem;
   line-height: 2.05;
   letter-spacing: 0.055em;
