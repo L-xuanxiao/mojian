@@ -351,7 +351,7 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
         // 终止进行中的平滑/惯性滚动：VT 捕获发生在滚动停止后，若点击时页面还在动，
         // 捕获滚动位置会晚于测量值 S2-S1，圆心相对按钮上偏这么多
         window.scrollTo({ top: scrollY, left: scrollX, behavior: 'instant' });
-        // View Transition 的 snapshot containing block 是视口盒；直接使用按钮的视口像素坐标。
+        // 圆心和半径使用视口相对单位，避免 Chrome 在系统显示缩放下错配 CSS px 与快照像素。
         const rect = btn.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
@@ -359,7 +359,8 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
           Math.max(centerX, innerWidth - centerX),
           Math.max(centerY, innerHeight - centerY)
         ) + 2;
-        const at = `${centerX}px ${centerY}px`;
+        const radiusVmax = radius / (Math.max(innerWidth, innerHeight) / 100);
+        const at = `${(centerX / innerWidth) * 100}% ${(centerY / innerHeight) * 100}%`;
         themeVtDepth++;
         document.documentElement.classList.add('theme-vt');
         const vt = document.startViewTransition(() => applyTheme(next));
@@ -370,7 +371,7 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
         vt.finished.then(release, release);
         vt.ready.then(() => {
           document.documentElement.animate(
-            { clipPath: [`circle(0px at ${at})`, `circle(${radius}px at ${at})`] },
+            { clipPath: [`circle(0px at ${at})`, `circle(${radiusVmax}vmax at ${at})`] },
             // 半径匀速扩散：ease-in-out 的中段加速会被感知为“中途突然加速”
             { duration: 600, easing: 'linear', pseudoElement: '::view-transition-new(root)' }
           );
