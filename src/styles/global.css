@@ -128,6 +128,11 @@ html[data-theme="night"] body::after {
   mix-blend-mode: normal;
 }
 
+/* 扩散期间关闭 body 颜色交叉淡化：避免新状态快照每帧整页重栅格（卡顿），并保证圆边界锐利 */
+html.theme-vt body {
+  transition: none;
+}
+
 body.inner-page main {
   padding-top: 84px;
 }
