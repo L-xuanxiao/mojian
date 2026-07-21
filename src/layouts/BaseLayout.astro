@@ -330,14 +330,33 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
       })();
 
       // 昼夜切换：事件委托（按钮位于 Swup 交换的 header 内，委托到 document 不丢绑定）
-      document.addEventListener('click', (event) => {
-        const btn = event.target && event.target.closest ? event.target.closest('[data-theme-toggle]') : null;
-        if (!btn) return;
-        const next = document.documentElement.dataset.theme === 'night' ? 'day' : 'night';
+      // 支持 View Transitions 时新主题从按钮中心圆形扩散；reduced-motion 或不支持时回退瞬时切换
+      const applyTheme = (next) => {
         document.documentElement.dataset.theme = next;
         try {
           localStorage.setItem('mj-theme', next);
         } catch {}
+      };
+      document.addEventListener('click', (event) => {
+        const btn = event.target && event.target.closest ? event.target.closest('[data-theme-toggle]') : null;
+        if (!btn) return;
+        const next = document.documentElement.dataset.theme === 'night' ? 'day' : 'night';
+        if (typeof document.startViewTransition !== 'function' || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          applyTheme(next);
+          return;
+        }
+        // 圆心取按钮中心，半径取到最远角的距离，保证圆铺满全屏
+        const rect = btn.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        const maxRadius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+        const vt = document.startViewTransition(() => applyTheme(next));
+        vt.ready.then(() => {
+          document.documentElement.animate(
+            { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${maxRadius}px at ${x}px ${y}px)`] },
+            { duration: 600, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', pseudoElement: '::view-transition-new(root)' }
+          );
+        });
       });
 
       // 顶部进度条 + 回到顶部（window 监听，Swup 换页后仍有效）

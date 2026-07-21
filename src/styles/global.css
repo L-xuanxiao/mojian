@@ -121,6 +121,13 @@ html[data-theme="night"] body::after {
     radial-gradient(circle at 38% 40%, rgb(233 226 208 / 4%), transparent 34%);
 }
 
+/* 昼夜扩散：禁用 View Transitions 默认交叉淡化，圆形 clip-path 扩散由 BaseLayout 脚本驱动 */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
 body.inner-page main {
   padding-top: 84px;
 }
