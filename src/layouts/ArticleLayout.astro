@@ -28,14 +28,14 @@ const lqip = post.data.cover
 <BaseLayout title={post.data.title} description={description || undefined}>
   <article class="article-page page-shell">
     <header class="article-header rise-in">
-      <p class="meta page-kicker">
+      <p class="meta page-kicker" data-font-role="hand">
         <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
         <span>{post.data.category}</span>
         {words > 0 && <span>凡 {words} 言</span>}
         {minutes > 0 && <span>读之 {minutes} 分钟</span>}
       </p>
       <div class="title-row">
-        <h1 class="page-display-title">{post.data.title}</h1>
+        <h1 class="page-display-title" data-font-role="cal">{post.data.title}</h1>
         <span class="seal" aria-hidden="true">墨<br />记</span>
       </div>
       {description && <p class="description">{description}</p>}

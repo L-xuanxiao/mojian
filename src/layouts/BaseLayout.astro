@@ -1,9 +1,4 @@
 ---
-import '@fontsource/noto-serif-sc/chinese-simplified-400.css';
-import '@fontsource/noto-serif-sc/chinese-simplified-500.css';
-import '@fontsource/noto-serif-sc/chinese-simplified-700.css';
-import '@fontsource/ma-shan-zheng/chinese-simplified-400.css';
-import '@fontsource/long-cang/chinese-simplified-400.css';
 import SiteFooter from '../components/layout/SiteFooter.astro';
 import SiteHeader from '../components/layout/SiteHeader.astro';
 import { siteConfig } from '../config/siteConfig';
@@ -46,16 +41,21 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <link rel="icon" type="image/svg+xml" href={`${BASE}favicon.svg`} />
+    {
+      import.meta.env.DEV
+        ? <link rel="stylesheet" href={`${BASE}__fonts/fonts.css`} />
+        : <meta name="mojian-fonts" content="pending" />
+    }
     <title>{documentTitle}</title>
   </head>
-  <body class:list={{ 'home-page': isHome, 'inner-page': !isHome }} data-base={BASE}>
+  <body class:list={{ 'home-page': isHome, 'inner-page': !isHome }} data-base={BASE} data-font-role="serif">
     {/* 首载动画：仅完整加载出现一次，Swup 换页不重现；无 JS 时 CSS 隐藏 */}
     <div id="loader" aria-hidden="true">
       <div class="load-mark">
-        <div class="load-txt">
+        <div class="load-txt" data-font-role="cal">
           {[...siteConfig.name].map((ch) => <span>{ch}</span>)}
         </div>
-        <p class="load-sub">{siteConfig.description}</p>
+        <p class="load-sub" data-font-role="hand">{siteConfig.description}</p>
       </div>
     </div>
 
@@ -131,7 +131,6 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
         display: flex;
         gap: 0.1em;
         color: var(--ink);
-        font-family: var(--font-cal);
         font-size: 3rem;
         letter-spacing: 0.3em;
       }
@@ -152,7 +151,6 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
       .load-sub {
         margin: 0;
         color: var(--ink-faint);
-        font-family: var(--font-hand);
         font-size: 0.95rem;
         letter-spacing: 0.3em;
         opacity: 0;
@@ -216,7 +214,6 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
         background: var(--paper-light);
         box-shadow: 0 8px 20px -10px var(--shadow);
         cursor: pointer;
-        font-family: var(--font-cal);
         font-size: 1.2rem;
         line-height: 1;
         opacity: 0;
@@ -246,7 +243,7 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
       <slot />
     </main>
     <SiteFooter />
-    <button id="toTop" class="to-top" aria-label="回到顶部" type="button">顶</button>
+    <button id="toTop" class="to-top" aria-label="回到顶部" type="button" data-font-role="cal">顶</button>
     <script is:inline>
       // 滚动显现：首页 .reveal 元素进入视口后淡入。
       // Swup 换页不触发脚本重执行，故在 swup:page:view 上重放；
@@ -330,11 +327,16 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
             setTimeout(() => loader.remove(), 800);
           }, wait);
         };
-        if (document.readyState === 'complete') {
-          finish();
-        } else {
-          window.addEventListener('load', finish, { once: true });
-        }
+        const pageReady = document.readyState === 'complete'
+          ? Promise.resolve()
+          : new Promise((resolve) => window.addEventListener('load', resolve, { once: true }));
+        const fontsReady = document.fonts?.load
+          ? Promise.all([
+              document.fonts.load('400 1em "Noto Serif SC"', '墨笺正文'),
+              document.fonts.load('400 1em "Ma Shan Zheng"', '墨笺'),
+            ]).catch(() => undefined)
+          : Promise.resolve();
+        Promise.all([pageReady, fontsReady]).then(finish);
         setTimeout(finish, 2600);
       })();
 

@@ -41,7 +41,6 @@ const categoryCounts = new Map(
       gap: 12px;
       margin: 0 0 13px;
       color: var(--cinnabar);
-      font-family: var(--font-hand);
       font-size: 0.9rem;
       letter-spacing: 0.22em;
     }
@@ -56,7 +55,6 @@ const categoryCounts = new Map(
 
     .section-title {
       margin: 0;
-      font-family: var(--font-cal);
       font-size: clamp(2.45rem, 5vw, 4.25rem);
       font-weight: 400;
       line-height: 1.12;
@@ -132,7 +130,6 @@ const categoryCounts = new Map(
       gap: 15px;
       margin: 0 0 24px;
       color: var(--moss);
-      font-family: var(--font-hand);
       font-size: 0.95rem;
       letter-spacing: 0.28em;
     }
@@ -147,7 +144,6 @@ const categoryCounts = new Map(
 
     .hero-title {
       margin: 0;
-      font-family: var(--font-cal);
       font-size: clamp(4.2rem, 7.4vw, 6.8rem);
       font-weight: 400;
       line-height: 0.98;
@@ -363,7 +359,6 @@ const categoryCounts = new Map(
       justify-items: center;
       gap: 8px;
       color: var(--ink-faint);
-      font-family: var(--font-hand);
       font-size: 0.9rem;
       letter-spacing: 0.32em;
       transform: translateX(-50%);
@@ -410,7 +405,6 @@ const categoryCounts = new Map(
 
     .study-title {
       margin: 0;
-      font-family: var(--font-cal);
       font-size: clamp(2.35rem, 4.7vw, 4rem);
       font-weight: 400;
       line-height: 1.15;
@@ -872,7 +866,6 @@ const categoryCounts = new Map(
     .hero-note-head strong,
     .panel-mark,
     .about-seal {
-      font-family: var(--font-cal);
       font-weight: 400;
     }
 
@@ -1401,8 +1394,8 @@ const categoryCounts = new Map(
     <section class="hero" aria-labelledby="hero-title">
       <div class="shell hero-grid">
         <div class="hero-content">
-          <p class="hero-eyebrow">一方墨笺 · 记于人间</p>
-          <h1 class="hero-title" id="hero-title">墨笺有余闲<span class="accent-dot">。</span></h1>
+          <p class="hero-eyebrow" data-font-role="hand">一方墨笺 · 记于人间</p>
+          <h1 class="hero-title" id="hero-title" data-font-role="cal">墨笺有余闲<span class="accent-dot">。</span></h1>
           <p class="hero-subtitle">写日常，也写山川与旧书</p>
           <div class="hero-intro">
             这里收拢寻常日子里的微光。<br />
@@ -1415,10 +1408,10 @@ const categoryCounts = new Map(
         </div>
 
         <div class="hero-side">
-          <div class="hero-vertical-copy" aria-hidden="true">风来疏竹　雨过远山</div>
+          <div class="hero-vertical-copy" aria-hidden="true" data-font-role="hand">风来疏竹　雨过远山</div>
           <aside class="hero-note" aria-label="最新文章">
             <div class="hero-note-head">
-              <strong>新札</strong>
+              <strong data-font-role="cal">新札</strong>
               <time datetime={latestPost.data.pubDate.toISOString()}>{formatDate(latestPost.data.pubDate)}</time>
             </div>
             <a class="hero-note-post" href={`${BASE}posts/${latestPost.id}/`}>{latestPost.data.title}</a>
@@ -1437,7 +1430,7 @@ const categoryCounts = new Map(
           fetchpriority="high"
         />
       </div>
-      <div class="scroll-hint" aria-hidden="true">入卷</div>
+      <div class="scroll-hint" aria-hidden="true" data-font-role="hand">入卷</div>
     </section>
 
     <div class="home-layout">
@@ -1445,8 +1438,8 @@ const categoryCounts = new Map(
       <div class="shell study-grid">
         <div class="study-intro reveal">
           <div>
-            <p class="section-kicker">THE STUDY INDEX</p>
-            <h2 class="study-title" id="study-title">书斋目录</h2>
+            <p class="section-kicker" data-font-role="hand">THE STUDY INDEX</p>
+            <h2 class="study-title" id="study-title" data-font-role="cal">书斋目录</h2>
             <p>把日常与见闻，按四条线索慢慢归置。</p>
           </div>
           <div class="study-mini-painting" aria-hidden="true">
@@ -1467,7 +1460,7 @@ const categoryCounts = new Map(
           {siteConfig.categories.map((cat) => (
             <a class="index-item" href={`${BASE}category/${cat.slug}/`}>
               <span class="index-number">{cat.number}</span>
-              <span class="index-name">{cat.key}</span>
+              <span class="index-name" data-font-role="cal">{cat.key}</span>
               <span class="index-desc">{cat.description}</span>
               <span class="index-count">{String(categoryCounts.get(cat.key) ?? 0).padStart(2, '0')} 篇</span>
             </a>
@@ -1484,8 +1477,8 @@ const categoryCounts = new Map(
       <div class="shell">
         <div class="section-heading reveal">
           <div>
-            <p class="section-kicker">RECENT NOTES</p>
-            <h2 class="section-title" id="latest-title">近来所记</h2>
+            <p class="section-kicker" data-font-role="hand">RECENT NOTES</p>
+            <h2 class="section-title" id="latest-title" data-font-role="cal">近来所记</h2>
           </div>
           <p class="section-note">新札三卷，横陈案上。行旅、日常与旧书各成一卷，也把远山与墨痕留在纸面。</p>
         </div>
@@ -1505,15 +1498,15 @@ const categoryCounts = new Map(
       <div class="shell">
         <div class="section-heading reveal">
           <div>
-            <p class="section-kicker">ON THE DESK</p>
-            <h2 class="section-title" id="desk-title">案头近况</h2>
+            <p class="section-kicker" data-font-role="hand">ON THE DESK</p>
+            <h2 class="section-title" id="desk-title" data-font-role="cal">案头近况</h2>
           </div>
           <p class="section-note">不只保存已经写完的文章，也留下正在发生的过程。墨色稍深，像夜里案上的一盏灯。</p>
         </div>
 
         <div class="desk-grid">
           <article class="now-panel reveal">
-            <div class="panel-mark" aria-hidden="true">今</div>
+            <div class="panel-mark" aria-hidden="true" data-font-role="cal">今</div>
             <div class="now-head">
               <span>此刻</span>
               <time datetime="2026-07-15">2026.07.15</time>
@@ -1569,8 +1562,8 @@ const categoryCounts = new Map(
     <section class="section about" id="about" aria-labelledby="about-title">
       <div class="shell about-grid">
         <div class="about-copy reveal">
-          <p class="section-kicker">ABOUT THIS PLACE</p>
-          <h2 class="section-title" id="about-title">关于此间</h2>
+          <p class="section-kicker" data-font-role="hand">ABOUT THIS PLACE</p>
+          <h2 class="section-title" id="about-title" data-font-role="cal">关于此间</h2>
           <div class="about-text">
             <p>我喜欢记录日常，也喜欢山川与旧书。</p>
             <p>这个网站会保存沿途所见、读书所得，以及一些没有明确分类的想法。</p>
@@ -1610,7 +1603,7 @@ const categoryCounts = new Map(
               <path d="M132 219l13 4" />
             </g>
           </svg>
-          <div class="about-seal">山窗<br />小记</div>
+          <div class="about-seal" data-font-role="cal">山窗<br />小记</div>
         </div>
       </div>
     </section>

@@ -29,8 +29,8 @@ const BASE = import.meta.env.BASE_URL;
 <BaseLayout title={category.key} description={`墨笺「${category.key}」分类：${category.description}。`}>
   <section class="category-page page-shell">
     <header>
-      <p class="page-kicker">书斋目录 · {category.number}</p>
-      <h1 class="page-display-title">{category.key}</h1>
+      <p class="page-kicker" data-font-role="hand">书斋目录 · {category.number}</p>
+      <h1 class="page-display-title" data-font-role="cal">{category.key}</h1>
       <p class="category-desc">{category.description}</p>
     </header>
 

@@ -4,6 +4,7 @@ import { defineConfig } from 'astro/config';
 import icon from 'astro-icon';
 
 import tailwindcss from '@tailwindcss/vite';
+import { fontPipeline } from './src/integrations/font-pipeline.mjs';
 import { remarkExcerpt } from './src/plugins/remark-excerpt.mjs';
 import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs';
 
@@ -15,6 +16,7 @@ export default defineConfig({
   base: REPO_BASE,
   trailingSlash: 'always',
   integrations: [
+    fontPipeline(),
     swup({
       theme: false,
       animationClass: 'transition-swup-',

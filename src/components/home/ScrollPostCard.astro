@@ -61,14 +61,14 @@ const filterId = `postSoft${index}`;
         </svg>
       )}
       </div>
-      <span class="scroll-seal" aria-hidden="true">卷<br />{seal}</span>
+      <span class="scroll-seal" aria-hidden="true" data-font-role="cal">卷<br />{seal}</span>
       <div class="post-meta" data-index={indexLabel}>
         <time datetime={post.data.pubDate.toISOString()}>{formatDateShort(post.data.pubDate)}</time>
         <span class="category">{post.data.category}</span>
         <span class="reading-time">约 {minutes} 分钟</span>
       </div>
       <div class="post-main">
-        <h3 class="post-title"><span class="post-title-text">{post.data.title}</span></h3>
+        <h3 class="post-title" data-font-role="cal"><span class="post-title-text">{post.data.title}</span></h3>
         <p class="post-excerpt">{excerpt}</p>
       </div>
       <div class="post-tags" aria-label="文章标签">
@@ -608,14 +608,9 @@ const filterId = `postSoft${index}`;
     }
   }
 
-  /* 标题与印章字换书法体 */
+  /* 标题与印章字由全局字体角色分配 */
   .post-title {
-    font-family: var(--font-cal);
     font-weight: 400;
-  }
-
-  .scroll-seal {
-    font-family: var(--font-cal);
   }
 
   /* ============ 夜色：宣纸变夜笺 ============ */

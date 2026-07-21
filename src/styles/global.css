@@ -31,8 +31,8 @@
   --page-width: 1220px;
   --side-space: clamp(18px, 5vw, 72px);
   --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", SimSun, serif;
-  --font-cal: "Ma Shan Zheng", "Noto Serif SC", serif;
-  --font-hand: "Long Cang", "Noto Serif SC", serif;
+  --font-cal: "Ma Shan Zheng", "Noto Serif SC", "Source Han Serif SC", "Songti SC", SimSun, serif;
+  --font-hand: "Long Cang", "Noto Serif SC", "Source Han Serif SC", "Songti SC", SimSun, serif;
   --sans: "MiSans", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   /* 花瓣颜色（rgb 三元组，供 canvas 拼透明度） */

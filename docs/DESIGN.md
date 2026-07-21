@@ -94,12 +94,13 @@
 
 ### 字体
 
-- 文学性标题与正文：Noto Serif SC（`@fontsource/noto-serif-sc` 自托管、简体中文子集），宋体回退；`body` 默认即此，未点名元素一律继承，`--sans`（MiSans 系）仅作备用 token 不默认引用。
+- 文学性标题与正文：Noto Serif SC（400 / 500 / 700），宋体回退；`body` 使用 `data-font-role="serif"` 并默认继承，`--sans`（MiSans 系）仅作备用 token，不默认引用。
 - 展示级书法标题（页面大标题、区块标题、手卷标题、印章文字、归档干支章）：Ma Shan Zheng（`@fontsource/ma-shan-zheng`），字重保持 400。
 - 手写小字（kicker、眉批）：Long Cang（`@fontsource/long-cang`）。
-- 字体分配唯一出处为 `src/styles/typography.css`（body 默认、表单控件继承、全局文字角色）；组件内仅保留各自的书法/手写特化，不再重复声明 serif。
+- 字体角色协议为 `data-font-role="serif|cal|hand"`；字体分配唯一出处为 `src/styles/typography.css`，组件不得声明角色字体的 `font-family`。
 - 大标题保持较松字距和紧凑行高；正文保持约 `1.8–2.15` 行高。
-- 字体全部经 fontsource 自托管并子集化，不依赖运行时字体 CDN；不为布局参考更换字体或改变字体性格。
+- `src/integrations/font-pipeline.mjs` 在 Astro 输出最终 HTML 后提取实际字符，按角色用 `subset-font` 裁切 Fontsource WOFF2 构建源，生成哈希文件、精确 `unicode-range`、清单与 OFL 许可证；HTML 仅注入本地字体 CSS 和当前页面必要的 preload，不依赖运行时字体 CDN。
+- 正文字体子集覆盖全部页面文本，确保装饰字体缺字或加载失败时仍回退到 Noto；未知运行时文本继续回退到系统宋体栈。
 
 ### 形态与材质
 
@@ -179,7 +180,7 @@
 ## 6. 动效与性能
 
 - 首屏和滚动 reveal 动画约 `300ms`。
-- 首载 loader：整页宣纸遮罩，「墨」「笺」逐字显现加墨晕，`load` 后最短停留约 900ms 淡出并移除，`2.6s` 兜底；仅在 `.js` 环境渲染，不参与 Swup 交换。
+- 首载 loader：整页宣纸遮罩，「墨」「笺」逐字显现加墨晕，同时等待页面与 Noto Serif SC 400、Ma Shan Zheng 400 就绪，最短停留约 900ms；失败或慢网由 `2.6s` 硬超时释放。仅在 `.js` 环境渲染，不参与 Swup 交换。
 - 全局氛围动效集中在 `<canvas id="fx">`：花瓣飘落、鼠标洇墨（距离插值补点，`hover: none` 设备不启用）、左键点击墨渍扩散（不规则边缘、随机大小、附溅点）；单一 `requestAnimationFrame` 驱动，主题色随昼夜变量轮询刷新，`prefers-reduced-motion` 时整体不启动。
 - 滚动进度条与回顶按钮仅使用 `opacity`/`transform`，不参与布局。
 - 动画仅使用 `opacity` 与 `transform`。
@@ -187,6 +188,7 @@
 - 禁止无限山景漂移和固定全屏 SVG 噪点。导航 `backdrop-filter` 仅用于浮动控制层，禁止扩散到正文或动画化模糊值。
 - 尊重 `prefers-reduced-motion: reduce`，关闭动画时内容必须直接可见。
 - 不为全站动效新增依赖。
+- 生产 WOFF2 总量不得超过 750 KiB，单文件不得超过 220 KiB；首页只预载 Noto Serif SC 400 的命中分片和 Ma Shan Zheng 命中分片，Long Cang 不预载。
 
 ## 7. 可访问性
 
@@ -203,7 +205,7 @@
 - 所有页面必须使用 `src/layouts/BaseLayout.astro`；共享导航、页脚和视觉基础分别只在 `SiteHeader`、`SiteFooter` 与 `global.css` 维护。
 - `src/pages/index.astro` 只维护首页专属首屏和内容区，不重复声明文档、导航、页脚或全局基础样式。
 - 保持 GitHub Pages 的 `/mojian/` 基础路径兼容，站内链接继续使用现有 `BASE`。
-- 不新增性能、布局或动画依赖。
+- 不为纯布局或动画新增依赖；字体构建依赖只允许用于离线裁切，不得产生运行时服务或 CDN 请求。
 - 修改布局时不得顺手更换配色、字体、纹理、文案和文章内容。
 - 启动开发服务使用 `astro dev --background`，完成后使用 `astro dev stop`。
 

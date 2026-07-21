@@ -1,8 +1,8 @@
 /* 全站字体分配唯一出处。token 定义在 global.css，此处只决定"谁用什么字体"。
-   覆盖策略：body 默认 serif 全包，组件内仅保留各自书法/手写特化（随标记共存）。
+   body 默认 serif 全包；组件只标 data-font-role，不自行声明角色字体。
    新增全局文字角色时在此登记，不要在页面里补 font-family。 */
 
-body {
+[data-font-role='serif'] {
   font-family: var(--serif);
 }
 
@@ -14,11 +14,10 @@ button {
   font: inherit;
 }
 
-.page-kicker {
+[data-font-role='hand'] {
   font-family: var(--font-hand);
 }
 
-.page-display-title,
-.section-title {
+[data-font-role='cal'] {
   font-family: var(--font-cal);
 }

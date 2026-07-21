@@ -13,7 +13,7 @@
 - 页面切换由 Swup 无刷新驱动，交换容器为 `#main-content` 与 `#siteHeader`。换页时被换容器内的 `<script>` 不会重跑：需要跨页生效的逻辑放 `BaseLayout` 持久脚本并监听 `swup:page:view` 重放；DOM 查询在回调内即时进行，监听器只挂 window/document。入口链接加 `data-no-swup` 可退回整页加载（如寻墨页、留墨页）。
 - 昼夜双主题：`localStorage("mj-theme")` 存偏好，`<head>` 内联脚本首绘前写入 `html[data-theme]` 避免闪烁；夜色变量集中在 `global.css` 的 `html[data-theme="night"]` 块，切换按钮经 document 级委托 `[data-theme-toggle]` 处理。
 - 首载 loader、`#fx` 全局画布动效（花瓣/鼠标墨点/点击墨晕）、滚动进度条、回顶按钮均在 `BaseLayout`；reveal 隐藏态由 `.js` 根类门控，`prefers-reduced-motion` 时画布动效不启动，无 JS 时内容直接可见。
-- 字体经 `@fontsource/noto-serif-sc`、`@fontsource/ma-shan-zheng`（书法标题）、`@fontsource/long-cang`（手写小字）自托管，在 `BaseLayout` frontmatter 引入简体中文子集。
+- 字体由 `src/integrations/font-pipeline.mjs` 在最终 HTML 生成后按实际字符裁切：Fontsource 包仅作构建源，`subset-font` 输出哈希 WOFF2/CSS 并注入字体占位标记，禁止在组件或 `BaseLayout` 直接导入 Fontsource CSS。字体角色统一使用 `data-font-role="serif|cal|hand"`，分配规则只写在 `src/styles/typography.css`。
 - `astro-icon` 的 Material Symbols 图标须在 `astro.config.mjs` 的 `icon({include})` 白名单登记，新增图标未登记会构建报 `Unable to locate`。
 
 ## 目录
@@ -24,6 +24,7 @@
 - `src/components/`：按职责分目录，清单与分类规则见 `src/components/README.md`。`layout/` 全站框架、`home/` 首页专属、`common/` 跨页复用。
 - `src/layouts/`：`BaseLayout`（导航+页脚+`<head>`）与 `ArticleLayout`（文章详情）。
 - `src/plugins/`：remark 插件（自动摘要、字数与阅读时长），产出写入 `remarkPluginFrontmatter`。
+- `src/integrations/font-pipeline.mjs`：生产环境从最终 HTML 提取各角色字符并生成字体资产；开发环境从源码生成内存子集，经 Vite middleware 提供。
 - `src/lib/posts.ts`：已发布文章过滤、排序、日期格式化与摘要兜底 `getExcerpt()`。
 - `src/styles/global.css`：全局主题变量、基础样式与 `.reveal` 滚动显现工具类；`src/styles/typography.css`：全站字体分配唯一出处（body 默认 serif、表单继承、文字角色）；`src/assets/`：源码资源。
 - 视觉规则见 [docs/DESIGN.md](docs/DESIGN.md)。
@@ -47,7 +48,7 @@ npm run preview
 
 ## 验证
 
-- 项目当前没有自动化测试命令或测试框架。
+- 字体管线使用 Node.js 内置 `node:test`，命令为 `npm run test:fonts`，并已纳入 `npm run check`；其余模块暂无自动化测试框架。
 - 源码改动至少运行 `npm run check` 和 `npm run build`（`astro check` 已含类型诊断，无需另跑 tsc）。
 - 界面改动还需用浏览器实测：断点 1440 / 820 / 620 / 390，检查横向溢出、hover 与键盘焦点、控制台零报错；截图随 PR 附。
 - 本机可用 playwright-cli（须 `--browser=chrome`）做断点截图与交互回归；用后清理仓库内 `.playwright-cli/` 目录。
