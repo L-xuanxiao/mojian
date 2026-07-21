@@ -232,10 +232,11 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
     </main>
     <SiteFooter />
     <button id="toTop" class="to-top" aria-label="回到顶部" type="button" data-font-role="cal">顶</button>
-    <script is:inline>
+    <script is:inline data-swup-ignore-script>
+      // 本脚本为全站持久逻辑，只执行一次；data-swup-ignore-script 阻止 Swup ScriptsPlugin
+      // 换页时重放（重放会导致监听器重复注册、顶层声明冲突）。
       // 滚动显现：首页 .reveal 元素进入视口后淡入。
-      // Swup 换页不触发脚本重执行，故在 swup:page:view 上重放；
-      // 系统关闭动画或无 IntersectionObserver 时直接显示。
+      // 换页后在 swup:page:view 上重放；系统关闭动画或无 IntersectionObserver 时直接显示。
       function initReveal() {
         const revealItems = document.querySelectorAll('.reveal:not(.is-visible)');
         if (revealItems.length === 0) return;
