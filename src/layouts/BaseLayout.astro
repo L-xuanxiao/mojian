@@ -348,11 +348,17 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
           applyTheme(next);
           return;
         }
-        // 圆心取按钮中心，半径取到最远角的距离，保证圆铺满全屏
+        // 圆心取按钮中心的文档坐标百分比：root 捕获盒是整个文档而非视口，clip 坐标按文档
+        // 空间解释且不补偿滚动；百分比与盒子缩放（CSS px / 设备 px）无关，圆心才能钉在按钮上
         const rect = btn.getBoundingClientRect();
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
-        const maxRadius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+        const docW = document.documentElement.scrollWidth;
+        const docH = document.documentElement.scrollHeight;
+        const docX = rect.left + rect.width / 2 + scrollX;
+        const docY = rect.top + rect.height / 2 + scrollY;
+        // 半径覆盖可见视口四角（文档坐标），换算成参考盒对角线分数（2% 余量）
+        const radiusCss = Math.hypot(Math.max(docX, docW - docX), Math.max(docY - scrollY, scrollY + innerHeight - docY));
+        const radiusPct = (radiusCss / (Math.hypot(docW, docH) / Math.SQRT2)) * 100 * 1.02;
+        const at = `${(docX / docW) * 100}% ${(docY / docH) * 100}%`;
         themeVtDepth++;
         document.documentElement.classList.add('theme-vt');
         const vt = document.startViewTransition(() => applyTheme(next));
@@ -363,7 +369,7 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
         vt.finished.then(release, release);
         vt.ready.then(() => {
           document.documentElement.animate(
-            { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${maxRadius}px at ${x}px ${y}px)`] },
+            { clipPath: [`circle(0% at ${at})`, `circle(${radiusPct}% at ${at})`] },
             { duration: 600, easing: 'ease-in-out', pseudoElement: '::view-transition-new(root)' }
           );
         }, () => {});
