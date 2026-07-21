@@ -348,6 +348,9 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
           applyTheme(next);
           return;
         }
+        // 终止进行中的平滑/惯性滚动：VT 捕获发生在滚动停止后，若点击时页面还在动，
+        // 捕获滚动位置会晚于测量值 S2-S1，圆心相对按钮上偏这么多
+        window.scrollTo({ top: scrollY, left: scrollX, behavior: 'instant' });
         // 圆心取按钮中心的文档坐标百分比：root 捕获盒是整个文档而非视口，clip 坐标按文档
         // 空间解释且不补偿滚动；百分比与盒子缩放（CSS px / 设备 px）无关，圆心才能钉在按钮上
         const rect = btn.getBoundingClientRect();
@@ -355,9 +358,10 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
         const docH = document.documentElement.scrollHeight;
         const docX = rect.left + rect.width / 2 + scrollX;
         const docY = rect.top + rect.height / 2 + scrollY;
-        // 半径覆盖可见视口四角（文档坐标），换算成参考盒对角线分数（2% 余量）
-        const radiusCss = Math.hypot(Math.max(docX, docW - docX), Math.max(docY - scrollY, scrollY + innerHeight - docY));
-        const radiusPct = (radiusCss / (Math.hypot(docW, docH) / Math.SQRT2)) * 100 * 1.02;
+        // 半径用 vmax 视口单位：clip circle 的 % 半径按伪元素参考盒对角线解析（实测远小于
+        // 预期，圆铺不满 → 过渡结束伪元素移除时未覆盖区域瞬间跳变 = "后段突然加速"）；
+        // vmax 恒为视口 CSS 像素，与参考盒解释无关，任何环境都恰好铺满
+        const radiusVmax = (Math.hypot(Math.max(rect.left + rect.width / 2, innerWidth - rect.left - rect.width / 2), Math.max(rect.top + rect.height / 2, innerHeight - rect.top - rect.height / 2)) / (Math.max(innerWidth, innerHeight) / 100)) * 1.03;
         const at = `${(docX / docW) * 100}% ${(docY / docH) * 100}%`;
         themeVtDepth++;
         document.documentElement.classList.add('theme-vt');
@@ -369,8 +373,9 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
         vt.finished.then(release, release);
         vt.ready.then(() => {
           document.documentElement.animate(
-            { clipPath: [`circle(0% at ${at})`, `circle(${radiusPct}% at ${at})`] },
-            { duration: 600, easing: 'ease-in-out', pseudoElement: '::view-transition-new(root)' }
+            { clipPath: [`circle(0px at ${at})`, `circle(${radiusVmax}vmax at ${at})`] },
+            // 半径匀速扩散：ease-in-out 的中段加速会被感知为“中途突然加速”
+            { duration: 600, easing: 'linear', pseudoElement: '::view-transition-new(root)' }
           );
         }, () => {});
       });
