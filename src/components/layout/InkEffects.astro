@@ -1,0 +1,631 @@
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<style>
+  #fx {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #fx {
+      display: none;
+    }
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    const canvas = document.getElementById('fx');
+    if (!(canvas instanceof HTMLCanvasElement)) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const limits = { stamps: 120, wisps: 12, blooms: 4, drops: 40 };
+    const stampLife = 1500;
+    const bloomLife = 1800;
+    const tau = Math.PI * 2;
+
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+    let raf = 0;
+    let running = false;
+    let lastFrame = 0;
+    let pointer = null;
+    let trailTravel = 0;
+    let smokeTravel = 0;
+    let colors;
+    let stampAtlas = [];
+
+    const petals = [];
+    const stamps = [];
+    const wisps = [];
+    const blooms = [];
+    const drops = [];
+
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+    const mix = (from, to, amount) => from + (to - from) * amount;
+    const easeOutCubic = (value) => 1 - Math.pow(1 - value, 3);
+    const rgba = (rgb, alpha) => `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})`;
+    const trimTo = (items, max) => {
+      if (items.length > max) items.splice(0, items.length - max);
+    };
+
+    const randomFrom = (seed) => () => {
+      seed |= 0;
+      seed = (seed + 0x6d2b79f5) | 0;
+      let value = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      value = (value + Math.imul(value ^ (value >>> 7), 61 | value)) ^ value;
+      return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+    };
+
+    const toRgb = (value, fallback) => {
+      const color = (value || '').trim();
+      if (color.startsWith('#')) {
+        const number = Number.parseInt(color.slice(1), 16);
+        return [(number >> 16) & 255, (number >> 8) & 255, number & 255];
+      }
+      const channels = color.match(/[\d.]+/g);
+      return channels && channels.length >= 3 ? channels.slice(0, 3).map(Number) : fallback;
+    };
+
+    const readColors = () => {
+      const style = getComputedStyle(document.documentElement);
+      return {
+        petal: toRgb(style.getPropertyValue('--petal'), [214, 142, 150]),
+        ink: toRgb(style.getPropertyValue('--ink'), [41, 42, 39]),
+      };
+    };
+
+    const buildStampAtlas = () => {
+      stampAtlas = Array.from({ length: 8 }, (_, index) => {
+        const size = 64;
+        const bitmap = document.createElement('canvas');
+        bitmap.width = Math.round(size * dpr);
+        bitmap.height = Math.round(size * dpr);
+        const stampCtx = bitmap.getContext('2d');
+        if (!stampCtx) return bitmap;
+
+        const random = randomFrom(1823 + index * 7919);
+        stampCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        stampCtx.translate(size / 2, size / 2);
+        stampCtx.rotate((random() - 0.5) * 0.18);
+        stampCtx.scale(1, 0.74 + random() * 0.2);
+
+        const bleed = stampCtx.createRadialGradient(0, 0, 2, 0, 0, 31);
+        bleed.addColorStop(0, rgba(colors.ink, 0.05));
+        bleed.addColorStop(0.56, rgba(colors.ink, 0.035));
+        bleed.addColorStop(1, rgba(colors.ink, 0));
+        stampCtx.fillStyle = bleed;
+        stampCtx.beginPath();
+        stampCtx.arc(0, 0, 31, 0, tau);
+        stampCtx.fill();
+
+        stampCtx.fillStyle = rgba(colors.ink, 0.18);
+        stampCtx.beginPath();
+        stampCtx.ellipse(0, 0, 17.5, 16 + random() * 1.5, 0, 0, tau);
+        stampCtx.fill();
+
+        stampCtx.fillStyle = rgba(colors.ink, 0.38);
+        stampCtx.beginPath();
+        stampCtx.ellipse((random() - 0.5) * 2, (random() - 0.5) * 2, 8.5, 7.2, 0, 0, tau);
+        stampCtx.fill();
+
+        stampCtx.globalCompositeOperation = 'destination-out';
+        const flywhiteTarget = Math.PI * 17.5 * 16.75 * (0.12 + random() * 0.08);
+        let flywhiteArea = 0;
+        while (flywhiteArea < flywhiteTarget) {
+          const angle = random() * tau;
+          const distance = Math.sqrt(random()) * 15;
+          const radiusX = 0.8 + random() * 1.6;
+          const radiusY = 0.3 + random() * 0.6;
+          const alpha = 0.65 + random() * 0.35;
+          stampCtx.globalAlpha = alpha;
+          stampCtx.beginPath();
+          stampCtx.ellipse(
+            Math.cos(angle) * distance,
+            Math.sin(angle) * distance,
+            radiusX,
+            radiusY,
+            random() * tau,
+            0,
+            tau,
+          );
+          stampCtx.fill();
+          flywhiteArea += Math.PI * radiusX * radiusY * alpha;
+        }
+        stampCtx.globalAlpha = 1;
+        stampCtx.globalCompositeOperation = 'source-over';
+        return bitmap;
+      });
+    };
+
+    const makePetal = (fromTop = false) => ({
+      x: Math.random() * width,
+      y: fromTop ? -20 : Math.random() * height,
+      r: 3.5 + Math.random() * 5,
+      rot: Math.random() * Math.PI,
+      vr: (Math.random() - 0.5) * 0.02,
+      vy: 0.35 + Math.random() * 0.7,
+      phase: Math.random() * tau,
+      amp: 0.5 + Math.random(),
+      a: 0.28 + Math.random() * 0.32,
+    });
+
+    const syncPetals = () => {
+      const target = width < 700 ? 10 : 18;
+      while (petals.length < target) petals.push(makePetal());
+      if (petals.length > target) petals.length = target;
+    };
+
+    const resize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      dpr = clamp(window.devicePixelRatio || 1, 1, 2);
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      pointer = null;
+      trailTravel = 0;
+      smokeTravel = 0;
+      syncPetals();
+      buildStampAtlas();
+    };
+
+    const addStamp = (x, y, angle, radius, aspect, born) => {
+      stamps.push({
+        x,
+        y,
+        angle,
+        radius,
+        aspect,
+        born,
+        life: stampLife,
+        variant: Math.floor(Math.random() * stampAtlas.length),
+      });
+      trimTo(stamps, limits.stamps);
+    };
+
+    const addWisp = (x, y, angle, speed, born) => {
+      const direction = Math.random() < 0.5 ? -1 : 1;
+      wisps.push({
+        x,
+        y,
+        angle,
+        nx: -Math.sin(angle) * direction,
+        ny: Math.cos(angle) * direction,
+        length: 18 + speed * 12,
+        drift: 6 + Math.random() * 10,
+        curve: 4 + Math.random() * 8,
+        born,
+        life: 520 + Math.random() * 240,
+      });
+      trimTo(wisps, limits.wisps);
+    };
+
+    const samplePointer = (event) => {
+      const x = event.clientX;
+      const y = event.clientY;
+      const time = event.timeStamp || performance.now();
+      if (!pointer || pointer.type !== event.pointerType) {
+        pointer = { x, y, time, speed: 0, vx: 0, vy: 0, type: event.pointerType };
+        trailTravel = 0;
+        smokeTravel = 0;
+        return;
+      }
+
+      const dx = x - pointer.x;
+      const dy = y - pointer.y;
+      const distance = Math.hypot(dx, dy);
+      const elapsed = Math.max(1, time - pointer.time);
+      if (distance < 0.5) return;
+
+      const speed = clamp(distance / elapsed, 0, 2.4);
+      const angle = Math.atan2(dy, dx);
+      const spacing = mix(6, 3, speed / 2.4);
+      const mouseRadius = mix(12, 4.75, speed / 2.4);
+      const pressure = event.pointerType === 'pen' && event.pressure > 0
+        ? 0.7 + event.pressure * 0.8
+        : 1;
+      const tilt = event.pointerType === 'pen'
+        ? clamp(Math.hypot(event.tiltX || 0, event.tiltY || 0) / 90, 0, 1)
+        : 0;
+      const aspect = event.pointerType === 'pen'
+        ? mix(1, 0.7, tilt)
+        : mix(0.66, 0.5, speed / 2.4);
+
+      for (let traveled = spacing - Math.min(trailTravel, spacing); traveled <= distance; traveled += spacing) {
+        const amount = traveled / distance;
+        const born = mix(pointer.time, time, amount);
+        addStamp(
+          pointer.x + dx * amount,
+          pointer.y + dy * amount,
+          angle,
+          mouseRadius * pressure * (0.9 + Math.random() * 0.2),
+          aspect,
+          born,
+        );
+      }
+      trailTravel = (trailTravel + distance) % spacing;
+
+      if (speed > 0.9) {
+        smokeTravel += distance;
+        while (smokeTravel >= 24) {
+          smokeTravel -= 24;
+          const amount = clamp(1 - smokeTravel / Math.max(distance, 1), 0, 1);
+          addWisp(pointer.x + dx * amount, pointer.y + dy * amount, angle, speed, time);
+        }
+      } else {
+        smokeTravel = 0;
+      }
+
+      pointer = {
+        x,
+        y,
+        time,
+        speed,
+        vx: dx / elapsed,
+        vy: dy / elapsed,
+        type: event.pointerType,
+      };
+    };
+
+    const makeContour = (seed, fingerCount) => {
+      const random = randomFrom(seed);
+      const count = 20;
+      let radii = Array.from({ length: count }, () => 0.84 + random() * 0.3);
+      for (let pass = 0; pass < 2; pass++) {
+        radii = radii.map((radius, index) => (
+          radii[(index + count - 1) % count] + radius * 2 + radii[(index + 1) % count]
+        ) / 4);
+      }
+      const availableIndices = Array.from({ length: count }, (_, index) => index);
+      for (let i = 0; i < fingerCount; i++) {
+        const slot = Math.floor(random() * availableIndices.length);
+        const [index] = availableIndices.splice(slot, 1);
+        radii[index] += 0.14 + random() * 0.12;
+      }
+
+      const points = radii.map((radius, index) => {
+        const angle = (index / count) * tau;
+        return [Math.cos(angle) * radius, Math.sin(angle) * radius];
+      });
+      const path = new Path2D();
+      path.moveTo(
+        (points[count - 1][0] + points[0][0]) / 2,
+        (points[count - 1][1] + points[0][1]) / 2,
+      );
+      for (let i = 0; i < count; i++) {
+        const point = points[i];
+        const next = points[(i + 1) % count];
+        path.quadraticCurveTo(point[0], point[1], (point[0] + next[0]) / 2, (point[1] + next[1]) / 2);
+      }
+      path.closePath();
+      return { path, random };
+    };
+
+    const addDrop = (event, direction, spread, speed, now) => {
+      const angle = direction + (Math.random() - 0.5) * spread;
+      const velocity = 70 + Math.random() * 80 + speed * 45;
+      drops.push({
+        x: event.clientX,
+        y: event.clientY,
+        vx: Math.cos(angle) * velocity,
+        vy: Math.sin(angle) * velocity - 24,
+        radius: 1.4 + Math.random() * 2,
+        angle: Math.random() * tau,
+        spin: (Math.random() - 0.5) * 2,
+        born: now,
+        life: 700 + Math.random() * 400,
+        variant: Math.floor(Math.random() * stampAtlas.length),
+      });
+    };
+
+    const addBloom = (event) => {
+      const now = performance.now();
+      const recentPointer = pointer
+        && pointer.type === event.pointerType
+        && now - pointer.time <= 140
+        ? pointer
+        : null;
+      const speed = recentPointer?.speed || 0;
+      const direction = recentPointer && speed > 0.08
+        ? Math.atan2(recentPointer.vy, recentPointer.vx)
+        : Math.random() * tau;
+      const narrow = width <= 620;
+      const minRadius = narrow ? 72 : 90;
+      const maxRadius = narrow ? 112 : 140;
+      const impact = speed / 2.4;
+      const radius = mix(minRadius, maxRadius, clamp(0.25 + Math.random() * 0.5 + impact * 0.25, 0, 1));
+      const seed = Math.floor(Math.random() * 0x7fffffff);
+      const fingerCount = 3 + Math.floor(Math.random() * 3);
+      const { path, random } = makeContour(seed, fingerCount);
+      const granules = Array.from({ length: 24 }, () => {
+        const angle = random() * tau;
+        const distance = Math.sqrt(random()) * 0.72;
+        return {
+          x: Math.cos(angle) * distance,
+          y: Math.sin(angle) * distance,
+          radius: 0.007 + random() * 0.015,
+          alpha: 0.035 + random() * 0.055,
+        };
+      });
+
+      blooms.push({
+        x: event.clientX,
+        y: event.clientY,
+        born: now,
+        maxRadius: radius,
+        path,
+        granules,
+        rotation: Math.random() * tau,
+        sx: 0.88 + Math.random() * 0.24,
+        sy: 0.88 + Math.random() * 0.24,
+      });
+      trimTo(blooms, limits.blooms);
+
+      const touch = event.pointerType === 'touch';
+      const dropCount = touch ? 4 + Math.floor(Math.random() * 3) : 6 + Math.floor(Math.random() * 5);
+      const spread = speed > 0.08 ? 1.35 : tau;
+      for (let i = 0; i < dropCount; i++) addDrop(event, direction, spread, speed, now);
+      trimTo(drops, limits.drops);
+    };
+
+    const drawPetals = (frameScale) => {
+      for (const petal of petals) {
+        petal.y += petal.vy * frameScale;
+        petal.phase += 0.01 * frameScale;
+        petal.x += Math.sin(petal.phase) * petal.amp * frameScale;
+        petal.rot += petal.vr * frameScale;
+        if (petal.y > height + 20) {
+          Object.assign(petal, makePetal(true));
+          petal.x = Math.random() * width;
+        }
+        ctx.save();
+        ctx.translate(petal.x, petal.y);
+        ctx.rotate(petal.rot);
+        ctx.fillStyle = rgba(colors.petal, petal.a);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, petal.r, petal.r * 0.55, 0, 0, tau);
+        ctx.fill();
+        ctx.restore();
+      }
+    };
+
+    const drawStamps = (now) => {
+      for (let i = stamps.length - 1; i >= 0; i--) {
+        const stamp = stamps[i];
+        const progress = (now - stamp.born) / stamp.life;
+        if (progress >= 1) {
+          stamps.splice(i, 1);
+          continue;
+        }
+        if (progress < 0) continue;
+        const size = stamp.radius * 3.66;
+        ctx.save();
+        ctx.translate(stamp.x, stamp.y);
+        ctx.rotate(stamp.angle);
+        ctx.globalAlpha = Math.pow(1 - progress, 1.1);
+        ctx.drawImage(stampAtlas[stamp.variant], -size / 2, -(size * stamp.aspect) / 2, size, size * stamp.aspect);
+        ctx.restore();
+      }
+    };
+
+    const drawWisps = (now) => {
+      for (let i = wisps.length - 1; i >= 0; i--) {
+        const wisp = wisps[i];
+        const progress = (now - wisp.born) / wisp.life;
+        if (progress >= 1) {
+          wisps.splice(i, 1);
+          continue;
+        }
+        if (progress < 0) continue;
+        const eased = easeOutCubic(progress);
+        const drift = wisp.drift * eased;
+        const cos = Math.cos(wisp.angle);
+        const sin = Math.sin(wisp.angle);
+        const x = wisp.x + wisp.nx * drift;
+        const y = wisp.y + wisp.ny * drift - eased * 5;
+        const alpha = Math.sin(progress * Math.PI) * 0.06;
+        ctx.save();
+        ctx.strokeStyle = rgba(colors.ink, alpha);
+        ctx.lineWidth = 0.8 + (1 - progress) * 0.7;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(x - cos * wisp.length * 0.45, y - sin * wisp.length * 0.45);
+        ctx.bezierCurveTo(
+          x - cos * wisp.length * 0.15 + wisp.nx * wisp.curve,
+          y - sin * wisp.length * 0.15 + wisp.ny * wisp.curve,
+          x + cos * wisp.length * 0.18 - wisp.nx * wisp.curve * 0.5,
+          y + sin * wisp.length * 0.18 - wisp.ny * wisp.curve * 0.5,
+          x + cos * wisp.length * 0.55,
+          y + sin * wisp.length * 0.55,
+        );
+        ctx.stroke();
+        ctx.restore();
+      }
+    };
+
+    const drawDrops = (now, delta) => {
+      for (let i = drops.length - 1; i >= 0; i--) {
+        const drop = drops[i];
+        const progress = (now - drop.born) / drop.life;
+        if (progress >= 1) {
+          drops.splice(i, 1);
+          continue;
+        }
+        drop.x += drop.vx * delta;
+        drop.y += drop.vy * delta;
+        drop.vy += 80 * delta;
+        drop.angle += drop.spin * delta;
+        const size = drop.radius * 3.66;
+        ctx.save();
+        ctx.translate(drop.x, drop.y);
+        ctx.rotate(drop.angle);
+        ctx.globalAlpha = Math.pow(1 - progress, 1.4);
+        ctx.drawImage(dropAtlas(drop.variant), -size / 2, -size * 0.38, size, size * 0.76);
+        ctx.restore();
+      }
+    };
+
+    const dropAtlas = (variant) => stampAtlas[variant] || stampAtlas[0];
+
+    const drawBlooms = (now) => {
+      for (let i = blooms.length - 1; i >= 0; i--) {
+        const bloom = blooms[i];
+        const age = now - bloom.born;
+        if (age >= bloomLife) {
+          blooms.splice(i, 1);
+          continue;
+        }
+
+        const drying = clamp((age - 900) / 900, 0, 1);
+        let radius;
+        let fade = 1;
+        if (age < 120) {
+          radius = bloom.maxRadius * 0.55 * easeOutCubic(age / 120);
+        } else if (age < 900) {
+          radius = bloom.maxRadius * (0.55 + 0.45 * easeOutCubic((age - 120) / 780));
+        } else {
+          radius = bloom.maxRadius * (1 + 0.04 * easeOutCubic(drying));
+          fade = 1 - drying;
+        }
+        if (radius <= 0) continue;
+
+        const impact = Math.min(1, age / 120);
+        const diffusion = clamp((age - 120) / 780, 0, 1);
+
+        ctx.save();
+        ctx.translate(bloom.x, bloom.y);
+        ctx.rotate(bloom.rotation);
+        ctx.scale(radius * bloom.sx * 1.08, radius * bloom.sy * 1.08);
+        ctx.fillStyle = rgba(colors.ink, 0.05 * impact * fade);
+        ctx.fill(bloom.path);
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(bloom.x, bloom.y);
+        ctx.rotate(bloom.rotation);
+        ctx.scale(radius * bloom.sx, radius * bloom.sy);
+        const wash = ctx.createRadialGradient(0, 0, 0.03, 0, 0, 1);
+        const centerAlpha = 0.3 * impact * (age < 900 ? 1 : fade);
+        wash.addColorStop(0, rgba(colors.ink, centerAlpha));
+        wash.addColorStop(0.5, rgba(colors.ink, 0.14 * fade));
+        wash.addColorStop(0.82, rgba(colors.ink, 0.035 * fade));
+        wash.addColorStop(1, rgba(colors.ink, 0));
+        ctx.fillStyle = wash;
+        ctx.fill(bloom.path);
+
+        ctx.strokeStyle = rgba(
+          colors.ink,
+          (age < 900 ? 0.018 + diffusion * 0.037 : mix(0.055, 0.1, easeOutCubic(drying))) * fade,
+        );
+        ctx.lineWidth = (0.65 + diffusion * 0.55) / radius;
+        ctx.stroke(bloom.path);
+
+        const coreAlpha = age < 900
+          ? 0.24 * impact * (1 - diffusion * 0.45)
+          : 0.132 * fade;
+        ctx.fillStyle = rgba(colors.ink, coreAlpha);
+        ctx.save();
+        ctx.rotate(-0.18);
+        ctx.scale(0.43, 0.38);
+        ctx.fill(bloom.path);
+        ctx.restore();
+
+        for (const granule of bloom.granules) {
+          ctx.fillStyle = rgba(colors.ink, granule.alpha * diffusion * fade);
+          ctx.beginPath();
+          ctx.arc(granule.x, granule.y, granule.radius, 0, tau);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+    };
+
+    const draw = (now) => {
+      if (!running) return;
+      const currentDpr = clamp(window.devicePixelRatio || 1, 1, 2);
+      if (currentDpr !== dpr) resize();
+      const delta = lastFrame ? Math.min((now - lastFrame) / 1000, 0.033) : 0;
+      const frameScale = delta * 60;
+      lastFrame = now;
+
+      ctx.clearRect(0, 0, width, height);
+      drawPetals(frameScale);
+      drawStamps(now);
+      drawWisps(now);
+      drawDrops(now, delta);
+      drawBlooms(now);
+      raf = requestAnimationFrame(draw);
+    };
+
+    const clearCanvas = () => ctx.clearRect(0, 0, width, height);
+    const stop = (clear = false) => {
+      running = false;
+      cancelAnimationFrame(raf);
+      raf = 0;
+      lastFrame = 0;
+      pointer = null;
+      trailTravel = 0;
+      smokeTravel = 0;
+      if (clear) {
+        stamps.length = 0;
+        wisps.length = 0;
+        blooms.length = 0;
+        drops.length = 0;
+        clearCanvas();
+      }
+    };
+    const start = () => {
+      if (running || reduceMotion.matches || document.hidden) return;
+      running = true;
+      lastFrame = 0;
+      raf = requestAnimationFrame(draw);
+    };
+    const syncMotion = () => {
+      if (reduceMotion.matches) stop(true);
+      else start();
+    };
+
+    colors = readColors();
+    resize();
+    syncMotion();
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('pointermove', (event) => {
+      if (!running || (event.pointerType !== 'mouse' && event.pointerType !== 'pen')) return;
+      const coalesced = event.getCoalescedEvents?.();
+      const samples = coalesced?.length ? coalesced : [event];
+      for (const sample of samples) samplePointer(sample);
+    }, { passive: true });
+    window.addEventListener('pointerdown', (event) => {
+      if (!running || event.button !== 0) return;
+      addBloom(event);
+    }, { passive: true });
+    document.documentElement.addEventListener('pointerleave', () => {
+      pointer = null;
+      trailTravel = 0;
+      smokeTravel = 0;
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop();
+      else syncMotion();
+    });
+    reduceMotion.addEventListener('change', syncMotion);
+    setInterval(() => {
+      const nextColors = readColors();
+      if (nextColors.ink.join(',') !== colors.ink.join(',')) {
+        colors = nextColors;
+        buildStampAtlas();
+      } else {
+        colors = nextColors;
+      }
+    }, 1500);
+  })();
+</script>

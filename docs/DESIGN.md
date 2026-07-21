@@ -181,7 +181,7 @@
 
 - 首屏和滚动 reveal 动画约 `300ms`。
 - 首载 loader：整页宣纸遮罩，「墨」「笺」逐字显现加墨晕，同时等待页面与 Noto Serif SC 400、Ma Shan Zheng 400 就绪，最短停留约 900ms；失败或慢网由 `2.6s` 硬超时释放。仅在 `.js` 环境渲染，不参与 Swup 交换。
-- 全局氛围动效集中在 `<canvas id="fx">`：花瓣飘落、鼠标洇墨（距离插值补点，`hover: none` 设备不启用）、左键点击墨渍扩散（不规则边缘、随机大小、附溅点）；单一 `requestAnimationFrame` 驱动，主题色随昼夜变量轮询刷新，`prefers-reduced-motion` 时整体不启动。
+- 全局氛围动效由 `src/components/layout/InkEffects.astro` 集中管理，仍只使用一个 `<canvas id="fx">` 与一个 `requestAnimationFrame`：花瓣保持轻缓；精细指针轨迹由外洇、墨身、积墨核与飞白组成，快速移动才带短暂轻烟；点击墨渍依次经历压墨、毛细扩散与积边干燥，并附少量定向墨滴。Canvas backing store 的 DPR 上限为 2，stamp / 烟丝 / 墨晕 / 墨滴分别硬封顶为 120 / 12 / 4 / 40；粗指针不显示移动轨迹，`prefers-reduced-motion` 时整体停止并清空。当前原生 Canvas 2D 足以完成合成、渐变、路径与离屏预渲染，不引入渲染依赖；只有需要持续流体模拟、自定义 GPU shader 或数百粒子时，才评估 GPU/流体库。
 - 滚动进度条与回顶按钮仅使用 `opacity`/`transform`，不参与布局。
 - 动画仅使用 `opacity` 与 `transform`。
 - reveal 隐藏态由 `.js` 根类门控：禁用 JavaScript 时内容默认可见，题图默认可靠显示。

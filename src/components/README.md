@@ -6,6 +6,7 @@
 
 - `SiteHeader.astro`：固定导航栏，导航项读 `src/config/siteConfig.ts`
 - `SiteFooter.astro`：页脚，文案读 `siteConfig.footer`
+- `InkEffects.astro`：全站单画布动效；统一管理花瓣、湿墨轨迹、轻烟与点击墨晕，随 `prefers-reduced-motion` 停启
 
 ## home/ — 首页专属
 
