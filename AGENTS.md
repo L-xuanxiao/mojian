@@ -57,3 +57,17 @@ npm run preview
 - 新文章放入 `src/content/blog/`，frontmatter 遵循 `src/content.config.ts`；分类仅限其中定义的枚举值。
 - `description` 可省略，摘要自动取首段（`remark-excerpt`），显式书写优先。
 - 列表与静态文章路由复用 `getPublishedPosts()`，不展示 `draft: true` 的文章。
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked as GitHub issues on `L-xuanxiao/mojian` (via `gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five-role vocabulary (`needs-triage` / `needs-info` / `ready-for-agent` / `ready-for-human` / `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout (`CONTEXT.md` + `docs/adr/` at repo root, created lazily). See `docs/agents/domain.md`.
