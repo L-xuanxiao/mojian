@@ -1,28 +1,95 @@
-<canvas id="fx" aria-hidden="true"></canvas>
+---
+import '../../styles/InkEffects.css';
 
-<style>
-  #fx {
-    position: fixed;
-    z-index: 20;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
+const botanicals = [
+  // 近景：四组竹枝、五片落英。
+  { kind: 'bamboo', shape: 'fan', tone: 'moss', depth: 'near', path: 'a', x: 2, size: 82, duration: 14.8, delay: -8.6, opacity: 0.88, leafCount: 4, density: 'core', inner: true, drifts: [120, -24, 148, 54] },
+  { kind: 'bamboo', shape: 'slender', tone: 'deep', depth: 'near', path: 'c', x: 18, size: 72, duration: 16.2, delay: -2.9, opacity: 0.8, leafCount: 3, density: 'full', inner: false, drifts: [-84, 52, -112, -36] },
+  { kind: 'bamboo', shape: 'young', tone: 'backlit', depth: 'near', path: 'b', x: 82, size: 78, duration: 15.4, delay: -12.7, opacity: 0.84, leafCount: 4, density: 'wide', inner: false, drifts: [-116, 28, -142, -48] },
+  { kind: 'bamboo', shape: 'dry', tone: 'ochre', depth: 'near', path: 'd', x: 96, size: 60, duration: 17.1, delay: -5.4, opacity: 0.74, leafCount: 3, density: 'compact', inner: true, drifts: [92, -46, 118, 34] },
+  { kind: 'petal', shape: 'folded', tone: 'rose', depth: 'near', path: 'e', x: 5, size: 33, duration: 14.2, delay: -7, opacity: 0.84, density: 'core', inner: true, drifts: [88, -30, 110, 40] },
+  { kind: 'petal', shape: 'cup', tone: 'apricot', depth: 'near', path: 'c', x: 24, size: 28, duration: 16, delay: -12.4, opacity: 0.76, density: 'core', inner: false, drifts: [-60, 38, -84, -20] },
+  { kind: 'petal', shape: 'pointed', tone: 'cinnabar', depth: 'near', path: 'd', x: 76, size: 32, duration: 13.8, delay: -3.1, opacity: 0.82, density: 'wide', inner: true, drifts: [106, -42, 132, 50] },
+  { kind: 'petal', shape: 'split', tone: 'plum', depth: 'near', path: 'b', x: 91, size: 26, duration: 15.4, delay: -9.7, opacity: 0.72, density: 'full', inner: true, drifts: [-92, 26, -120, -44] },
+  { kind: 'petal', shape: 'round', tone: 'ivory', depth: 'near', path: 'a', x: 99, size: 24, duration: 17, delay: -1.4, opacity: 0.7, density: 'full', inner: false, drifts: [72, -28, 96, 24] },
+
+  // 中景：八组竹枝、十一片落英，形成主要风带。
+  { kind: 'bamboo', shape: 'young', tone: 'moss', depth: 'mid', path: 'b', x: 6, size: 54, duration: 20.6, delay: -15.8, opacity: 0.68, leafCount: 4, density: 'core', inner: true, drifts: [-74, 30, -96, -28] },
+  { kind: 'bamboo', shape: 'slender', tone: 'backlit', depth: 'mid', path: 'a', x: 14, size: 48, duration: 22.4, delay: -5.1, opacity: 0.61, leafCount: 3, density: 'wide', inner: true, drifts: [68, -36, 88, 26] },
+  { kind: 'bamboo', shape: 'fan', tone: 'deep', depth: 'mid', path: 'c', x: 29, size: 44, duration: 19.3, delay: -11.7, opacity: 0.64, leafCount: 3, density: 'compact', inner: false, drifts: [82, -24, 104, 42] },
+  { kind: 'bamboo', shape: 'dry', tone: 'ochre', depth: 'mid', path: 'd', x: 40, size: 36, duration: 23.8, delay: -20.9, opacity: 0.52, leafCount: 3, density: 'full', inner: false, drifts: [-52, 38, -70, 18] },
+  { kind: 'bamboo', shape: 'fan', tone: 'moss', depth: 'mid', path: 'a', x: 62, size: 50, duration: 21.1, delay: -8.3, opacity: 0.66, leafCount: 4, density: 'core', inner: true, drifts: [-70, 34, -92, -22] },
+  { kind: 'bamboo', shape: 'slender', tone: 'deep', depth: 'mid', path: 'c', x: 72, size: 42, duration: 24.2, delay: -17.6, opacity: 0.57, leafCount: 3, density: 'wide', inner: false, drifts: [58, -40, 76, 32] },
+  { kind: 'bamboo', shape: 'young', tone: 'backlit', depth: 'mid', path: 'b', x: 88, size: 56, duration: 19.8, delay: -2.2, opacity: 0.69, leafCount: 4, density: 'core', inner: true, drifts: [-84, 22, -108, -38] },
+  { kind: 'bamboo', shape: 'dry', tone: 'ochre', depth: 'mid', path: 'd', x: 99, size: 38, duration: 22.7, delay: -13.4, opacity: 0.55, leafCount: 3, density: 'full', inner: true, drifts: [62, -32, 86, 20] },
+  { kind: 'petal', shape: 'round', tone: 'rose', depth: 'mid', path: 'a', x: 8, size: 21, duration: 20.4, delay: -14.3, opacity: 0.67, density: 'core', inner: true, drifts: [62, -36, 82, 24] },
+  { kind: 'petal', shape: 'pointed', tone: 'apricot', depth: 'mid', path: 'b', x: 17, size: 18, duration: 22.1, delay: -4.8, opacity: 0.6, density: 'core', inner: true, drifts: [-54, 28, -72, -18] },
+  { kind: 'petal', shape: 'cup', tone: 'ivory', depth: 'mid', path: 'c', x: 32, size: 16, duration: 19.7, delay: -10.6, opacity: 0.56, density: 'core', inner: false, drifts: [52, -20, 70, 30] },
+  { kind: 'petal', shape: 'split', tone: 'plum', depth: 'mid', path: 'd', x: 43, size: 14, duration: 23.5, delay: -18.2, opacity: 0.48, density: 'core', inner: false, drifts: [-40, 32, -58, 16] },
+  { kind: 'petal', shape: 'folded', tone: 'rose', depth: 'mid', path: 'e', x: 55, size: 13, duration: 18.8, delay: -6.7, opacity: 0.46, density: 'core', inner: false, drifts: [46, -28, 64, -24] },
+  { kind: 'petal', shape: 'pointed', tone: 'cinnabar', depth: 'mid', path: 'b', x: 66, size: 19, duration: 21.5, delay: -16.4, opacity: 0.63, density: 'compact', inner: true, drifts: [-58, 24, -76, -30] },
+  { kind: 'petal', shape: 'round', tone: 'ivory', depth: 'mid', path: 'a', x: 73, size: 16, duration: 24.1, delay: -12.8, opacity: 0.52, density: 'compact', inner: false, drifts: [48, -30, 66, 20] },
+  { kind: 'petal', shape: 'folded', tone: 'rose', depth: 'mid', path: 'c', x: 84, size: 22, duration: 19.1, delay: -1.7, opacity: 0.69, density: 'wide', inner: true, drifts: [-68, 34, -92, -26] },
+  { kind: 'petal', shape: 'cup', tone: 'apricot', depth: 'mid', path: 'e', x: 95, size: 18, duration: 22.8, delay: -9.2, opacity: 0.61, density: 'wide', inner: false, drifts: [64, -22, 88, 34] },
+  { kind: 'petal', shape: 'split', tone: 'plum', depth: 'mid', path: 'd', x: 2, size: 20, duration: 20.9, delay: -17.9, opacity: 0.58, density: 'full', inner: true, drifts: [-56, 28, -78, -18] },
+  { kind: 'petal', shape: 'pointed', tone: 'cinnabar', depth: 'mid', path: 'b', x: 36, size: 15, duration: 18.6, delay: -3.9, opacity: 0.51, density: 'full', inner: true, drifts: [42, -34, 60, 22] },
+
+  // 远景：四组竹枝、六片落英，低明度缓慢掠过。
+  { kind: 'bamboo', shape: 'slender', tone: 'backlit', depth: 'far', path: 'c', x: 4, size: 30, duration: 29.8, delay: -19.6, opacity: 0.36, leafCount: 3, density: 'core', inner: true, drifts: [36, -18, 48, 16] },
+  { kind: 'bamboo', shape: 'dry', tone: 'ochre', depth: 'far', path: 'd', x: 34, size: 24, duration: 32.4, delay: -7.2, opacity: 0.3, leafCount: 3, density: 'compact', inner: true, drifts: [-28, 16, -40, -12] },
+  { kind: 'bamboo', shape: 'young', tone: 'moss', depth: 'far', path: 'a', x: 67, size: 28, duration: 30.7, delay: -24.3, opacity: 0.34, leafCount: 3, density: 'wide', inner: true, drifts: [32, -20, 44, 14] },
+  { kind: 'bamboo', shape: 'fan', tone: 'deep', depth: 'far', path: 'b', x: 92, size: 22, duration: 34.2, delay: -13.8, opacity: 0.27, leafCount: 2, density: 'full', inner: false, drifts: [-24, 14, -34, -10] },
+  { kind: 'petal', shape: 'cup', tone: 'ivory', depth: 'far', path: 'c', x: 4, size: 12, duration: 29.2, delay: -18.7, opacity: 0.38, density: 'core', inner: true, drifts: [26, -16, 38, 12] },
+  { kind: 'petal', shape: 'round', tone: 'rose', depth: 'far', path: 'a', x: 27, size: 9, duration: 32.6, delay: -6.4, opacity: 0.32, density: 'core', inner: false, drifts: [-22, 14, -32, -10] },
+  { kind: 'petal', shape: 'split', tone: 'plum', depth: 'far', path: 'd', x: 48, size: 8, duration: 30.1, delay: -23.8, opacity: 0.28, density: 'core', inner: false, drifts: [20, -12, 30, 9] },
+  { kind: 'petal', shape: 'pointed', tone: 'apricot', depth: 'far', path: 'b', x: 70, size: 10, duration: 34.5, delay: -14.6, opacity: 0.35, density: 'core', inner: false, drifts: [-24, 15, -36, -11] },
+  { kind: 'petal', shape: 'folded', tone: 'cinnabar', depth: 'far', path: 'e', x: 87, size: 11, duration: 28.7, delay: -3.4, opacity: 0.39, density: 'compact', inner: false, drifts: [28, -17, 40, 13] },
+  { kind: 'petal', shape: 'cup', tone: 'ivory', depth: 'far', path: 'c', x: 98, size: 7, duration: 33.8, delay: -26.1, opacity: 0.26, density: 'wide', inner: false, drifts: [-18, 11, -28, -8] },
+] as const;
+---
+
+<div class="botanical-layer" aria-hidden="true">
+  {
+    botanicals.map((item) => {
+      const classes = [
+        'botanical-item',
+        `depth-${item.depth}`,
+        `density-${item.density}`,
+        item.inner && 'botanical-inner',
+        `${item.kind}-${item.shape}`,
+        `${item.kind}-${item.tone}`,
+        `${item.kind}-path-${item.path}`,
+      ];
+      const style = `--item-x:${item.x}%;--item-size:${item.size}px;--item-duration:${item.duration}s;--item-delay:${item.delay}s;--item-opacity:${item.opacity};--drift-1:${item.drifts[0]}px;--drift-2:${item.drifts[1]}px;--drift-3:${item.drifts[2]}px;--drift-4:${item.drifts[3]}px;`;
+
+      return item.kind === 'bamboo'
+        ? (
+          <i class:list={[...classes, 'bamboo-spray']} style={style}>
+            {
+              Array.from({ length: item.leafCount }, (_, index) => (
+                <span class={`bamboo-leaf bamboo-leaf-${index + 1}`}></span>
+              ))
+            }
+          </i>
+        )
+        : (
+          <i class:list={[...classes, 'petal-piece']} style={style}>
+            <span class="petal-fold"></span>
+          </i>
+        );
+    })
   }
+</div>
+<canvas id="fx" aria-hidden="true" data-development={import.meta.env.DEV ? 'true' : undefined}></canvas>
 
-  @media (prefers-reduced-motion: reduce) {
-    #fx {
-      display: none;
-    }
-  }
-</style>
-
-<script is:inline>
+<script is:inline data-swup-ignore-script>
   (() => {
     const canvas = document.getElementById('fx');
     if (!(canvas instanceof HTMLCanvasElement)) return;
+    if (canvas.dataset.initialized === 'true') return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    canvas.dataset.initialized = 'true';
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const limits = { stamps: 120, wisps: 12, blooms: 4, drops: 40 };
@@ -42,11 +109,20 @@
     let colors;
     let stampAtlas = [];
 
-    const petals = [];
     const stamps = [];
     const wisps = [];
     const blooms = [];
     const drops = [];
+
+    const writeDebugState = () => {
+      if (canvas.dataset.development !== 'true') return;
+      canvas.dataset.running = String(running);
+      canvas.dataset.raf = String(raf);
+      canvas.dataset.stamps = String(stamps.length);
+      canvas.dataset.wisps = String(wisps.length);
+      canvas.dataset.blooms = String(blooms.length);
+      canvas.dataset.drops = String(drops.length);
+    };
 
     const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
     const mix = (from, to, amount) => from + (to - from) * amount;
@@ -77,7 +153,6 @@
     const readColors = () => {
       const style = getComputedStyle(document.documentElement);
       return {
-        petal: toRgb(style.getPropertyValue('--petal'), [214, 142, 150]),
         ink: toRgb(style.getPropertyValue('--ink'), [41, 42, 39]),
       };
     };
@@ -145,24 +220,6 @@
       });
     };
 
-    const makePetal = (fromTop = false) => ({
-      x: Math.random() * width,
-      y: fromTop ? -20 : Math.random() * height,
-      r: 3.5 + Math.random() * 5,
-      rot: Math.random() * Math.PI,
-      vr: (Math.random() - 0.5) * 0.02,
-      vy: 0.35 + Math.random() * 0.7,
-      phase: Math.random() * tau,
-      amp: 0.5 + Math.random(),
-      a: 0.28 + Math.random() * 0.32,
-    });
-
-    const syncPetals = () => {
-      const target = width < 700 ? 10 : 18;
-      while (petals.length < target) petals.push(makePetal());
-      if (petals.length > target) petals.length = target;
-    };
-
     const resize = () => {
       width = window.innerWidth;
       height = window.innerHeight;
@@ -173,7 +230,6 @@
       pointer = null;
       trailTravel = 0;
       smokeTravel = 0;
-      syncPetals();
       buildStampAtlas();
     };
 
@@ -376,27 +432,6 @@
       trimTo(drops, limits.drops);
     };
 
-    const drawPetals = (frameScale) => {
-      for (const petal of petals) {
-        petal.y += petal.vy * frameScale;
-        petal.phase += 0.01 * frameScale;
-        petal.x += Math.sin(petal.phase) * petal.amp * frameScale;
-        petal.rot += petal.vr * frameScale;
-        if (petal.y > height + 20) {
-          Object.assign(petal, makePetal(true));
-          petal.x = Math.random() * width;
-        }
-        ctx.save();
-        ctx.translate(petal.x, petal.y);
-        ctx.rotate(petal.rot);
-        ctx.fillStyle = rgba(colors.petal, petal.a);
-        ctx.beginPath();
-        ctx.ellipse(0, 0, petal.r, petal.r * 0.55, 0, 0, tau);
-        ctx.fill();
-        ctx.restore();
-      }
-    };
-
     const drawStamps = (now) => {
       for (let i = stamps.length - 1; i >= 0; i--) {
         const stamp = stamps[i];
@@ -553,22 +588,34 @@
       const currentDpr = clamp(window.devicePixelRatio || 1, 1, 2);
       if (currentDpr !== dpr) resize();
       const delta = lastFrame ? Math.min((now - lastFrame) / 1000, 0.033) : 0;
-      const frameScale = delta * 60;
       lastFrame = now;
 
       ctx.clearRect(0, 0, width, height);
-      drawPetals(frameScale);
       drawStamps(now);
       drawWisps(now);
       drawDrops(now, delta);
       drawBlooms(now);
-      raf = requestAnimationFrame(draw);
+      if (hasActiveCanvasEffects()) {
+        raf = requestAnimationFrame(draw);
+      } else {
+        running = false;
+        raf = 0;
+        lastFrame = 0;
+        clearCanvas();
+        writeDebugState();
+      }
     };
 
     const clearCanvas = () => ctx.clearRect(0, 0, width, height);
+    const hasActiveCanvasEffects = () => (
+      stamps.length > 0
+      || wisps.length > 0
+      || blooms.length > 0
+      || drops.length > 0
+    );
     const stop = (clear = false) => {
       running = false;
-      cancelAnimationFrame(raf);
+      if (raf) cancelAnimationFrame(raf);
       raf = 0;
       lastFrame = 0;
       pointer = null;
@@ -581,16 +628,17 @@
         drops.length = 0;
         clearCanvas();
       }
+      writeDebugState();
     };
-    const start = () => {
-      if (running || reduceMotion.matches || document.hidden) return;
+    const ensureRunning = () => {
+      if (running || !hasActiveCanvasEffects() || reduceMotion.matches || document.hidden) return;
       running = true;
       lastFrame = 0;
       raf = requestAnimationFrame(draw);
+      writeDebugState();
     };
     const syncMotion = () => {
       if (reduceMotion.matches) stop(true);
-      else start();
     };
 
     colors = readColors();
@@ -599,14 +647,24 @@
 
     window.addEventListener('resize', resize);
     window.addEventListener('pointermove', (event) => {
-      if (!running || (event.pointerType !== 'mouse' && event.pointerType !== 'pen')) return;
+      if (
+        reduceMotion.matches
+        || document.hidden
+        || (event.pointerType !== 'mouse' && event.pointerType !== 'pen')
+      ) return;
       const coalesced = event.getCoalescedEvents?.();
       const samples = coalesced?.length ? coalesced : [event];
       for (const sample of samples) samplePointer(sample);
+      ensureRunning();
     }, { passive: true });
     window.addEventListener('pointerdown', (event) => {
-      if (!running || event.button !== 0) return;
+      if (
+        reduceMotion.matches
+        || document.hidden
+        || (event.pointerType !== 'touch' && event.button !== 0)
+      ) return;
       addBloom(event);
+      ensureRunning();
     }, { passive: true });
     document.documentElement.addEventListener('pointerleave', () => {
       pointer = null;
@@ -614,11 +672,10 @@
       smokeTravel = 0;
     });
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) stop();
-      else syncMotion();
+      if (document.hidden) stop(true);
     });
     reduceMotion.addEventListener('change', syncMotion);
-    setInterval(() => {
+    const themeObserver = new MutationObserver(() => {
       const nextColors = readColors();
       if (nextColors.ink.join(',') !== colors.ink.join(',')) {
         colors = nextColors;
@@ -626,6 +683,22 @@
       } else {
         colors = nextColors;
       }
-    }, 1500);
+    });
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+
+    if (canvas.dataset.development === 'true') {
+      window.__getInkEffectsState = () => ({
+        running,
+        raf,
+        stamps: stamps.length,
+        wisps: wisps.length,
+        blooms: blooms.length,
+        drops: drops.length,
+      });
+      writeDebugState();
+    }
   })();
 </script>

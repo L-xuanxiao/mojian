@@ -1,0 +1,752 @@
+.botanical-layer {
+  --motion-scale: 1;
+  --alpha-scale: 1;
+  --leaf-moss-light: #91a08a;
+  --leaf-moss-mid: #586258;
+  --leaf-moss-dark: #374139;
+  --leaf-deep-light: #667067;
+  --leaf-deep-mid: #3f4841;
+  --leaf-deep-dark: #273029;
+  --leaf-backlit-light: #99a58b;
+  --leaf-backlit-mid: #6c7a62;
+  --leaf-backlit-dark: #59665a;
+  --leaf-ochre-light: #bba272;
+  --leaf-ochre-mid: #846f4d;
+  --leaf-ochre-dark: #59472f;
+  --petal-rose-light: #f7dadd;
+  --petal-rose-mid: #d68e96;
+  --petal-rose-dark: #a85e68;
+  --petal-apricot-light: #f3d9bf;
+  --petal-apricot-mid: #d5a173;
+  --petal-apricot-dark: #a86f4f;
+  --petal-cinnabar-light: #edb6ab;
+  --petal-cinnabar-mid: #b75d50;
+  --petal-cinnabar-dark: #843b34;
+  --petal-plum-light: #dbc0c8;
+  --petal-plum-mid: #a97a88;
+  --petal-plum-dark: #73505d;
+  --petal-ivory-light: #fffaf0;
+  --petal-ivory-mid: #d9cbae;
+  --petal-ivory-dark: #a5936f;
+  position: fixed;
+  z-index: 19;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  perspective: 1000px;
+}
+
+html[data-theme='night'] .botanical-layer {
+  --leaf-moss-light: #c1cfba;
+  --leaf-moss-mid: #93a892;
+  --leaf-moss-dark: #657966;
+  --leaf-deep-light: #aab9aa;
+  --leaf-deep-mid: #718672;
+  --leaf-deep-dark: #4f6152;
+  --leaf-backlit-light: #d2d8c9;
+  --leaf-backlit-mid: #a4b19d;
+  --leaf-backlit-dark: #738072;
+  --leaf-ochre-light: #cbb68e;
+  --leaf-ochre-mid: #a08661;
+  --leaf-ochre-dark: #705b42;
+  --petal-rose-light: #efd0d4;
+  --petal-rose-mid: #c47e88;
+  --petal-rose-dark: #925763;
+  --petal-apricot-light: #ead1b9;
+  --petal-apricot-mid: #c3956d;
+  --petal-apricot-dark: #8e654b;
+  --petal-cinnabar-light: #efb0a5;
+  --petal-cinnabar-mid: #c86c5d;
+  --petal-cinnabar-dark: #94483e;
+  --petal-plum-light: #ddc0ca;
+  --petal-plum-mid: #ac7a8b;
+  --petal-plum-dark: #765260;
+  --petal-ivory-light: #eee7d8;
+  --petal-ivory-mid: #c9bdab;
+  --petal-ivory-dark: #968a78;
+}
+
+.botanical-item {
+  position: absolute;
+  top: 0;
+  left: var(--item-x);
+  width: var(--item-size);
+  pointer-events: none;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  animation-duration: calc(var(--item-duration) * var(--motion-scale));
+  animation-delay: var(--item-delay);
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.depth-near {
+  z-index: 2;
+  will-change: transform, opacity;
+}
+
+.depth-mid {
+  z-index: 1;
+  will-change: transform, opacity;
+}
+
+.depth-far {
+  z-index: 0;
+}
+
+body.inner-page .botanical-layer {
+  --motion-scale: 1.08;
+  --alpha-scale: 0.78;
+}
+
+body.inner-page .botanical-item:not(.botanical-inner) {
+  display: none;
+}
+
+/* 竹枝由一个动画父层承载 2–4 枚叶片，降低合成层数量。 */
+.bamboo-spray {
+  aspect-ratio: 1 / 0.92;
+  transform-origin: 48% 72%;
+  animation-timing-function: cubic-bezier(0.36, 0.08, 0.58, 0.96);
+}
+
+.bamboo-spray::before {
+  position: absolute;
+  top: 8%;
+  left: 48%;
+  width: max(1px, calc(var(--item-size) * 0.022));
+  height: 82%;
+  border-radius: 999px;
+  background: linear-gradient(to bottom, transparent, var(--leaf-light) 18%, var(--leaf-dark) 92%);
+  content: '';
+  opacity: 0.68;
+  transform: rotate(-8deg);
+  transform-origin: 50% 100%;
+}
+
+/* 四种竹叶轮廓：手绘贝塞尔披针形带微弧叶身与滴水尖，叶根和叶尖在 mask alpha 内渐隐，
+   避免圆角团块的贴纸感；dry 为尖部下弯微卷的枯叶，焦尖渐隐更长。 */
+.botanical-layer {
+  --mask-leaf-fan: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 44'%3E%3ClinearGradient id='f' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0' stop-opacity='.55'/%3E%3Cstop offset='.08' stop-opacity='1'/%3E%3Cstop offset='.8' stop-opacity='1'/%3E%3Cstop offset='1' stop-opacity='.18'/%3E%3C/linearGradient%3E%3Cpath fill='url(%23f)' d='M3,22 C30,7 80,2 126,7 C158,11 186,15 199,21 C193,24 176,28 150,31 C100,37 34,34 3,22 Z'/%3E%3C/svg%3E");
+  --mask-leaf-slender: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 44'%3E%3ClinearGradient id='f' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0' stop-opacity='.5'/%3E%3Cstop offset='.07' stop-opacity='1'/%3E%3Cstop offset='.84' stop-opacity='1'/%3E%3Cstop offset='1' stop-opacity='.2'/%3E%3C/linearGradient%3E%3Cpath fill='url(%23f)' d='M3,21 C38,9 92,5 138,9 C166,12 188,15 199,19 C190,22 168,25 138,27 C90,31 36,29 3,21 Z'/%3E%3C/svg%3E");
+  --mask-leaf-young: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 44'%3E%3ClinearGradient id='f' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0' stop-opacity='.55'/%3E%3Cstop offset='.09' stop-opacity='1'/%3E%3Cstop offset='.78' stop-opacity='1'/%3E%3Cstop offset='1' stop-opacity='.22'/%3E%3C/linearGradient%3E%3Cpath fill='url(%23f)' d='M4,23 C26,5 64,1 106,8 C140,13 172,18 196,23 C176,30 142,38 104,41 C62,44 22,37 4,23 Z'/%3E%3C/svg%3E");
+  --mask-leaf-dry: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 44'%3E%3ClinearGradient id='f' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0' stop-opacity='.5'/%3E%3Cstop offset='.06' stop-opacity='1'/%3E%3Cstop offset='.68' stop-opacity='1'/%3E%3Cstop offset='1' stop-opacity='.15'/%3E%3C/linearGradient%3E%3Cpath fill='url(%23f)' d='M3,19 C40,6 98,3 144,8 C170,11 190,15 198,19 C200,23 196,28 188,28 C176,28 162,25 148,23 C100,31 36,29 3,19 Z'/%3E%3C/svg%3E");
+}
+
+/* 叶片着色为折面模型：上表面受光（light）、中脉一线深（dark）、下表面背光渐暗（mid→dark），
+   叠加顶部柔光与叶尖微亮；中脉由明暗交界自然形成，不再画白色直线叶脉。 */
+.bamboo-leaf {
+  --leaf-mask: var(--mask-leaf-fan);
+  position: absolute;
+  left: 47%;
+  width: 68%;
+  height: 14.5%;
+  background:
+    linear-gradient(to bottom, rgb(255 255 255 / 16%), transparent 44%),
+    linear-gradient(to right, transparent 58%, rgb(255 255 255 / 14%) 84%, transparent 99%),
+    linear-gradient(to bottom, var(--leaf-light) 40%, var(--leaf-dark) 50%, var(--leaf-mid) 60%, var(--leaf-dark) 100%);
+  -webkit-mask-image: var(--leaf-mask);
+  mask-image: var(--leaf-mask);
+  -webkit-mask-mode: alpha;
+  mask-mode: alpha;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  transform-origin: 5% 52%;
+}
+
+.bamboo-leaf-1 {
+  top: 59%;
+  transform: rotate(190deg) scale(0.92, 0.84);
+}
+
+.bamboo-leaf-2 {
+  top: 43%;
+  transform: rotate(-24deg) scale(0.94);
+}
+
+.bamboo-leaf-3 {
+  top: 27%;
+  transform: rotate(166deg) scale(0.78, 0.9);
+}
+
+.bamboo-leaf-4 {
+  top: 11%;
+  transform: rotate(-14deg) scale(0.7, 0.82);
+}
+
+.bamboo-slender .bamboo-leaf {
+  --leaf-mask: var(--mask-leaf-slender);
+  width: 74%;
+  height: 12%;
+}
+
+.bamboo-slender .bamboo-leaf-1 {
+  top: 63%;
+  transform: rotate(198deg) scale(0.92, 0.78);
+}
+
+.bamboo-slender .bamboo-leaf-2 {
+  top: 42%;
+  transform: rotate(-16deg) scale(0.88, 0.8);
+}
+
+.bamboo-slender .bamboo-leaf-3 {
+  top: 20%;
+  transform: rotate(174deg) scale(0.72, 0.76);
+}
+
+.bamboo-young .bamboo-leaf {
+  --leaf-mask: var(--mask-leaf-young);
+  width: 56%;
+  height: 17%;
+}
+
+.bamboo-young .bamboo-leaf-1 {
+  top: 56%;
+  transform: rotate(184deg) scale(0.95);
+}
+
+.bamboo-young .bamboo-leaf-2 {
+  top: 39%;
+  transform: rotate(-31deg) scale(0.9);
+}
+
+.bamboo-young .bamboo-leaf-3 {
+  top: 23%;
+  transform: rotate(155deg) scale(0.8);
+}
+
+.bamboo-young .bamboo-leaf-4 {
+  top: 7%;
+  transform: rotate(-20deg) scale(0.66);
+}
+
+/* 枯叶尖部叠一层焦黄，随 mask 尖部渐隐自然淡出。 */
+.bamboo-dry .bamboo-leaf {
+  --leaf-mask: var(--mask-leaf-dry);
+  width: 66%;
+  height: 13%;
+  background:
+    linear-gradient(to bottom, rgb(255 255 255 / 10%), transparent 42%),
+    linear-gradient(to right, transparent 46%, rgb(133 92 40 / 26%) 80%, transparent 99%),
+    linear-gradient(to bottom, var(--leaf-light) 42%, var(--leaf-dark) 50%, var(--leaf-mid) 60%, var(--leaf-dark) 100%);
+}
+
+.bamboo-dry .bamboo-leaf-1 {
+  top: 60%;
+  transform: rotate(202deg) scale(0.9, 0.78);
+}
+
+.bamboo-dry .bamboo-leaf-2 {
+  top: 40%;
+  transform: rotate(-18deg) scale(0.82);
+}
+
+.bamboo-dry .bamboo-leaf-3 {
+  top: 18%;
+  transform: rotate(170deg) scale(0.68);
+}
+
+.bamboo-moss {
+  --leaf-light: var(--leaf-moss-light);
+  --leaf-mid: var(--leaf-moss-mid);
+  --leaf-dark: var(--leaf-moss-dark);
+}
+
+.bamboo-deep {
+  --leaf-light: var(--leaf-deep-light);
+  --leaf-mid: var(--leaf-deep-mid);
+  --leaf-dark: var(--leaf-deep-dark);
+}
+
+.bamboo-backlit {
+  --leaf-light: var(--leaf-backlit-light);
+  --leaf-mid: var(--leaf-backlit-mid);
+  --leaf-dark: var(--leaf-backlit-dark);
+}
+
+.bamboo-ochre {
+  --leaf-light: var(--leaf-ochre-light);
+  --leaf-mid: var(--leaf-ochre-mid);
+  --leaf-dark: var(--leaf-ochre-dark);
+}
+
+.bamboo-path-a {
+  animation-name: leaf-drift-a;
+}
+
+.bamboo-path-b {
+  animation-name: leaf-drift-b;
+}
+
+.bamboo-path-c {
+  animation-name: leaf-drift-c;
+}
+
+.bamboo-path-d {
+  animation-name: leaf-drift-d;
+}
+
+/* 近/中景叶片的次级摆动：独立 rotate 属性与姿态 transform 叠加（互不覆盖），
+   绕叶基轻颤，打破整枝刚体翻滚的风车感；远景幅度不可见，不启用以省合成开销。 */
+.depth-near .bamboo-leaf,
+.depth-mid .bamboo-leaf {
+  animation: leaf-sway var(--sway-duration, 2.7s) ease-in-out var(--sway-delay, 0s) infinite alternate;
+}
+
+.depth-near .bamboo-leaf {
+  --sway-amp: 3.2deg;
+}
+
+.depth-mid .bamboo-leaf {
+  --sway-amp: 2.1deg;
+}
+
+.bamboo-leaf-1 {
+  --sway-duration: 2.9s;
+  --sway-delay: -0.7s;
+}
+
+.bamboo-leaf-2 {
+  --sway-duration: 2.3s;
+  --sway-delay: -1.6s;
+}
+
+.bamboo-leaf-3 {
+  --sway-duration: 3.1s;
+  --sway-delay: -0.3s;
+}
+
+.bamboo-leaf-4 {
+  --sway-duration: 2.1s;
+  --sway-delay: -2.2s;
+}
+
+/* 五种花瓣轮廓：贝塞尔瓣形带微波浪缘，pointed/split 含尖端缺刻；
+   基部扇形脉以灰色刻进 SVG 内嵌 mask（luminance），在瓣面透出半透细沟；
+   轮廓放大半透层垫底，形成薄透软边。 */
+.botanical-layer {
+  --mask-petal-round: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 134 100'%3E%3Cmask id='v' maskUnits='userSpaceOnUse' x='0' y='0' width='134' height='100'%3E%3Crect width='134' height='100' fill='%23fff'/%3E%3Cpath fill='rgb(150,150,150)' d='M12,50 C34,36 58,22 78,15 C60,26, 36,40 12,50 Z'/%3E%3Cpath fill='rgb(150,150,150)' d='M12,50 C40,40 68,32 92,28 C70,36 42,45 12,50 Z'/%3E%3Cpath fill='rgb(150,150,150)' d='M12,50 C42,50 70,52 94,56 C70,56 42,54 12,50 Z'/%3E%3Cpath fill='rgb(150,150,150)' d='M12,50 C36,60 58,72 74,82 C56,70 34,59 12,50 Z'/%3E%3C/mask%3E%3Cpath fill='black' fill-opacity='.32' transform='translate(67,50) scale(1.045) translate(-67,-50)' d='M11,50 C22,20 54,6 86,11 C108,15 122,27 126,43 C123,46 121,47 121,49 C121,51 123,53 126,56 C122,73 106,87 82,92 C54,97 23,82 11,50 Z'/%3E%3Cpath fill='black' mask='url(%23v)' d='M11,50 C22,20 54,6 86,11 C108,15 122,27 126,43 C123,46 121,47 121,49 C121,51 123,53 126,56 C122,73 106,87 82,92 C54,97 23,82 11,50 Z'/%3E%3C/svg%3E");
+  --mask-petal-pointed: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 134 100'%3E%3Cmask id='v' maskUnits='userSpaceOnUse' x='0' y='0' width='134' height='100'%3E%3Crect width='134' height='100' fill='%23fff'/%3E%3Cpath fill='rgb(150,150,150)' d='M11,52 C36,34 62,20 84,15 C64,26 38,40 11,52 Z'/%3E%3Cpath fill='rgb(150,150,150)' d='M11,52 C42,42 74,34 100,31 C76,38 44,47 11,52 Z'/%3E%3Cpath fill='rgb(150,150,150)' d='M11,52 C44,53 76,56 102,61 C76,60 44,57 11,52 Z'/%3E%3Cpath fill='rgb(150,150,150)' d='M11,52 C38,63 60,75 78,84 C58,73 34,61 11,52 Z'/%3E%3C/mask%3E%3Cpath fill='black' fill-opacity='.32' transform='translate(67,50) scale(1.045) translate(-67,-50)' d='M10,52 C20,28 48,12 82,13 C106,14 122,28 129,46 C125,48 123,49 123,50 C123,52 125,54 129,56 C124,75 106,88 80,89 C50,90 20,77 10,52 Z'/%3E%3Cpath fill='black' mask='url(%23v)' d='M10,52 C20,28 48,12 82,13 C106,14 122,28 129,46 C125,48 123,49 123,50 C123,52 125,54 129,56 C124,75 106,88 80,89 C50,90 20,77 10,52 Z'/%3E%3C/svg%3E");
+  --mask-petal-folded: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 134 100'%3E%3Cmask id='v' maskUnits='userSpaceOnUse' x='0' y='0' width='134' height='100'%3E%3Crect width='134' height='100' fill='%23fff'/%3E%3Cpath fill='rgb(150,150,150)' d='M13,48 C36,32 62,18 84,13 C64,24 38,38 13,48 Z'/%3E%3Cpath fill='rgb(150,150,150)' d='M13,48 C44,40 74,35 98,33 C74,39 44,45 13,48 Z'/%3E%3Cpath fill='rgb(150,150,150)' d='M13,48 C44,50 70,52 92,55 C70,56 42,53 13,48 Z'/%3E%3C/mask%3E%3Cpath fill='black' fill-opacity='.32' transform='translate(67,50) scale(1.045) translate(-67,-50)' d='M12,48 C26,16 62,5 92,13 C114,19 126,34 127,52 C112,60 96,63 82,61 C88,70 88,80 80,86 C56,92 26,76 12,48 Z'/%3E%3Cpath fill='black' mask='url(%23v)' d='M12,48 C26,16 62,5 92,13 C114,19 126,34 127,52 C112,60 96,63 82,61 C88,70 88,80 80,86 C56,92 26,76 12,48 Z'/%3E%3C/svg%3E");
+  --mask-petal-split: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 134 100'%3E%3Cmask id='v' maskUnits='userSpaceOnUse' x='0' y='0' width='134' height='100'%3E%3Crect width='134' height='100' fill='%23fff'/%3E%3Cpath fill='rgb(150,150,150)' d='M12,51 C34,35 58,20 78,14 C60,25 36,39 12,51 Z'/%3E%3Cpath fill='rgb(150,150,150)' d='M12,51 C40,41 66,33 90,29 C68,36 40,45 12,51 Z'/%3E%3Cpath fill='rgb(150,150,150)' d='M12,51 C40,53 64,58 84,64 C64,60 38,56 12,51 Z'/%3E%3Cpath fill='rgb(150,150,150)' d='M12,51 C34,62 54,74 70,84 C52,73 32,61 12,51 Z'/%3E%3C/mask%3E%3Cpath fill='black' fill-opacity='.32' transform='translate(67,50) scale(1.045) translate(-67,-50)' d='M11,51 C20,24 48,9 80,11 C100,13 116,24 124,38 C119,41 115,44 112,48 C115,52 120,56 126,60 C120,75 104,89 78,91 C50,93 20,79 11,51 Z'/%3E%3Cpath fill='black' mask='url(%23v)' d='M11,51 C20,24 48,9 80,11 C100,13 116,24 124,38 C119,41 115,44 112,48 C115,52 120,56 126,60 C120,75 104,89 78,91 C50,93 20,79 11,51 Z'/%3E%3C/svg%3E");
+  --mask-petal-cup: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 134 100'%3E%3Cmask id='v' maskUnits='userSpaceOnUse' x='0' y='0' width='134' height='100'%3E%3Crect width='134' height='100' fill='%23fff'/%3E%3Cpath fill='rgb(150,150,150)' d='M13,50 C32,32 52,18 72,12 C54,24 34,38 13,50 Z'/%3E%3Cpath fill='rgb(150,150,150)' d='M13,50 C40,40 66,32 90,29 C68,36 40,44 13,50 Z'/%3E%3Cpath fill='rgb(150,150,150)' d='M13,50 C42,52 66,57 86,63 C66,59 40,55 13,50 Z'/%3E%3Cpath fill='rgb(150,150,150)' d='M13,50 C34,62 52,74 68,84 C52,73 32,61 13,50 Z'/%3E%3C/mask%3E%3Cpath fill='black' fill-opacity='.32' transform='translate(67,50) scale(1.045) translate(-67,-50)' d='M12,50 C14,28 36,11 66,9 C96,7 120,20 126,42 C127,54 120,68 106,77 C86,89 52,91 33,77 C21,68 12,60 12,50 Z'/%3E%3Cpath fill='black' mask='url(%23v)' d='M12,50 C14,28 36,11 66,9 C96,7 120,20 126,42 C127,54 120,68 106,77 C86,89 52,91 33,77 C21,68 12,60 12,50 Z'/%3E%3C/svg%3E");
+}
+
+/* 花瓣着色为没骨晕染：基部 dark 径向晕染、主体 light→mid、受光侧白高光；
+   ::after 是一道低透明斜向折痕，与主色融合，不再是独立色块。 */
+.petal-piece {
+  --petal-mask: var(--mask-petal-round);
+  aspect-ratio: 1.34 / 1;
+  background:
+    radial-gradient(ellipse 55% 50% at 30% 22%, rgb(255 255 255 / 20%), transparent 52%),
+    radial-gradient(ellipse 45% 48% at 10% 52%, var(--petal-dark), transparent 58%),
+    linear-gradient(100deg, var(--petal-light) 5%, var(--petal-mid) 58%, var(--petal-dark) 112%);
+  -webkit-mask-image: var(--petal-mask);
+  mask-image: var(--petal-mask);
+  -webkit-mask-mode: alpha;
+  mask-mode: alpha;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  transform-origin: 43% 57%;
+  animation-timing-function: cubic-bezier(0.38, 0.06, 0.62, 0.95);
+}
+
+.petal-piece::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(102deg, transparent 54%, rgb(94 54 57 / 10%) 67%, transparent 82%);
+  content: '';
+}
+
+/* 折叠/杯状瓣的折痕与杯底凹影，默认关闭，随 mask 裁剪不出界。 */
+.petal-fold {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.petal-folded .petal-fold {
+  background: linear-gradient(100deg, transparent 40%, rgb(75 39 45 / 16%) 54%, rgb(255 255 255 / 15%) 62%, transparent 74%);
+  opacity: 1;
+}
+
+.petal-cup .petal-fold {
+  background: radial-gradient(ellipse 46% 42% at 56% 54%, rgb(75 39 45 / 15%), transparent 70%);
+  opacity: 1;
+}
+
+.petal-pointed {
+  --petal-mask: var(--mask-petal-pointed);
+}
+
+.petal-folded {
+  --petal-mask: var(--mask-petal-folded);
+}
+
+.petal-split {
+  --petal-mask: var(--mask-petal-split);
+}
+
+.petal-cup {
+  --petal-mask: var(--mask-petal-cup);
+}
+
+.petal-rose {
+  --petal-light: var(--petal-rose-light);
+  --petal-mid: var(--petal-rose-mid);
+  --petal-dark: var(--petal-rose-dark);
+}
+
+.petal-apricot {
+  --petal-light: var(--petal-apricot-light);
+  --petal-mid: var(--petal-apricot-mid);
+  --petal-dark: var(--petal-apricot-dark);
+}
+
+.petal-cinnabar {
+  --petal-light: var(--petal-cinnabar-light);
+  --petal-mid: var(--petal-cinnabar-mid);
+  --petal-dark: var(--petal-cinnabar-dark);
+}
+
+.petal-plum {
+  --petal-light: var(--petal-plum-light);
+  --petal-mid: var(--petal-plum-mid);
+  --petal-dark: var(--petal-plum-dark);
+}
+
+.petal-ivory {
+  --petal-light: var(--petal-ivory-light);
+  --petal-mid: var(--petal-ivory-mid);
+  --petal-dark: var(--petal-ivory-dark);
+}
+
+.petal-path-a {
+  animation-name: petal-fall-a;
+}
+
+.petal-path-b {
+  animation-name: petal-fall-b;
+}
+
+.petal-path-c {
+  animation-name: petal-fall-c;
+}
+
+.petal-path-d {
+  animation-name: petal-fall-d;
+}
+
+.petal-path-e {
+  animation-name: petal-fall-e;
+}
+
+#fx {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+@keyframes leaf-sway {
+  from {
+    rotate: calc(var(--sway-amp, 2.5deg) * -0.7);
+  }
+  to {
+    rotate: var(--sway-amp, 2.5deg);
+  }
+}
+
+/* 轨迹关键帧只改旋转：各轴中途换向（摇曳回摆）取代匀速单向翻滚，
+   位移与透明度节奏不变；末帧 opacity 为 0，姿态跳回起点不可见。 */
+@keyframes leaf-drift-a {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -20vh, -8px) rotateX(18deg) rotateY(-24deg) rotateZ(-14deg);
+  }
+  8% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  27% {
+    transform: translate3d(var(--drift-1), 25vh, 12px) rotateX(58deg) rotateY(32deg) rotateZ(16deg);
+  }
+  53% {
+    transform: translate3d(var(--drift-2), 53vh, -10px) rotateX(26deg) rotateY(-38deg) rotateZ(-11deg);
+  }
+  78% {
+    transform: translate3d(var(--drift-3), 82vh, 8px) rotateX(66deg) rotateY(28deg) rotateZ(18deg);
+  }
+  93% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift-4), 118vh, 0) rotateX(32deg) rotateY(-30deg) rotateZ(-13deg);
+  }
+}
+
+@keyframes leaf-drift-b {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -16vh, 7px) rotateX(-18deg) rotateY(34deg) rotateZ(12deg);
+  }
+  10% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  24% {
+    transform: translate3d(var(--drift-1), 18vh, -8px) rotateX(46deg) rotateY(-38deg) rotateZ(-16deg);
+  }
+  49% {
+    transform: translate3d(var(--drift-2), 48vh, 10px) rotateX(-24deg) rotateY(44deg) rotateZ(14deg);
+  }
+  72% {
+    transform: translate3d(var(--drift-3), 73vh, -4px) rotateX(52deg) rotateY(-30deg) rotateZ(-13deg);
+  }
+  91% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift-4), 116vh, 0) rotateX(-20deg) rotateY(36deg) rotateZ(11deg);
+  }
+}
+
+@keyframes leaf-drift-c {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -18vh, -5px) rotateX(24deg) rotateY(-30deg) rotateZ(10deg);
+  }
+  7% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  22% {
+    transform: translate3d(var(--drift-1), 20vh, 8px) rotateX(-32deg) rotateY(36deg) rotateZ(-13deg);
+  }
+  43% {
+    transform: translate3d(var(--drift-2), 42vh, -9px) rotateX(40deg) rotateY(-26deg) rotateZ(12deg);
+  }
+  63% {
+    transform: translate3d(var(--drift-3), 61vh, 10px) rotateX(-28deg) rotateY(34deg) rotateZ(-11deg);
+  }
+  82% {
+    transform: translate3d(var(--drift-2), 88vh, -3px) rotateX(36deg) rotateY(-22deg) rotateZ(10deg);
+  }
+  94% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift-4), 114vh, 0) rotateX(-26deg) rotateY(28deg) rotateZ(-9deg);
+  }
+}
+
+@keyframes leaf-drift-d {
+  0% {
+    opacity: 0;
+    transform: translate3d(calc(-18vw + var(--drift-1)), -8vh, 8px) rotateX(-14deg) rotateY(38deg) rotateZ(-16deg);
+  }
+  12% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  31% {
+    transform: translate3d(var(--drift-2), 31vh, -8px) rotateX(38deg) rotateY(-42deg) rotateZ(13deg);
+  }
+  58% {
+    transform: translate3d(var(--drift-3), 55vh, 9px) rotateX(-24deg) rotateY(48deg) rotateZ(-14deg);
+  }
+  79% {
+    transform: translate3d(var(--drift-1), 84vh, -5px) rotateX(44deg) rotateY(-36deg) rotateZ(15deg);
+  }
+  92% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(12vw + var(--drift-4)), 117vh, 0) rotateX(-18deg) rotateY(40deg) rotateZ(-15deg);
+  }
+}
+
+@keyframes petal-fall-a {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -14vh, 0) rotateX(15deg) rotateY(-20deg) rotateZ(8deg);
+  }
+  8% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  25% {
+    transform: translate3d(var(--drift-1), 22vh, 10px) rotateX(58deg) rotateY(34deg) rotateZ(-22deg);
+  }
+  49% {
+    transform: translate3d(var(--drift-2), 50vh, -8px) rotateX(24deg) rotateY(-26deg) rotateZ(26deg);
+  }
+  73% {
+    transform: translate3d(var(--drift-3), 78vh, 6px) rotateX(62deg) rotateY(28deg) rotateZ(-28deg);
+  }
+  93% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift-4), 114vh, 0) rotateX(30deg) rotateY(-18deg) rotateZ(20deg);
+  }
+}
+
+@keyframes petal-fall-b {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -18vh, -5px) rotateX(-24deg) rotateY(36deg) rotateZ(-10deg);
+  }
+  11% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  29% {
+    transform: translate3d(var(--drift-1), 27vh, 8px) rotateX(32deg) rotateY(-30deg) rotateZ(20deg);
+  }
+  53% {
+    transform: translate3d(var(--drift-2), 51vh, 2px) rotateX(-30deg) rotateY(42deg) rotateZ(-24deg);
+  }
+  76% {
+    transform: translate3d(var(--drift-3), 82vh, -10px) rotateX(38deg) rotateY(-34deg) rotateZ(22deg);
+  }
+  91% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift-4), 118vh, 0) rotateX(-26deg) rotateY(38deg) rotateZ(-12deg);
+  }
+}
+
+@keyframes petal-fall-c {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -12vh, 6px) rotateX(32deg) rotateY(-28deg) rotateZ(14deg);
+  }
+  6% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  21% {
+    transform: translate3d(var(--drift-1), 17vh, -8px) rotateX(-16deg) rotateY(30deg) rotateZ(-22deg);
+  }
+  47% {
+    transform: translate3d(var(--drift-2), 48vh, 10px) rotateX(38deg) rotateY(-24deg) rotateZ(26deg);
+  }
+  67% {
+    transform: translate3d(var(--drift-3), 69vh, 1px) rotateX(-20deg) rotateY(26deg) rotateZ(-24deg);
+  }
+  94% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift-4), 112vh, -4px) rotateX(34deg) rotateY(-22deg) rotateZ(18deg);
+  }
+}
+
+@keyframes petal-fall-d {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -16vh, -6px) rotateX(-14deg) rotateY(44deg) rotateZ(-20deg);
+  }
+  9% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  33% {
+    transform: translate3d(var(--drift-1), 34vh, 5px) rotateX(36deg) rotateY(-38deg) rotateZ(24deg);
+  }
+  58% {
+    transform: translate3d(var(--drift-2), 57vh, -9px) rotateX(-22deg) rotateY(46deg) rotateZ(-28deg);
+  }
+  78% {
+    transform: translate3d(var(--drift-3), 86vh, 9px) rotateX(42deg) rotateY(-34deg) rotateZ(26deg);
+  }
+  92% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift-4), 116vh, 0) rotateX(-18deg) rotateY(40deg) rotateZ(-22deg);
+  }
+}
+
+@keyframes petal-fall-e {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -15vh, 9px) rotateX(44deg) rotateY(-10deg) rotateZ(22deg);
+  }
+  7% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  19% {
+    transform: translate3d(var(--drift-1), 16vh, -7px) rotateX(18deg) rotateY(38deg) rotateZ(-24deg);
+  }
+  41% {
+    transform: translate3d(var(--drift-2), 45vh, 11px) rotateX(50deg) rotateY(-20deg) rotateZ(28deg);
+  }
+  64% {
+    transform: translate3d(var(--drift-3), 66vh, -4px) rotateX(14deg) rotateY(34deg) rotateZ(-26deg);
+  }
+  83% {
+    transform: translate3d(var(--drift-2), 89vh, 7px) rotateX(46deg) rotateY(-16deg) rotateZ(24deg);
+  }
+  95% {
+    opacity: calc(var(--item-opacity) * var(--alpha-scale));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift-4), 115vh, 0) rotateX(20deg) rotateY(30deg) rotateZ(-20deg);
+  }
+}
+
+@media (max-width: 1439px) {
+  .density-full {
+    display: none;
+  }
+}
+
+@media (max-width: 820px) {
+  .botanical-layer {
+    --motion-scale: 1.06;
+    --alpha-scale: 0.92;
+  }
+
+  body.inner-page .botanical-layer {
+    --motion-scale: 1.12;
+    --alpha-scale: 0.72;
+  }
+
+  .density-wide {
+    display: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .botanical-layer {
+    --motion-scale: 1.12;
+    --alpha-scale: 0.88;
+  }
+
+  body.inner-page .botanical-layer {
+    --motion-scale: 1.18;
+    --alpha-scale: 0.68;
+  }
+
+  .density-compact {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .botanical-layer,
+  #fx {
+    display: none;
+  }
+}
