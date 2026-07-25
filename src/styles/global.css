@@ -28,6 +28,10 @@
   --line: rgb(83 79 70 / 18%);
   --line-strong: rgb(83 79 70 / 32%);
   --shadow: rgb(62 54 43 / 12%);
+  --page-background:
+    radial-gradient(circle at 12% 8%, rgb(255 255 255 / 72%), transparent 25%),
+    radial-gradient(circle at 88% 26%, rgb(255 255 255 / 48%), transparent 22%),
+    linear-gradient(180deg, var(--paper-light) 0%, var(--paper) 44%, #eee8dc 100%);
   --page-width: 1220px;
   --side-space: clamp(18px, 5vw, 72px);
   --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", SimSun, serif;
@@ -61,6 +65,10 @@ html[data-theme="night"] {
   --line: rgb(233 226 208 / 16%);
   --line-strong: rgb(233 226 208 / 30%);
   --shadow: rgb(0 0 0 / 45%);
+  --page-background:
+    radial-gradient(circle at 12% 8%, rgb(233 226 208 / 5%), transparent 25%),
+    radial-gradient(circle at 88% 26%, rgb(233 226 208 / 4%), transparent 22%),
+    linear-gradient(180deg, var(--paper-light) 0%, var(--paper) 44%, #131411 100%);
   --petal: 176 108 116;
 }
 
@@ -76,26 +84,20 @@ html {
   background: var(--paper);
 }
 
+html.is-changing {
+  scroll-behavior: auto;
+}
+
 body {
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
   color: var(--ink);
-  background:
-    radial-gradient(circle at 12% 8%, rgb(255 255 255 / 72%), transparent 25%),
-    radial-gradient(circle at 88% 26%, rgb(255 255 255 / 48%), transparent 22%),
-    linear-gradient(180deg, var(--paper-light) 0%, var(--paper) 44%, #eee8dc 100%);
+  background: var(--page-background);
   line-height: 1.8;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   transition: color 0.6s ease, background-color 0.6s ease;
-}
-
-html[data-theme="night"] body {
-  background:
-    radial-gradient(circle at 12% 8%, rgb(233 226 208 / 5%), transparent 25%),
-    radial-gradient(circle at 88% 26%, rgb(233 226 208 / 4%), transparent 22%),
-    linear-gradient(180deg, var(--paper-light) 0%, var(--paper) 44%, #131411 100%);
 }
 
 body::after {

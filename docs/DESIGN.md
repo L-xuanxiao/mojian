@@ -180,7 +180,8 @@
 ## 6. 动效与性能
 
 - 首屏和滚动 reveal 动画约 `300ms`。
-- 首载 loader：整页宣纸遮罩，「墨」「笺」逐字显现加墨晕，同时等待页面与 Noto Serif SC 400、Ma Shan Zheng 400 就绪，最短停留约 900ms；失败或慢网由 `2.6s` 硬超时释放。仅在 `.js` 环境渲染，不参与 Swup 交换。
+- 首载 loader：整页宣纸遮罩，「墨」「笺」逐字显现加墨晕，同时等待页面与 Noto Serif SC 400、Ma Shan Zheng 400 就绪，最短停留约 900ms；失败或慢网由 `2.6s` 硬超时释放，退场使用 `280ms` 纸色淡化。仅在 `.js` 环境渲染，不参与 Swup 交换。
+- Swup 跨页换页由 `src/components/layout/PageTransition.astro` 集中管理：旧页面保持不透明，固定墨纸遮幕以原生 WAAPI 在 `120ms` 内覆盖视口，内容交换与滚动归零藏在遮幕下，再以 `160ms` 揭开新页；遮幕与 body、loader 共用 `--page-background`，中止访问时统一取消并复位。`prefers-reduced-motion` 时回退为短纸色淡化，不引入动画依赖。
 - 全局氛围动效由 `src/components/layout/InkEffects.astro` 集中管理：竹叶与花瓣的形态、景深、昼夜配色、九套风向轨迹和响应式密度写在 `src/styles/InkEffects.css`，仅动画 `transform`（含独立 `rotate` 属性）与 `opacity`；首页使用完整花叶层，内页自动减半。`<canvas id="fx">` 只负责精细指针轨迹、轻烟、点击墨晕和定向墨滴，存在临时对象时才启动唯一 `requestAnimationFrame`，对象耗尽即停止并清屏。Canvas backing store 的 DPR 上限为 2，stamp / 烟丝 / 墨晕 / 墨滴分别硬封顶为 120 / 12 / 4 / 40；粗指针不显示移动轨迹，`prefers-reduced-motion` 时花叶层隐藏且 Canvas 停止并清空。当前原生 CSS 与 Canvas 2D 足以完成效果，不引入渲染依赖；只有需要持续流体模拟、自定义 GPU shader 或数百粒子时，才评估 GPU/流体库。
 - 昼夜切换经 View Transitions 从新主题按钮中心圆形扩散：`600ms`、`linear` 匀速（ease-in-out 的中段加速会被感知为突变）；snapshot containing block 是视口盒，圆心以按钮中心相对视口宽高的百分比表示，半径为圆心到最远视口角的距离加 `2px` 抗锯齿余量，再按 `circle()` 的归一化对角线（`hypot(width, height) / sqrt(2)`）换算为百分比，起终关键帧统一使用百分比，避免 Chrome 合成线程在系统显示缩放下错配长度与快照坐标；切换前以 `scrollTo(behavior:'instant')` 钉住进行中的平滑/惯性滚动，防捕获与测量滚动位置不一致导致圆心上偏；扩散期间经 `html.theme-vt` 关闭 body 颜色交叉淡化（防快照整页重栅格卡顿、保证边界锐利）；`prefers-reduced-motion` 或浏览器不支持时回退瞬时切换。
 - 滚动进度条与回顶按钮仅使用 `opacity`/`transform`，不参与布局。

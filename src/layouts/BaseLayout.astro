@@ -1,5 +1,6 @@
 ---
 import InkEffects from '../components/layout/InkEffects.astro';
+import PageTransition from '../components/layout/PageTransition.astro';
 import SiteFooter from '../components/layout/SiteFooter.astro';
 import SiteHeader from '../components/layout/SiteHeader.astro';
 import { siteConfig } from '../config/siteConfig';
@@ -60,22 +61,13 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
       </div>
     </div>
 
+    <PageTransition />
     <InkEffects />
     <div class="scroll-progress" aria-hidden="true"><i id="scrollBar"></i></div>
 
     <a class="skip-link" href="#main-content">跳到正文</a>
     <SiteHeader />
     <style>
-      /* Swup 换页淡入淡出（reduced-motion 由全局规则压平） */
-      .transition-swup-fade {
-        transition: opacity 220ms ease;
-        opacity: 1;
-      }
-
-      html.is-animating .transition-swup-fade {
-        opacity: 0;
-      }
-
       /* ============ 首载动画 ============ */
       #loader {
         position: fixed;
@@ -83,8 +75,8 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
         inset: 0;
         display: none;
         place-items: center;
-        background: var(--paper);
-        transition: opacity 0.7s ease, visibility 0.7s;
+        background: var(--page-background);
+        transition: opacity 280ms cubic-bezier(0.23, 1, 0.32, 1), visibility 280ms;
       }
 
       :global(.js) #loader {
@@ -227,7 +219,7 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
       }
 
     </style>
-    <main id="main-content" class="transition-swup-fade" data-pagefind-body>
+    <main id="main-content" data-pagefind-body>
       <slot />
     </main>
     <SiteFooter />
@@ -313,7 +305,7 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
           setTimeout(() => {
             loader.classList.add('done');
             document.body.classList.add('loaded');
-            setTimeout(() => loader.remove(), 800);
+            setTimeout(() => loader.remove(), 320);
           }, wait);
         };
         const pageReady = document.readyState === 'complete'

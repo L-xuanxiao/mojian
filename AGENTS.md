@@ -29,6 +29,12 @@
 - `src/styles/global.css`：全局主题变量、基础样式与 `.reveal` 滚动显现工具类；`src/styles/typography.css`：全站字体分配唯一出处（body 默认 serif、表单继承、文字角色）；`src/assets/`：源码资源。
 - 视觉规则见 [docs/DESIGN.md](docs/DESIGN.md)。
 
+## 组件化与模块化
+
+- 项目按职责组织组件和模块。后续开发中，若拆分能让职责更清晰，并提升维护、复用或扩展效率，应优先沿用现有目录结构拆成独立组件或模块。
+- 单处使用且与所属组件强耦合的结构、样式和脚本应就近共置；避免为形式上的组件化制造空壳组件、单实现抽象或过细文件。
+- 新增实现前先检查现有组件与模块，能复用或扩展既有能力时，不重复创建同类实现。
+
 ## 提交规范
 
 - 使用 Conventional Commits：`feat:` / `fix:` / `refactor:` / `style:` / `docs:` / `chore:`。

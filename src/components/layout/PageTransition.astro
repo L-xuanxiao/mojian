@@ -1,0 +1,148 @@
+<div id="page-transition" aria-hidden="true"></div>
+
+<style>
+  #page-transition {
+    position: fixed;
+    z-index: 1800;
+    inset: 0;
+    visibility: hidden;
+    pointer-events: none;
+    background: var(--page-background);
+    opacity: 1;
+    transform: translate3d(-104%, 0, 0);
+  }
+
+  #page-transition::before {
+    position: absolute;
+    inset: 0;
+    content: '';
+    background:
+      radial-gradient(circle at 18% 24%, rgb(79 87 80 / 8%), transparent 28%),
+      radial-gradient(circle at 78% 68%, rgb(164 68 52 / 5%), transparent 24%);
+  }
+
+  #page-transition::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 38px;
+    content: '';
+    background: linear-gradient(90deg, transparent, rgb(63 72 65 / 7%) 52%, rgb(63 72 65 / 24%));
+  }
+
+  :global(html[data-theme='night']) #page-transition::before {
+    background:
+      radial-gradient(circle at 18% 24%, rgb(233 226 208 / 6%), transparent 28%),
+      radial-gradient(circle at 78% 68%, rgb(217 107 88 / 5%), transparent 24%);
+  }
+
+  :global(html[data-theme='night']) #page-transition::after {
+    background: linear-gradient(90deg, transparent, rgb(178 192 173 / 6%) 52%, rgb(178 192 173 / 20%));
+  }
+</style>
+
+<script is:inline data-swup-ignore-script>
+  (() => {
+    const veil = document.getElementById('page-transition');
+    if (!(veil instanceof HTMLElement) || veil.dataset.initialized === 'true') return;
+    veil.dataset.initialized = 'true';
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const hiddenTransform = 'translate3d(-104%, 0, 0)';
+    const coveredTransform = 'translate3d(0, 0, 0)';
+    const revealedTransform = 'translate3d(104%, 0, 0)';
+    const easing = 'cubic-bezier(0.23, 1, 0.32, 1)';
+    let activeAnimation = null;
+
+    const cancelActive = () => {
+      if (!activeAnimation) return;
+      activeAnimation.cancel();
+      activeAnimation = null;
+    };
+
+    const reset = () => {
+      cancelActive();
+      veil.style.visibility = 'hidden';
+      veil.style.opacity = '1';
+      veil.style.transform = hiddenTransform;
+    };
+
+    const animate = async (keyframes, options, finalStyles) => {
+      cancelActive();
+      const animation = veil.animate(keyframes, { fill: 'forwards', ...options });
+      activeAnimation = animation;
+      let completed = false;
+      try {
+        await animation.finished;
+        completed = true;
+      } catch {
+        // Swup 中止当前 visit 时 WAAPI finished 会 reject，复位由 visit:abort 统一处理。
+      } finally {
+        if (activeAnimation === animation) {
+          if (completed) Object.assign(veil.style, finalStyles);
+          animation.cancel();
+          activeAnimation = null;
+        }
+      }
+    };
+
+    const cover = async () => {
+      veil.style.visibility = 'visible';
+      if (reduceMotion.matches) {
+        veil.style.transform = coveredTransform;
+        veil.style.opacity = '0';
+        await animate(
+          [{ opacity: 0 }, { opacity: 1 }],
+          { duration: 80, easing },
+          { opacity: '1' }
+        );
+        return;
+      }
+
+      veil.style.opacity = '1';
+      veil.style.transform = hiddenTransform;
+      await animate(
+        [{ transform: hiddenTransform }, { transform: coveredTransform }],
+        { duration: 120, easing },
+        { transform: coveredTransform }
+      );
+    };
+
+    const reveal = async () => {
+      if (reduceMotion.matches) {
+        await animate(
+          [{ opacity: 1 }, { opacity: 0 }],
+          { duration: 100, easing },
+          { opacity: '0' }
+        );
+      } else {
+        await animate(
+          [{ transform: coveredTransform }, { transform: revealedTransform }],
+          { duration: 160, easing },
+          { transform: revealedTransform }
+        );
+      }
+      reset();
+    };
+
+    const bind = (swup) => {
+      if (!swup?.hooks || veil.dataset.bound === 'true') return;
+      veil.dataset.bound = 'true';
+
+      swup.hooks.on('visit:start', (visit) => {
+        visit.animation.wait = true;
+      });
+      swup.hooks.replace('animation:out:await', cover);
+      swup.hooks.replace('animation:in:await', reveal);
+      swup.hooks.on('visit:abort', reset);
+      swup.hooks.on('visit:end', reset);
+    };
+
+    if (window.swup) {
+      bind(window.swup);
+    } else {
+      document.addEventListener('swup:enable', () => bind(window.swup), { once: true });
+    }
+  })();
+</script>
