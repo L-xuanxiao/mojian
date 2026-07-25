@@ -118,6 +118,28 @@ const activeKey = isHome
     width: min(calc(100% - 7vw), 1820px);
   }
 
+  /* 包角：书封布角垂在两端下缘，半遮武线如裹角 */
+  .site-header::before,
+  .site-header::after {
+    position: absolute;
+    bottom: -14px;
+    width: 14px;
+    height: 16px;
+    content: '';
+    pointer-events: none;
+    background: var(--moss-deep);
+  }
+
+  .site-header::before {
+    left: 0;
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+  }
+
+  .site-header::after {
+    right: 0;
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+  }
+
   .nav-shell {
     width: 100%;
     margin-inline: auto;
@@ -134,10 +156,25 @@ const activeKey = isHome
     padding: 0 22px;
     border-bottom: 1px solid var(--line);
     background-color: rgb(248 246 239 / 94%);
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.52' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='.15'/%3E%3C/svg%3E");
-    background-size: 220px 220px;
-    background-blend-mode: soft-light;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M1 23 V1 H23 V23 H7 V7 H17 V17 H13' fill='none' stroke='rgb(83,79,70)' stroke-opacity='.055'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.52' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='.15'/%3E%3C/svg%3E");
+    background-size: 24px 24px, 220px 220px;
+    background-blend-mode: normal, soft-light;
     transition: background-color 240ms ease, border-color 240ms ease;
+  }
+
+  /* 装订线脚：右端四道等距竖线，如线装书脊缝线 */
+  .nav-inner::after {
+    position: absolute;
+    top: 50%;
+    right: 66px;
+    width: 26px;
+    height: 10px;
+    content: '';
+    pointer-events: none;
+    background: repeating-linear-gradient(90deg, var(--line-strong) 0 1px, transparent 1px 7px);
+    transform: translateY(-50%);
   }
 
   /* 武线：文线（border）下隔 3px 再压一道粗的，合成古籍版框文武边 */
@@ -161,13 +198,18 @@ const activeKey = isHome
     background: rgb(83 79 70 / 45%);
   }
 
+  /* 题签：线装书封面左上贴的签条，字标与印章同列其中 */
   .brand {
     display: inline-flex;
     align-items: center;
     gap: 11px;
     flex: 0 0 auto;
-    padding-right: 22px;
-    border-right: 1px solid var(--line);
+    margin: 10px 0;
+    padding: 7px 18px 7px 14px;
+    border: 1px solid var(--line-strong);
+    background: var(--paper-light);
+    box-shadow: 1px 2px 5px rgb(62 54 43 / 10%);
+    transform: rotate(-1deg);
     font-size: 1.28rem;
     font-weight: 600;
     letter-spacing: 0.16em;
@@ -407,6 +449,14 @@ const activeKey = isHome
   /* ============ 夜色覆盖 ============ */
   :global(html[data-theme='night']) .nav-inner {
     background-color: rgb(31 32 28 / 94%);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M1 23 V1 H23 V23 H7 V7 H17 V17 H13' fill='none' stroke='rgb(233,226,208)' stroke-opacity='.05'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.52' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='.15'/%3E%3C/svg%3E");
+  }
+
+  :global(html[data-theme='night']) .site-header::before,
+  :global(html[data-theme='night']) .site-header::after {
+    background: #101110;
   }
 
   :global(html[data-theme='night']) .site-header.is-scrolled .nav-inner {
@@ -435,9 +485,10 @@ const activeKey = isHome
       display: block;
     }
 
-    .brand {
-      padding-right: 0;
-      border-right: 0;
+    .site-header::before,
+    .site-header::after,
+    .nav-inner::after {
+      content: none;
     }
   }
 
@@ -460,6 +511,7 @@ const activeKey = isHome
 
     .brand {
       gap: 7px;
+      padding: 6px 12px 6px 10px;
       font-size: 1.05rem;
       letter-spacing: 0.08em;
     }
