@@ -57,7 +57,7 @@ const lqip = post.data.cover
       <slot />
     </div>
 
-    <a class="back-link" href={`${BASE}#articles`}>返回笺录</a>
+    <a class="back-link" href={`${BASE}#articles`} data-page-transition-direction="backward">返回笺录</a>
 
     {(newerPost || olderPost) && (
       <nav class="post-nav" aria-label="文章翻页">

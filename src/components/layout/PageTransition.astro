@@ -31,6 +31,12 @@
     background: linear-gradient(90deg, transparent, rgb(63 72 65 / 7%) 52%, rgb(63 72 65 / 24%));
   }
 
+  #page-transition[data-direction='backward']::after {
+    right: auto;
+    left: 0;
+    transform: scaleX(-1);
+  }
+
   :global(html[data-theme='night']) #page-transition::before {
     background:
       radial-gradient(circle at 18% 24%, rgb(233 226 208 / 6%), transparent 28%),
@@ -49,11 +55,15 @@
     veil.dataset.initialized = 'true';
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const hiddenTransform = 'translate3d(-104%, 0, 0)';
+    const hiddenLeftTransform = 'translate3d(-104%, 0, 0)';
+    const hiddenRightTransform = 'translate3d(104%, 0, 0)';
     const coveredTransform = 'translate3d(0, 0, 0)';
-    const revealedTransform = 'translate3d(104%, 0, 0)';
     const easing = 'cubic-bezier(0.23, 1, 0.32, 1)';
     let activeAnimation = null;
+    const scrollPositions = new Map();
+
+    const getLocationKey = ({ url, hash }) => `${url}${hash ?? ''}`;
+    const initialScrollRestoration = window.history.scrollRestoration;
 
     const cancelActive = () => {
       if (!activeAnimation) return;
@@ -65,7 +75,8 @@
       cancelActive();
       veil.style.visibility = 'hidden';
       veil.style.opacity = '1';
-      veil.style.transform = hiddenTransform;
+      veil.style.transform = hiddenLeftTransform;
+      veil.dataset.direction = 'forward';
     };
 
     const animate = async (keyframes, options, finalStyles) => {
@@ -87,7 +98,13 @@
       }
     };
 
-    const cover = async () => {
+    const getDirection = (visit) =>
+      visit.meta.pageTransitionDirection === 'backward' ? 'backward' : 'forward';
+
+    const cover = async (visit) => {
+      const direction = getDirection(visit);
+      const hiddenTransform = direction === 'backward' ? hiddenRightTransform : hiddenLeftTransform;
+      veil.dataset.direction = direction;
       veil.style.visibility = 'visible';
       if (reduceMotion.matches) {
         veil.style.transform = coveredTransform;
@@ -104,12 +121,14 @@
       veil.style.transform = hiddenTransform;
       await animate(
         [{ transform: hiddenTransform }, { transform: coveredTransform }],
-        { duration: 120, easing },
+        { duration: 200, easing },
         { transform: coveredTransform }
       );
     };
 
-    const reveal = async () => {
+    const reveal = async (visit) => {
+      const direction = getDirection(visit);
+      const revealedTransform = direction === 'backward' ? hiddenLeftTransform : hiddenRightTransform;
       if (reduceMotion.matches) {
         await animate(
           [{ opacity: 1 }, { opacity: 0 }],
@@ -119,7 +138,7 @@
       } else {
         await animate(
           [{ transform: coveredTransform }, { transform: revealedTransform }],
-          { duration: 160, easing },
+          { duration: 240, easing },
           { transform: revealedTransform }
         );
       }
@@ -129,9 +148,32 @@
     const bind = (swup) => {
       if (!swup?.hooks || veil.dataset.bound === 'true') return;
       veil.dataset.bound = 'true';
+      window.history.scrollRestoration = 'manual';
+      window.addEventListener(
+        'pagehide',
+        () => {
+          window.history.scrollRestoration = initialScrollRestoration;
+        },
+        { once: true }
+      );
 
+      swup.hooks.before('history:popstate', (visit) => {
+        visit.animation.animate = true;
+      });
       swup.hooks.on('visit:start', (visit) => {
+        scrollPositions.set(getLocationKey(visit.from), window.scrollY);
         visit.animation.wait = true;
+        const semanticBack = visit.trigger.el?.closest(
+          '[data-page-transition-direction="backward"]'
+        );
+        visit.meta.pageTransitionDirection =
+          visit.history.direction === 'backwards' || semanticBack ? 'backward' : 'forward';
+      });
+      swup.hooks.on('content:scroll', (visit) => {
+        if (!visit.history.popstate) return;
+        const storedPosition = scrollPositions.get(getLocationKey(visit.to));
+        if (storedPosition === undefined) return;
+        window.scrollTo({ top: storedPosition, left: 0, behavior: 'instant' });
       });
       swup.hooks.replace('animation:out:await', cover);
       swup.hooks.replace('animation:in:await', reveal);
