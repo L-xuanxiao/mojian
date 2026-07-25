@@ -6,7 +6,7 @@
 
 ## 技术与部署
 
-- Node.js 要求 `>=22.12.0`。项目为 Astro 7 静态站，使用 TypeScript 严格模式、Tailwind CSS 4、`astro-icon` 与 Material Symbols 图标集。
+- Node.js 要求 `>=22.12.0`。项目为 Astro 7 静态站，使用 TypeScript 严格模式、Tailwind CSS 4、`astro-icon` 与 Lucide 图标集。
 - GitHub Pages 站点基路径为 `/mojian/`，路由使用尾斜杠。站内链接和静态资源路径需兼容 `import.meta.env.BASE_URL`。
 - 推送到 `main` 后由 GitHub Actions 构建并部署 Pages。
 - `npm run build` 会在 `astro build` 后自动执行 `pagefind --site dist` 生成搜索索引（`dist/pagefind/`）；`/search/` 寻墨页依赖该索引，仅构建后可用，dev 模式下搜索框不工作。
@@ -14,7 +14,7 @@
 - 昼夜双主题：`localStorage("mj-theme")` 存偏好，`<head>` 内联脚本首绘前写入 `html[data-theme]` 避免闪烁；夜色变量集中在 `global.css` 的 `html[data-theme="night"]` 块，切换按钮经 document 级委托 `[data-theme-toggle]` 处理，支持 View Transitions 时新主题从按钮中心圆形扩散，`prefers-reduced-motion` 或不支持时回退瞬时切换。
 - 首载 loader、`#fx` 全局画布动效（花瓣/鼠标墨点/点击墨晕）、滚动进度条、回顶按钮均在 `BaseLayout`；reveal 隐藏态由 `.js` 根类门控，`prefers-reduced-motion` 时画布动效不启动，无 JS 时内容直接可见。
 - 字体由 `src/integrations/font-pipeline.mjs` 在最终 HTML 生成后按实际字符裁切：Fontsource 包仅作构建源，`subset-font` 输出哈希 WOFF2/CSS 并注入字体占位标记，禁止在组件或 `BaseLayout` 直接导入 Fontsource CSS。字体角色统一使用 `data-font-role="serif|cal|hand"`，分配规则只写在 `src/styles/typography.css`。
-- `astro-icon` 的 Material Symbols 图标须在 `astro.config.mjs` 的 `icon({include})` 白名单登记，新增图标未登记会构建报 `Unable to locate`。
+- `astro-icon` 的 Lucide 图标须在 `astro.config.mjs` 的 `icon({include})` 白名单登记，新增图标未登记会构建报 `Unable to locate`。
 
 ## 目录
 

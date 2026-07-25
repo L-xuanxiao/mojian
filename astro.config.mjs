@@ -36,13 +36,13 @@ export default defineConfig({
     }),
     icon({
       include: {
-        'material-symbols': [
-          'home-outline-rounded',
-          'article-outline-rounded',
-          'archive-outline-rounded',
-          'person-outline-rounded',
-          'edit-note-outline-rounded',
-          'menu-rounded'
+        lucide: [
+          'house',
+          'notebook-pen',
+          'scroll',
+          'mountain',
+          'feather',
+          'menu'
         ]
       }
     })
