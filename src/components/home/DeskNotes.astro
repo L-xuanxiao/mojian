@@ -1,0 +1,355 @@
+---
+// 首页「案头近况」：深墨过渡区，此刻状态 + 一页小记。样式自 index.astro 平移（scoped）。
+---
+
+<section class="section desk" aria-labelledby="desk-title">
+  <div class="shell">
+    <div class="section-heading reveal">
+      <div>
+        <p class="section-kicker" data-font-role="hand">ON THE DESK</p>
+        <h2 class="section-title" id="desk-title" data-font-role="cal">案头近况</h2>
+      </div>
+      <p class="section-note">不只保存已经写完的文章，也留下正在发生的过程。墨色稍深，像夜里案上的一盏灯。</p>
+    </div>
+
+    <div class="desk-grid">
+      <article class="now-panel reveal">
+        <div class="panel-mark" aria-hidden="true" data-font-role="cal">今</div>
+        <div class="now-head">
+          <span>此刻</span>
+          <time datetime="2026-07-15">2026.07.15</time>
+        </div>
+        <div class="now-list">
+          <div class="now-row">
+            <span class="now-label" data-font-role="hand">正在做</span>
+            <strong>继续打磨墨笺的视觉与内容</strong>
+            <span class="now-state">进行中</span>
+          </div>
+          <div class="now-row">
+            <span class="now-label" data-font-role="hand">正在读</span>
+            <strong>山川、旧书与日常写作的零散笔记</strong>
+            <span class="now-state">缓慢读</span>
+          </div>
+          <div class="now-row">
+            <span class="now-label" data-font-role="hand">正在学</span>
+            <strong>用更少的元素，建立更稳定的页面秩序</strong>
+            <span class="now-state">持续中</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="fragment-panel reveal">
+        <div class="fragment-art" aria-hidden="true">
+          <svg viewBox="0 0 540 310" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="deskSoft"><feGaussianBlur stdDeviation="3" /></filter>
+              <linearGradient id="deskMist" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#eef0e9" stop-opacity=".05" />
+                <stop offset="1" stop-color="#eef0e9" stop-opacity=".2" />
+              </linearGradient>
+            </defs>
+            <circle cx="402" cy="74" r="34" fill="#bd6756" fill-opacity=".24" />
+            <path d="M0 205C82 165 144 182 211 135C276 91 326 130 377 159C427 187 471 159 540 119V310H0Z" fill="url(#deskMist)" filter="url(#deskSoft)" />
+            <path d="M0 252C92 215 164 236 233 198C302 161 356 206 410 226C452 241 497 223 540 202V310H0Z" fill="#eef0e9" fill-opacity=".075" />
+            <path d="M76 260C142 234 199 242 256 220C326 193 378 219 440 241C476 253 508 247 540 234" fill="none" stroke="#eef0e9" stroke-opacity=".17" />
+            <path d="M92 202V72M92 72H320M320 72V205" fill="none" stroke="#eef0e9" stroke-opacity=".2" stroke-width="2" />
+            <path d="M207 72V202" fill="none" stroke="#eef0e9" stroke-opacity=".12" />
+            <path d="M430 238l7-38 6 38zm12 1 5-29 5 29z" fill="#eef0e9" fill-opacity=".16" />
+          </svg>
+        </div>
+        <div class="fragment-copy">
+          <p class="fragment-label">一页小记</p>
+          <blockquote>写作并不总是为了给出答案。很多时候，它只是把走过的路重新照亮。</blockquote>
+          <p class="fragment-source">—— 记于墨笺之间</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  .desk {
+    position: relative;
+    color: rgba(248, 246, 239, 0.92);
+    background:
+      radial-gradient(ellipse at 18% 38%, rgba(255,255,255,0.045), transparent 33%),
+      radial-gradient(ellipse at 80% 12%, rgba(164,68,52,0.08), transparent 22%),
+      linear-gradient(135deg, #3d4540, #303531 60%, #3a403b);
+    overflow: hidden;
+  }
+
+  .desk::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.22;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='d'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.46' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23d)' opacity='.6'/%3E%3C/svg%3E");
+    mix-blend-mode: soft-light;
+  }
+
+  .desk::after {
+    content: "";
+    position: absolute;
+    right: -7%;
+    bottom: -22%;
+    width: min(50vw, 760px);
+    aspect-ratio: 1.4;
+    border-radius: 50%;
+    border: 1px solid rgba(235, 232, 222, 0.08);
+    box-shadow:
+      0 0 0 34px rgba(235,232,222,0.025),
+      0 0 0 82px rgba(235,232,222,0.015);
+    transform: rotate(-8deg);
+  }
+
+  .desk .section-kicker {
+    color: #ce8b7e;
+  }
+
+  .desk .section-title {
+    color: #f1eee6;
+  }
+
+  .desk .section-note {
+    color: rgba(242, 239, 230, 0.64);
+  }
+
+  .desk-grid {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.8fr);
+    gap: clamp(32px, 5vw, 70px);
+  }
+
+  .now-panel,
+  .fragment-panel {
+    position: relative;
+    min-width: 0;
+    border-top: 1px solid rgba(240, 236, 226, 0.2);
+    border-bottom: 1px solid rgba(240, 236, 226, 0.1);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .now-panel {
+    padding: 30px 34px 18px;
+  }
+
+  .panel-mark {
+    position: absolute;
+    right: 26px;
+    top: -20px;
+    width: 42px;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    color: rgba(248, 238, 229, 0.94);
+    background: var(--cinnabar);
+    border: 1px solid rgba(118, 42, 33, 0.8);
+    transform: rotate(4deg);
+  }
+
+  .now-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+    padding-bottom: 20px;
+    color: rgba(247,244,235,0.9);
+  }
+
+  .now-head span {
+    font-size: 1.1rem;
+    letter-spacing: 0.15em;
+  }
+
+  .now-head time {
+    color: rgba(247,244,235,0.45);
+    font-size: 0.78rem;
+  }
+
+  .now-list {
+    border-top: 1px solid rgba(240, 236, 226, 0.12);
+  }
+
+  .now-row {
+    display: grid;
+    grid-template-columns: 78px minmax(0, 1fr) 64px;
+    gap: 20px;
+    align-items: center;
+    min-height: 92px;
+    border-bottom: 1px solid rgba(240, 236, 226, 0.08);
+  }
+
+  .now-label {
+    color: #d79a8d;
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+  }
+
+  .now-row strong {
+    color: rgba(248,246,239,0.88);
+    font-size: 1.02rem;
+    font-weight: 400;
+    line-height: 1.7;
+  }
+
+  .now-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    justify-self: end;
+    color: rgba(248,246,239,0.43);
+    font-size: 0.74rem;
+  }
+
+  .now-state::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #d79a8d;
+    opacity: 0.7;
+  }
+
+  .fragment-panel {
+    display: grid;
+    grid-template-rows: 210px 1fr;
+    overflow: hidden;
+  }
+
+  .fragment-art {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(240,236,226,0.12);
+  }
+
+  .fragment-art svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .fragment-copy {
+    padding: 26px 30px 30px;
+  }
+
+  .fragment-label {
+    margin: 0 0 12px;
+    color: #d79a8d;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+  }
+
+  .fragment-copy blockquote {
+    margin: 0;
+    color: rgba(248,246,239,0.88);
+    font-size: clamp(1.1rem, 1.8vw, 1.35rem);
+    line-height: 1.9;
+  }
+
+  .fragment-source {
+    margin: 18px 0 0;
+    color: rgba(248,246,239,0.4);
+    font-size: 0.78rem;
+    text-align: right;
+  }
+
+  /* ≥821px：home-layout 网格语境下的归属与覆盖 */
+  @media (min-width: 821px) {
+    :global(.home-layout) > .desk {
+      grid-area: desk;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    :global(.home-layout) .desk .section-heading,
+    :global(.home-layout) .desk-grid {
+      grid-template-columns: 1fr;
+    }
+
+    :global(.home-layout) .desk .section-heading {
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    :global(.home-layout) .desk-grid {
+      gap: 24px;
+    }
+
+    :global(.home-layout) .desk .section-title {
+      font-size: clamp(2rem, 2.8vw, 2.65rem);
+    }
+
+    :global(.home-layout) .desk .now-panel {
+      padding: 24px 20px 14px;
+    }
+
+    :global(.home-layout) .desk .now-row {
+      grid-template-columns: 1fr;
+      gap: 5px;
+      padding: 15px 0;
+    }
+
+    :global(.home-layout) .desk .now-state {
+      justify-self: start;
+    }
+
+    :global(.home-layout) .desk .fragment-panel {
+      grid-template-rows: 140px 1fr;
+    }
+
+    :global(.home-layout) .desk .fragment-copy {
+      padding: 20px;
+    }
+  }
+
+  /* ============ 响应式 ============ */
+  @media (max-width: 1080px) {
+    .desk-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .fragment-panel {
+      grid-template-columns: minmax(300px, 0.85fr) minmax(0, 1fr);
+      grid-template-rows: auto;
+    }
+
+    .fragment-art {
+      min-height: 300px;
+      border-right: 1px solid rgba(240,236,226,0.12);
+      border-bottom: 0;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .now-panel {
+      padding: 26px 18px 12px;
+    }
+
+    .now-row {
+      grid-template-columns: 64px minmax(0, 1fr);
+      gap: 12px;
+      padding: 18px 0;
+    }
+
+    .now-state {
+      grid-column: 2;
+      justify-self: start;
+    }
+
+    .fragment-panel {
+      grid-template-columns: 1fr;
+    }
+
+    .fragment-art {
+      min-height: 220px;
+      border-right: 0;
+      border-bottom: 1px solid rgba(240,236,226,0.12);
+    }
+
+    .fragment-copy {
+      padding: 24px 20px 28px;
+    }
+  }
+</style>

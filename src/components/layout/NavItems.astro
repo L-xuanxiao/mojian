@@ -1,0 +1,183 @@
+---
+import { Icon } from 'astro-icon/components';
+
+interface NavLinkItem {
+  key: string;
+  label: string;
+  icon: string;
+  ariaLabel: string;
+  path: string;
+  href: string;
+}
+
+interface Props {
+  items: NavLinkItem[];
+  activeKey: string;
+  /** 移动端面板模式：去掉桌面 aria-label，样式由 .nav-mobile-panel 上下文覆盖 */
+  mobile?: boolean;
+}
+
+const { items, activeKey, mobile = false } = Astro.props;
+---
+
+<ul class="nav-list">
+  {items.map((item) => (
+    <li>
+      <a
+        class="nav-link"
+        href={item.href}
+        aria-current={item.key === activeKey ? 'page' : undefined}
+        aria-label={mobile ? undefined : item.ariaLabel}
+        data-no-swup={item.path === 'guestbook/' ? true : undefined}
+      >
+        <Icon class="nav-icon" name={item.icon} />
+        {item.label}
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .nav-list {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    color: var(--ink-soft);
+    font-size: 0.94rem;
+    list-style: none;
+  }
+
+  :global(.nav-desktop) .nav-list > li {
+    display: flex;
+    align-items: center;
+  }
+
+  /* 朱丝栏：相邻链接间一道竖细线，如线装书界行 */
+  :global(.nav-desktop) .nav-list > li + li::before {
+    width: 1px;
+    height: 14px;
+    margin-inline: 4px;
+    content: '';
+    background: var(--line);
+  }
+
+  .nav-link {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    transition: color 200ms ease;
+  }
+
+  /* 悬停：字上一点朱砂圈点 */
+  .nav-link::after {
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    content: '';
+    background: var(--cinnabar);
+    transform: translateX(-50%) scale(0);
+    transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .nav-link:hover {
+    color: var(--ink);
+  }
+
+  .nav-link:hover::after {
+    transform: translateX(-50%) scale(1);
+  }
+
+  /* 当前页：一枚微斜朱砂小印盖在字后 */
+  .nav-link::before {
+    position: absolute;
+    z-index: -1;
+    inset: 7px;
+    content: '';
+    background: var(--cinnabar);
+    border: 1px solid var(--cinnabar-deep);
+    box-shadow: inset 0 0 0 2px rgb(255 255 255 / 14%);
+    opacity: 0;
+    transform: rotate(-3deg) scale(0.86);
+    transition: opacity 220ms ease, transform 260ms var(--ease);
+  }
+
+  .nav-link[aria-current='page'] {
+    color: var(--paper-light);
+  }
+
+  .nav-link[aria-current='page']::before {
+    opacity: 1;
+    transform: rotate(-3deg) scale(1);
+  }
+
+  .nav-link[aria-current='page']::after {
+    content: none;
+  }
+
+  .nav-link[aria-current='page'] .nav-icon {
+    color: var(--paper-light);
+  }
+
+  .nav-link:active {
+    transform: scale(0.98);
+  }
+
+  .nav-icon {
+    width: 19px;
+    height: 19px;
+    flex: 0 0 auto;
+    color: var(--moss-deep);
+  }
+
+  /* ============ 移动端面板上下文 ============ */
+  :global(.nav-mobile-panel) .nav-list {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  /* 面板内界行改为横细线 */
+  :global(.nav-mobile-panel) .nav-list > li + li {
+    border-top: 1px solid var(--line);
+  }
+
+  :global(.nav-mobile-panel) .nav-link {
+    width: 100%;
+  }
+
+  :global(.nav-mobile-panel) .nav-link::after {
+    top: 50%;
+    left: 6px;
+    transform: translateY(-50%) scale(0);
+  }
+
+  :global(.nav-mobile-panel) .nav-link:hover::after {
+    transform: translateY(-50%) scale(1);
+  }
+
+  /* 面板印章整行平盖，不斜 */
+  :global(.nav-mobile-panel) .nav-link::before {
+    inset: 5px 8px;
+    transform: scale(0.92);
+  }
+
+  :global(.nav-mobile-panel) .nav-link[aria-current='page']::before {
+    transform: scale(1);
+  }
+
+  @media (max-width: 620px) {
+    .nav-list {
+      font-size: 0.9rem;
+    }
+  }
+</style>

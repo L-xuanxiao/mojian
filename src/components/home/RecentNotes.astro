@@ -1,0 +1,102 @@
+---
+// 首页「近来所记」：手卷文章流 + 全部文章入口。样式自 index.astro 平移（scoped）。
+import type { CollectionEntry } from 'astro:content';
+import ScrollPostCard from './ScrollPostCard.astro';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+}
+
+const { posts } = Astro.props;
+const BASE = import.meta.env.BASE_URL;
+---
+
+<section class="section latest" id="articles" aria-labelledby="latest-title">
+  <div class="shell">
+    <div class="section-heading reveal">
+      <div>
+        <p class="section-kicker" data-font-role="hand">RECENT NOTES</p>
+        <h2 class="section-title" id="latest-title" data-font-role="cal">近来所记</h2>
+      </div>
+      <p class="section-note">新札三卷，横陈案上。行旅、日常与旧书各成一卷，也把远山与墨痕留在纸面。</p>
+    </div>
+
+    <div class="scroll-list" id="archive">
+      {posts.map((post, index) => (
+        <ScrollPostCard post={post} index={index} />
+      ))}
+    </div>
+    <div class="all-posts reveal">
+      <a href={`${BASE}archive/`}>查看全部文章</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .latest {
+    background:
+      radial-gradient(ellipse at 100% 22%, rgba(73, 82, 74, 0.08), transparent 27%),
+      radial-gradient(ellipse at 0% 76%, rgba(73, 82, 74, 0.055), transparent 28%),
+      rgba(250, 248, 242, 0.72);
+  }
+
+  .scroll-list {
+    position: relative;
+    scroll-margin-top: 92px;
+    display: grid;
+    gap: clamp(24px, 2.4vw, 30px);
+  }
+
+  .scroll-list::before {
+    content: "";
+    position: absolute;
+    left: 5%;
+    right: 5%;
+    top: -22px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--line-strong), transparent);
+  }
+
+  .all-posts {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 42px;
+  }
+
+  .all-posts a {
+    position: relative;
+    padding: 8px 30px 8px 0;
+    color: var(--ink-soft);
+    letter-spacing: 0.12em;
+  }
+
+  .all-posts a::before {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 20px;
+    height: 1px;
+    background: var(--cinnabar);
+    transition: width 260ms var(--ease);
+  }
+
+  .all-posts a:hover::before {
+    width: 28px;
+  }
+
+  /* ≥821px：home-layout 网格语境下的归属 */
+  @media (min-width: 821px) {
+    :global(.home-layout) > .latest {
+      grid-area: latest;
+    }
+  }
+
+  /* ============ 夜色覆盖 ============ */
+  :global(html[data-theme='night']) .latest {
+    background:
+      radial-gradient(ellipse at 100% 22%, rgba(233, 226, 208, 0.05), transparent 27%),
+      radial-gradient(ellipse at 0% 76%, rgba(233, 226, 208, 0.04), transparent 28%),
+      rgba(33, 34, 29, 0.66);
+  }
+</style>
