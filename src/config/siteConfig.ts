@@ -113,8 +113,6 @@ export const siteConfig = {
   postList: {
     /** 首页「近来所记」展示篇数 */
     recentCount: 3,
-    /** 卡片摘要截断行数 */
-    descriptionLines: 2,
     /** 无 description 时自动摘要截断字数 */
     excerptLength: 120,
     /** 卡片标签最多展示数 */
