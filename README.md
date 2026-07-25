@@ -20,7 +20,8 @@
 - Tailwind CSS 4
 - Swup（`@swup/astro`）与原生 WAAPI 页面过渡
 - Pagefind 静态搜索索引（构建时生成）
-- `astro-icon` 与 Material Symbols
+- `astro-icon` 与 Lucide 线性图标
+- 本地字体子集构建管线（`src/integrations/font-pipeline.mjs`，按实际字符裁切 WOFF2）
 - `@fontsource/noto-serif-sc`、`@fontsource/ma-shan-zheng`、`@fontsource/long-cang` 自托管字体
 - Astro Content Collections 管理 Markdown 文章
 
@@ -72,6 +73,7 @@ npm run preview
 - `src/components/`：按职责拆分组件；`layout/` 管理全站框架与动效，`home/` 放置首页专属组件，`common/` 放置跨页复用组件
 - `src/layouts/`：页面布局骨架，组合全站组件与页面内容
 - `src/plugins/`：remark 插件（自动摘要、字数与阅读时长）
+- `src/integrations/`：构建集成（字体子集管线）
 - `src/styles/`：全站主题与基础样式、字体分配，以及独立的花叶动效样式
 - `src/assets/`：源码图片资源
 - `docs/DESIGN.md`：全站视觉与响应式规范
