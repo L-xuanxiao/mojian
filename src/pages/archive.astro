@@ -142,7 +142,10 @@ const categorySlug = new Map(siteConfig.categories.map((cat) => [cat.key, cat.sl
   }
 
   .t-yearnum {
+    padding: 0 0.5em;
     color: var(--ink-faint);
+    /* 纸底小片遮住虚线，年份不再被线穿字 */
+    background: var(--paper);
     font-size: 0.92rem;
     letter-spacing: 0.24em;
   }

@@ -196,22 +196,16 @@ const categoryCounts = new Map(
     .action-primary {
       min-width: 126px;
       padding: 8px 20px;
-      color: var(--paper-light);
-      background: var(--ink);
+      color: var(--ink);
+      background: transparent;
       border: 1px solid var(--ink);
-    }
-
-    .action-primary::after {
-      content: "";
-      position: absolute;
-      inset: 4px;
-      border: 1px solid rgba(255,255,255,0.2);
     }
 
     .action-primary:hover {
       transform: translateY(-2px);
-      background: var(--moss-deep);
-      border-color: var(--moss-deep);
+      color: var(--paper-light);
+      background: var(--ink);
+      border-color: var(--ink);
     }
 
     .action-secondary {
@@ -249,7 +243,7 @@ const categoryCounts = new Map(
     .hero-vertical-copy {
       position: absolute;
       right: 4px;
-      top: 42px;
+      top: 28px;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -271,7 +265,7 @@ const categoryCounts = new Map(
     .hero-note {
       position: relative;
       width: 286px;
-      margin-right: 46px;
+      margin-right: 76px;
       padding: 28px 28px 26px;
       color: var(--ink-soft);
       background: rgba(249, 247, 240, 0.72);
@@ -610,9 +604,9 @@ const categoryCounts = new Map(
     .fragment-panel {
       position: relative;
       min-width: 0;
-      border-top: 1px solid rgba(240, 236, 226, 0.28);
-      border-bottom: 1px solid rgba(240, 236, 226, 0.12);
-      background: rgba(255,255,255,0.025);
+      border-top: 1px solid rgba(240, 236, 226, 0.2);
+      border-bottom: 1px solid rgba(240, 236, 226, 0.1);
+      background: rgba(255,255,255,0.02);
     }
 
     .now-panel {
@@ -662,12 +656,12 @@ const categoryCounts = new Map(
       gap: 20px;
       align-items: center;
       min-height: 92px;
-      border-bottom: 1px solid rgba(240, 236, 226, 0.11);
+      border-bottom: 1px solid rgba(240, 236, 226, 0.08);
     }
 
     .now-label {
       color: #d79a8d;
-      font-size: 0.78rem;
+      font-size: 0.95rem;
       letter-spacing: 0.08em;
     }
 
@@ -679,9 +673,21 @@ const categoryCounts = new Map(
     }
 
     .now-state {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
       justify-self: end;
       color: rgba(248,246,239,0.43);
       font-size: 0.74rem;
+    }
+
+    .now-state::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #d79a8d;
+      opacity: 0.7;
     }
 
     .fragment-panel {
@@ -947,10 +953,6 @@ const categoryCounts = new Map(
       stroke: #7d8577;
     }
 
-    :global(html[data-theme='night']) .action-primary::after {
-      border-color: rgba(233, 226, 208, 0.25);
-    }
-
     /* =========================
        动画
     ========================== */
@@ -1135,7 +1137,7 @@ const categoryCounts = new Map(
 
       .hero-note {
         width: 250px;
-        margin-right: 32px;
+        margin-right: 64px;
         padding: 24px;
       }
 
@@ -1513,17 +1515,17 @@ const categoryCounts = new Map(
             </div>
             <div class="now-list">
               <div class="now-row">
-                <span class="now-label">正在做</span>
+                <span class="now-label" data-font-role="hand">正在做</span>
                 <strong>继续打磨墨笺的视觉与内容</strong>
                 <span class="now-state">进行中</span>
               </div>
               <div class="now-row">
-                <span class="now-label">正在读</span>
+                <span class="now-label" data-font-role="hand">正在读</span>
                 <strong>山川、旧书与日常写作的零散笔记</strong>
                 <span class="now-state">缓慢读</span>
               </div>
               <div class="now-row">
-                <span class="now-label">正在学</span>
+                <span class="now-label" data-font-role="hand">正在学</span>
                 <strong>用更少的元素，建立更稳定的页面秩序</strong>
                 <span class="now-state">持续中</span>
               </div>
