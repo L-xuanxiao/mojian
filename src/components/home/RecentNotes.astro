@@ -75,14 +75,16 @@ const BASE = import.meta.env.BASE_URL;
     position: absolute;
     right: 0;
     top: 50%;
-    width: 20px;
+    width: 28px;
     height: 1px;
     background: var(--cinnabar);
-    transition: width 260ms var(--ease);
+    transform: scaleX(0.714);
+    transform-origin: right;
+    transition: transform 260ms var(--ease);
   }
 
   .all-posts a:hover::before {
-    width: 28px;
+    transform: scaleX(1);
   }
 
   /* ≥821px：home-layout 网格语境下的归属 */

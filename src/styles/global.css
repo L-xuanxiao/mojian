@@ -39,6 +39,7 @@
   --font-hand: "Long Cang", "Noto Serif SC", "Source Han Serif SC", "Songti SC", SimSun, serif;
   --sans: "MiSans", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   /* 花瓣颜色（rgb 三元组，供 canvas 拼透明度） */
   --petal: 214 142 150;
   background: var(--paper);

@@ -178,11 +178,17 @@ const BASE = import.meta.env.BASE_URL;
     border: 1px solid var(--ink);
   }
 
-  .action-primary:hover {
-    transform: translateY(-2px);
-    color: var(--paper-light);
-    background: var(--ink);
-    border-color: var(--ink);
+  @media (hover: hover) and (pointer: fine) {
+    .action-primary:hover {
+      transform: translateY(-2px);
+      color: var(--paper-light);
+      background: var(--ink);
+      border-color: var(--ink);
+    }
+  }
+
+  .action-primary:active {
+    transform: scale(0.97);
   }
 
   .action-secondary {
@@ -294,6 +300,7 @@ const BASE = import.meta.env.BASE_URL;
     line-height: 1.7;
     letter-spacing: 0.06em;
     text-decoration: none;
+    transition: color 200ms ease;
   }
 
   .hero-note-post:hover {

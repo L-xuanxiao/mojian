@@ -73,10 +73,10 @@ const { items, activeKey, mobile = false } = Astro.props;
     padding: 8px 12px;
     letter-spacing: 0.08em;
     text-decoration: none;
-    transition: color 200ms ease;
+    transition: color 200ms ease, transform 160ms ease-out;
   }
 
-  /* 悬停：字上一点朱砂圈点 */
+  /* 悬停：字上一点朱砂圈点（scale(0.5)+opacity 出生，不凭空蹦出） */
   .nav-link::after {
     position: absolute;
     top: 4px;
@@ -86,16 +86,21 @@ const { items, activeKey, mobile = false } = Astro.props;
     border-radius: 50%;
     content: '';
     background: var(--cinnabar);
-    transform: translateX(-50%) scale(0);
-    transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    opacity: 0;
+    transform: translateX(-50%) scale(0.5);
+    transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 200ms ease;
   }
 
   .nav-link:hover {
     color: var(--ink);
   }
 
-  .nav-link:hover::after {
-    transform: translateX(-50%) scale(1);
+  /* 触屏无假 hover：圈点弹出仅在精确指针下启用 */
+  @media (hover: hover) and (pointer: fine) {
+    .nav-link:hover::after {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
   }
 
   /* 当前页：一枚微斜朱砂小印盖在字后 */
@@ -158,11 +163,14 @@ const { items, activeKey, mobile = false } = Astro.props;
   :global(.nav-mobile-panel) .nav-link::after {
     top: 50%;
     left: 6px;
-    transform: translateY(-50%) scale(0);
+    transform: translateY(-50%) scale(0.5);
   }
 
-  :global(.nav-mobile-panel) .nav-link:hover::after {
-    transform: translateY(-50%) scale(1);
+  @media (hover: hover) and (pointer: fine) {
+    :global(.nav-mobile-panel) .nav-link:hover::after {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
   }
 
   /* 面板印章整行平盖，不斜 */

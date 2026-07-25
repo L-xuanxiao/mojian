@@ -73,16 +73,16 @@ const activeKey = isHome
   .site-header {
     position: fixed;
     z-index: 30;
-    top: 14px;
+    top: 8px;
     left: 50%;
     width: min(calc(100% - 9vw), 1860px);
-    transform: translateX(-50%);
-    transition: top 240ms ease, width 240ms ease;
+    transform: translateX(-50%) translateY(6px);
+    transition: transform 240ms ease;
   }
 
   .site-header.is-scrolled {
-    top: 8px;
     width: min(calc(100% - 7vw), 1820px);
+    transform: translateX(-50%) translateY(0);
   }
 
   /* 包角：书封布角垂在两端下缘，半遮武线如裹角 */
@@ -259,10 +259,16 @@ const activeKey = isHome
     transition: background 300ms ease, color 300ms ease, transform 300ms var(--ease);
   }
 
-  .theme-toggle:hover {
-    color: var(--paper-light);
-    background: var(--ink);
-    transform: rotate(8deg);
+  @media (hover: hover) and (pointer: fine) {
+    .theme-toggle:hover {
+      color: var(--paper-light);
+      background: var(--ink);
+      transform: rotate(8deg);
+    }
+  }
+
+  .theme-toggle:active {
+    transform: scale(0.97);
   }
 
   .theme-toggle .tt-night {
@@ -325,13 +331,14 @@ const activeKey = isHome
 
   @media (max-width: 620px) {
     .site-header {
-      top: 10px;
+      top: 6px;
       width: calc(100% - 20px);
+      transform: translateX(-50%) translateY(4px);
     }
 
     .site-header.is-scrolled {
-      top: 6px;
       width: calc(100% - 14px);
+      transform: translateX(-50%) translateY(0);
     }
 
     .nav-inner {

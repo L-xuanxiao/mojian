@@ -110,7 +110,6 @@ const filterId = `postSoft${index}`;
     margin-right: clamp(0px, 4vw, 54px);
   }
 
-  .article-scroll:hover,
   .article-scroll:focus-within {
     filter: drop-shadow(0 14px 24px rgba(63, 54, 41, 0.12));
   }
@@ -137,7 +136,6 @@ const filterId = `postSoft${index}`;
     transform: translateX(-9px);
   }
 
-  .article-scroll:hover .scroll-axis,
   .article-scroll:focus-within .scroll-axis {
     transform: translateX(0);
   }
@@ -196,7 +194,6 @@ const filterId = `postSoft${index}`;
     will-change: transform, clip-path;
   }
 
-  .article-scroll:hover .scroll-paper,
   .article-scroll:focus-within .scroll-paper {
     clip-path: polygon(2px 1%, 18% 0, 41% 1.1%, 64% 0.2%, 84% 1.2%, calc(100% - 2px) 0.5%, calc(100% - 2px) 99%, 78% 98.7%, 55% 100%, 31% 98.8%, 2px 100%);
     transform: scaleX(1);
@@ -240,9 +237,7 @@ const filterId = `postSoft${index}`;
     box-shadow: inset -6px 0 8px -2px rgba(80, 58, 35, 0.16), inset 4px 0 6px -2px rgba(255, 252, 244, 0.35), -6px 0 10px -2px rgba(86, 61, 36, 0.1);
   }
 
-  .article-scroll:hover .scroll-paper::before,
   .article-scroll:focus-within .scroll-paper::before,
-  .article-scroll:hover .scroll-paper::after,
   .article-scroll:focus-within .scroll-paper::after {
     transform: scaleX(0.6);
     opacity: 0.76;
@@ -362,7 +357,6 @@ const filterId = `postSoft${index}`;
     transition: color var(--scroll-motion), background-size var(--scroll-motion);
   }
 
-  .article-scroll:hover .post-title-text,
   .article-scroll:focus-within .post-title-text {
     color: #1f2420;
     background-size: 100% 1px;
@@ -406,8 +400,6 @@ const filterId = `postSoft${index}`;
     letter-spacing: 0.18em;
   }
 
-  .article-scroll:hover .post-main,
-  .article-scroll:hover .post-tags,
   .article-scroll:focus-within .post-main,
   .article-scroll:focus-within .post-tags {
     opacity: 1;
@@ -608,6 +600,45 @@ const filterId = `postSoft${index}`;
     }
   }
 
+  /* 触屏无假 hover：卷轴展开仅在精确指针下启用；键盘聚焦由 :focus-within 承担 */
+  @media (hover: hover) and (pointer: fine) {
+    .article-scroll:hover {
+      filter: drop-shadow(0 14px 24px rgba(63, 54, 41, 0.12));
+    }
+
+    .article-scroll:hover .scroll-axis {
+      transform: translateX(0);
+    }
+
+    .article-scroll:hover .scroll-paper {
+      clip-path: polygon(2px 1%, 18% 0, 41% 1.1%, 64% 0.2%, 84% 1.2%, calc(100% - 2px) 0.5%, calc(100% - 2px) 99%, 78% 98.7%, 55% 100%, 31% 98.8%, 2px 100%);
+      transform: scaleX(1);
+      box-shadow:
+        inset 16px 0 18px -8px rgba(99, 71, 40, 0.04),
+        inset -16px 0 18px -8px rgba(99, 71, 40, 0.035),
+        inset 0 7px 11px rgba(255,255,255,0.09),
+        inset 0 -7px 12px rgba(95, 71, 45, 0.032);
+    }
+
+    .article-scroll:hover .scroll-paper::before,
+    .article-scroll:hover .scroll-paper::after {
+      transform: scaleX(0.6);
+      opacity: 0.76;
+      box-shadow: inset 3px 0 5px rgba(102, 72, 41, 0.08);
+    }
+
+    .article-scroll:hover .post-title-text {
+      color: #1f2420;
+      background-size: 100% 1px;
+    }
+
+    .article-scroll:hover .post-main,
+    .article-scroll:hover .post-tags {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   /* 标题与印章字由全局字体角色分配 */
   .post-title {
     font-weight: 400;
@@ -618,7 +649,6 @@ const filterId = `postSoft${index}`;
     filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
   }
 
-  :global(html[data-theme='night']) .article-scroll:hover,
   :global(html[data-theme='night']) .article-scroll:focus-within {
     filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.45));
   }
@@ -641,7 +671,6 @@ const filterId = `postSoft${index}`;
       inset 0 -8px 13px rgba(0, 0, 0, 0.14);
   }
 
-  :global(html[data-theme='night']) .article-scroll:hover .scroll-paper,
   :global(html[data-theme='night']) .article-scroll:focus-within .scroll-paper {
     box-shadow:
       inset 16px 0 18px -8px rgba(0, 0, 0, 0.13),
@@ -664,9 +693,7 @@ const filterId = `postSoft${index}`;
     box-shadow: inset -6px 0 8px -2px rgba(0, 0, 0, 0.3), inset 4px 0 6px -2px rgba(233, 226, 208, 0.12), -6px 0 10px -2px rgba(0, 0, 0, 0.2);
   }
 
-  :global(html[data-theme='night']) .article-scroll:hover .scroll-paper::before,
   :global(html[data-theme='night']) .article-scroll:focus-within .scroll-paper::before,
-  :global(html[data-theme='night']) .article-scroll:hover .scroll-paper::after,
   :global(html[data-theme='night']) .article-scroll:focus-within .scroll-paper::after {
     box-shadow: inset 3px 0 5px rgba(0, 0, 0, 0.2);
   }
@@ -681,13 +708,35 @@ const filterId = `postSoft${index}`;
     mix-blend-mode: normal;
   }
 
-  :global(html[data-theme='night']) .article-scroll:hover .post-title-text,
   :global(html[data-theme='night']) .article-scroll:focus-within .post-title-text {
     color: #ece5d2;
   }
 
   :global(html[data-theme='night']) .post-meta::after {
     background: linear-gradient(180deg, transparent, rgba(233, 226, 208, 0.16) 18%, rgba(233, 226, 208, 0.16) 82%, transparent);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    :global(html[data-theme='night']) .article-scroll:hover {
+      filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.45));
+    }
+
+    :global(html[data-theme='night']) .article-scroll:hover .scroll-paper {
+      box-shadow:
+        inset 16px 0 18px -8px rgba(0, 0, 0, 0.13),
+        inset -16px 0 18px -8px rgba(0, 0, 0, 0.12),
+        inset 0 7px 11px rgba(233, 226, 208, 0.03),
+        inset 0 -7px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    :global(html[data-theme='night']) .article-scroll:hover .scroll-paper::before,
+    :global(html[data-theme='night']) .article-scroll:hover .scroll-paper::after {
+      box-shadow: inset 3px 0 5px rgba(0, 0, 0, 0.2);
+    }
+
+    :global(html[data-theme='night']) .article-scroll:hover .post-title-text {
+      color: #ece5d2;
+    }
   }
 
   @media (max-width: 620px) {

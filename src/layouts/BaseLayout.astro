@@ -76,7 +76,7 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
         display: none;
         place-items: center;
         background: var(--page-background);
-        transition: opacity 280ms cubic-bezier(0.23, 1, 0.32, 1), visibility 280ms;
+        transition: opacity 280ms var(--ease-out), visibility 280ms;
       }
 
       :global(.js) #loader {
@@ -204,7 +204,7 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
         opacity: 0;
         pointer-events: none;
         transform: translateY(16px);
-        transition: opacity 0.35s ease, transform 0.35s var(--ease), background 0.3s ease, color 0.3s ease;
+        transition: opacity 0.25s ease, transform 0.25s var(--ease), background 0.3s ease, color 0.3s ease;
       }
 
       .to-top.show {
@@ -216,6 +216,10 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
       .to-top:hover {
         color: var(--paper-light);
         background: var(--cinnabar);
+      }
+
+      .to-top:active {
+        transform: scale(0.97);
       }
 
     </style>
@@ -337,7 +341,13 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
         if (!btn) return;
         const next = document.documentElement.dataset.theme === 'night' ? 'day' : 'night';
         if (typeof document.startViewTransition !== 'function' || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          // 回退路径同样瞬时：挂 theme-vt 门闩关闭 body 颜色淡化（否则 body 0.6s 淡化、组件瞬变，双速换装）；
+          // 双 rAF 等新主题首帧绘制后再摘闩
+          document.documentElement.classList.add('theme-vt');
           applyTheme(next);
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => document.documentElement.classList.remove('theme-vt'));
+          });
           return;
         }
         // 终止进行中的平滑/惯性滚动：VT 捕获发生在滚动停止后，若点击时页面还在动，
@@ -374,7 +384,6 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
       (function () {
         const bar = document.getElementById('scrollBar');
         const toTop = document.getElementById('toTop');
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const onScroll = () => {
           const range = document.documentElement.scrollHeight - window.innerHeight;
           const progress = range > 0 ? window.scrollY / range : 0;
@@ -386,6 +395,8 @@ const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle
         document.addEventListener('swup:page:view', onScroll);
         if (toTop) {
           toTop.addEventListener('click', () => {
+            // 即时读 MQL：会话中改系统减弱动态设置也生效
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
           });
         }

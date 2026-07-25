@@ -127,20 +127,29 @@ const BASE = import.meta.env.BASE_URL;
     position: absolute;
     left: 0;
     top: 50%;
-    width: 0;
+    width: 28px;
     height: 1px;
     background: var(--cinnabar);
-    transition: width 320ms var(--ease);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 260ms var(--ease);
   }
 
-  .index-item:hover {
-    color: var(--moss-deep);
-    background: linear-gradient(90deg, rgba(164, 68, 52, 0.035), transparent 42%);
-    transform: translateX(6px);
-  }
+  /* 触屏无假 hover：位移类 hover 仅在精确指针下启用 */
+  @media (hover: hover) and (pointer: fine) {
+    .index-item:hover {
+      color: var(--moss-deep);
+      background: linear-gradient(90deg, rgba(164, 68, 52, 0.035), transparent 42%);
+      transform: translateX(6px);
+    }
 
-  .index-item:hover::before {
-    width: 28px;
+    .index-item:hover::before {
+      transform: scaleX(1);
+    }
+
+    .index-item:hover .index-number {
+      transform: translateX(32px);
+    }
   }
 
   .index-number {
@@ -148,10 +157,6 @@ const BASE = import.meta.env.BASE_URL;
     font-size: 0.88rem;
     letter-spacing: 0.12em;
     transition: transform 260ms var(--ease);
-  }
-
-  .index-item:hover .index-number {
-    transform: translateX(32px);
   }
 
   .index-name {
