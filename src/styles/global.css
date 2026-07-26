@@ -131,9 +131,11 @@ html[data-theme="night"] body::after {
   mix-blend-mode: normal;
 }
 
-/* 扩散期间关闭 body 颜色交叉淡化：避免新状态快照每帧整页重栅格（卡顿），并保证圆边界锐利 */
-html.theme-vt body {
-  transition: none;
+/* 主题切换期间冻结组件过渡：保证无 VT 回退瞬切，并避免 VT 新状态快照捕获到中间色 */
+html.theme-vt *,
+html.theme-vt *::before,
+html.theme-vt *::after {
+  transition: none !important;
 }
 
 body.inner-page main {

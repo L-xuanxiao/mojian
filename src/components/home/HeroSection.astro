@@ -209,9 +209,11 @@ const BASE = import.meta.env.BASE_URL;
     transition: transform 260ms var(--ease);
   }
 
-  .action-secondary:hover::after {
-    transform: scaleX(1);
-    transform-origin: left;
+  @media (hover: hover) and (pointer: fine) {
+    .action-secondary:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
   }
 
   .hero-side {

@@ -83,8 +83,10 @@ const BASE = import.meta.env.BASE_URL;
     transition: transform 260ms var(--ease);
   }
 
-  .all-posts a:hover::before {
-    transform: scaleX(1);
+  @media (hover: hover) and (pointer: fine) {
+    .all-posts a:hover::before {
+      transform: scaleX(1);
+    }
   }
 
   /* ≥821px：home-layout 网格语境下的归属 */
