@@ -28,4 +28,4 @@
 - 被多个页面引用 → `common/`
 - 仅首页使用 → `home/`
 - 全站框架级 → `layout/`
-- 配置统一走 `src/config/siteConfig.ts`，不在组件内硬编码站名/导航/文案
+- 站名、导航、页脚、分类与页面开关等跨页配置统一走 `src/config/siteConfig.ts`；首页专属且与组件强耦合的静态文案可就近共置
