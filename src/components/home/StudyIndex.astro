@@ -1,6 +1,8 @@
 ---
-// 首页「书斋目录」：分类索引 + 小景 SVG + 笔意分隔线。样式自 index.astro 平移（scoped）。
+// 首页「书斋目录」：分类索引 + 小景画 + 笔意分隔线。样式自 index.astro 平移（scoped）。
+import { Image } from 'astro:assets';
 import { homeContent } from '../../config/homeContent';
+import studyLotus from '../../assets/study-lotus.png';
 
 const { study } = homeContent;
 
@@ -30,16 +32,13 @@ const BASE = import.meta.env.BASE_URL;
         <p>{study.note}</p>
       </div>
       <div class="study-mini-painting" aria-hidden="true">
-        <svg viewBox="0 0 360 190" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <filter id="miniSoft"><feGaussianBlur stdDeviation="1.2" /></filter>
-          </defs>
-          <circle cx="286" cy="50" r="20" fill="#a44434" fill-opacity=".12" />
-          <path d="M0 140C63 120 87 86 138 96C184 105 196 137 241 125C281 115 312 86 360 82V190H0Z" fill="#586258" fill-opacity=".09" filter="url(#miniSoft)" />
-          <path d="M0 164C65 145 109 158 159 137C215 113 255 151 306 141C328 137 344 128 360 119V190H0Z" fill="#303631" fill-opacity=".1" />
-          <path d="M259 128l5-28 4 28zm10 1 4-22 3 22z" fill="#303631" fill-opacity=".2" />
-          <path d="M46 158c36-12 63-13 96-5" fill="none" stroke="#303631" stroke-opacity=".18" />
-        </svg>
+        <Image
+          src={studyLotus}
+          alt=""
+          widths={[480, 720, 960]}
+          sizes="(max-width: 620px) 100vw, (max-width: 820px) 260px, 330px"
+          loading="lazy"
+        />
       </div>
     </div>
 
@@ -105,9 +104,10 @@ const BASE = import.meta.env.BASE_URL;
     border-top: 1px solid var(--line);
   }
 
-  .study-mini-painting svg {
+  .study-mini-painting img {
     width: 100%;
     height: 100%;
+    object-fit: cover;
   }
 
   .index-list {
@@ -236,8 +236,8 @@ const BASE = import.meta.env.BASE_URL;
     border-bottom-color: rgba(233, 226, 208, 0.09);
   }
 
-  :global(html[data-theme='night']) .study-mini-painting svg {
-    filter: brightness(1.65);
+  :global(html[data-theme='night']) .study-mini-painting img {
+    filter: brightness(0.82) saturate(0.85);
   }
 
   :global(html[data-theme='night']) .brush-divider path {
