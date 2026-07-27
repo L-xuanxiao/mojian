@@ -56,6 +56,8 @@ draft: false
 
 分类仅支持 `日常`、`行旅`、`读书`、`摄影`；`description`、`updatedDate` 与 `cover` 可选，摘要缺省自动取首段。草稿不会出现在列表或静态文章路由中。
 
+封面与配图原图放 `src/assets/`（构建自动压成 webp 多尺寸，原图即素材备份）。**单张原图进仓前控制在 ≤3MB**，超出先压缩，避免仓库随图片内容膨胀。
+
 ## 检查与构建
 
 ```bash
@@ -65,6 +67,8 @@ npm run preview
 ```
 
 `npm run build` 在 `astro build` 后自动执行 `pagefind --site dist` 生成搜索索引。生产文件生成到 `dist/`，该目录不会提交到 Git。
+
+> 已知接受：`npm audit` 剩余高危告警全部位于构建期依赖链（`serialize-javascript` ← `@swup/astro`、`brace-expansion`），仅影响本地构建、不进产物；修复需 `--force` 降级 `@swup/astro`，代价大于收益，等上游升级传递依赖后再消。
 
 ## 目录
 
