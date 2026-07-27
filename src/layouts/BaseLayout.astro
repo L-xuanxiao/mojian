@@ -31,6 +31,8 @@ const pageTitle = title === siteConfig.name ? title : `${title}${siteConfig.titl
 const BASE = import.meta.env.BASE_URL;
 const isHome = Astro.url.pathname === BASE;
 const documentTitle = isHome && title === siteConfig.name ? siteConfig.homeTitle : pageTitle;
+// 首载动画主字：首页亮站名；内页亮页名（文章题等过长标题回退站名，避免撑破 loader 排版）
+const loaderText = !isHome && [...title].length <= 6 ? title : siteConfig.name;
 
 // OG 图统一转绝对 URL（站外抓取器不解析相对路径）；缺省取山水长卷裁 1200x630
 const fallbackOg = await getImage({ src: defaultOgImage, width: 1200, height: 630, fit: 'cover', format: 'jpg' });
@@ -79,12 +81,12 @@ const rssUrl = new URL(`${BASE}rss.xml`, Astro.site).href;
   </head>
   <body class:list={{ 'home-page': isHome, 'inner-page': !isHome }} data-base={BASE} data-font-role="serif">
     {/* 首载动画：仅完整加载出现一次，Swup 换页不重现；无 JS 时 CSS 隐藏 */}
-    <div id="loader" aria-hidden="true">
+    <div id="loader" aria-hidden="true" data-loader-text={loaderText}>
       <div class="load-mark">
         <div class="load-txt" data-font-role="cal">
-          {[...siteConfig.name].map((ch) => <span>{ch}</span>)}
+          {[...loaderText].map((ch) => <span>{ch}</span>)}
         </div>
-        <p class="load-sub" data-font-role="hand">{siteConfig.description}</p>
+        <p class="load-sub" data-font-role="hand">{description}</p>
       </div>
     </div>
 
@@ -345,7 +347,8 @@ const rssUrl = new URL(`${BASE}rss.xml`, Astro.site).href;
         const fontsReady = document.fonts?.load
           ? Promise.all([
               document.fonts.load('400 1em "Noto Serif SC"', '墨笺正文'),
-              document.fonts.load('400 1em "Ma Shan Zheng"', '墨笺'),
+              // 书法体按本页 loader 实际用字取样：子集字体只含页面文本，固定字样可能取不到
+              document.fonts.load('400 1em "Ma Shan Zheng"', loader.dataset.loaderText || '墨笺'),
             ]).catch(() => undefined)
           : Promise.resolve();
         Promise.all([pageReady, fontsReady]).then(finish);
