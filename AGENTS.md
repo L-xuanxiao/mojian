@@ -22,6 +22,8 @@
 - `src/pages/`：页面路由。首页、归档、关于、404 与文章详情均使用 `BaseLayout`；文章详情由 `posts/[slug].astro` 生成；分类文章列表由 `category/[category].astro` 生成（slug 映射见 `siteConfig.categories`）；留墨页 `guestbook.astro` 为 mailto 书信表单 + giscus 评论墙预留（`siteConfig.giscus` 配好 `repoId`/`categoryId` 后才渲染，收件邮箱为 `siteConfig.contactEmail`）。
 - `src/content/blog/`：Markdown 文章；字段约束见 `src/content.config.ts`。
 - `src/config/siteConfig.ts`：站点集中配置（站名、导航、页脚、分类、文章列表行为、页面开关），消费方不在组件内硬编码这些值。
+- `src/config/homeContent.ts`：首页准静态文案单一出处（hero、区块副文案、关于此间、名片），组件不写死首页文案。
+- `src/content/now/`：「此刻」状态集合（案头近况：frontmatter 存 date 与 items，正文为一页小记）。
 - `src/components/`：按职责分目录，清单与分类规则见 `src/components/README.md`。`layout/` 全站框架、`home/` 首页专属、`common/` 跨页复用。
 - `src/layouts/`：`BaseLayout`（导航+页脚+`<head>`）与 `ArticleLayout`（文章详情）。
 - `src/plugins/`：remark 插件（自动摘要、字数与阅读时长），产出写入 `remarkPluginFrontmatter`。
@@ -65,6 +67,7 @@ npm run preview
 - 新文章放入 `src/content/blog/`，frontmatter 遵循 `src/content.config.ts`；分类仅限其中定义的枚举值。
 - `description` 可省略，摘要自动取首段（`remark-excerpt`），显式书写优先。
 - 列表与静态文章路由复用 `getPublishedPosts()`，不展示 `draft: true` 的文章。
+- 更新「案头近况」改 `src/content/now/now.md`；首页文案改 `src/config/homeContent.ts`。
 
 ## Agent skills
 

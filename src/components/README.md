@@ -16,8 +16,8 @@
 - `StudyIndex.astro`：「书斋目录」分类索引。props：`categories`、`counts`（分类 key → 已发布篇数）
 - `RecentNotes.astro`：「近来所记」手卷文章流。props：`posts`
 - `ScrollPostCard.astro`：「近来所记」手卷卡片。props：`post`（blog 集合条目）、`index`（决定印章字与水墨变体，3 变体循环）
-- `DeskNotes.astro`：「案头近况」深墨过渡区（此刻状态 + 一页小记）
-- `AboutSection.astro`：「关于此间」文案与墨环竹影插画
+- `DeskNotes.astro`：「案头近况」深墨过渡区（此刻状态 + 一页小记），状态与小记读 `src/content/now/` 集合
+- `AboutSection.astro`：「关于此间」页尾全宽收尾区块。左名片列（头像/署名/社链/站点统计），右文字列（介绍/主题/签名/墨环竹影）。props：`stats`（由 index.astro 从文章数据派生）
 
 ## common/ — 跨页复用
 
@@ -28,4 +28,4 @@
 - 被多个页面引用 → `common/`
 - 仅首页使用 → `home/`
 - 全站框架级 → `layout/`
-- 站名、导航、页脚、分类与页面开关等跨页配置统一走 `src/config/siteConfig.ts`；首页专属且与组件强耦合的静态文案可就近共置
+- 站名、导航、页脚、分类与页面开关等跨页配置统一走 `src/config/siteConfig.ts`；首页专属文案统一走 `src/config/homeContent.ts`，组件内不写死文案
