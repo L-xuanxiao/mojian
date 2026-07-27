@@ -6,15 +6,16 @@
 
 ## 技术与部署
 
-- Node.js 要求 `>=22.12.0`。项目为 Astro 7 静态站，使用 TypeScript 严格模式、Tailwind CSS 4、`astro-icon` 与 Material Symbols 图标集。
+- Node.js 要求 `>=22.12.0`。项目为 Astro 7 静态站，使用 TypeScript 严格模式、Tailwind CSS 4、`astro-icon` 与 Lucide 图标集。
 - GitHub Pages 站点基路径为 `/mojian/`，路由使用尾斜杠。站内链接和静态资源路径需兼容 `import.meta.env.BASE_URL`。
 - 推送到 `main` 后由 GitHub Actions 构建并部署 Pages。
 - `npm run build` 会在 `astro build` 后自动执行 `pagefind --site dist` 生成搜索索引（`dist/pagefind/`）；`/search/` 寻墨页依赖该索引，仅构建后可用，dev 模式下搜索框不工作。
-- 页面切换由 Swup 无刷新驱动，交换容器为 `#main-content` 与 `#siteHeader`。换页时被换容器内的 `<script>` 不会重跑：需要跨页生效的逻辑放 `BaseLayout` 持久脚本并监听 `swup:page:view` 重放；DOM 查询在回调内即时进行，监听器只挂 window/document。入口链接加 `data-no-swup` 可退回整页加载（如寻墨页、留墨页）。
-- 昼夜双主题：`localStorage("mj-theme")` 存偏好，`<head>` 内联脚本首绘前写入 `html[data-theme]` 避免闪烁；夜色变量集中在 `global.css` 的 `html[data-theme="night"]` 块，切换按钮经 document 级委托 `[data-theme-toggle]` 处理。
+- SEO 基础设施内置：`@astrojs/sitemap` 构建期生成站点地图，`src/pages/rss.xml.ts` 输出 RSS 订阅源（`/rss.xml`，site 带 base 使链接指向 `/mojian/` 下）；canonical、OG/Twitter meta 统一由 `BaseLayout` 输出，文章页经 `ArticleLayout` 传 `ogType="article"` 与发布时间，OG 图有封面用封面、缺省山水默认图（构建期裁 1200x630）。
+- 页面切换由 Swup 无刷新驱动，交换容器为 `#main-content` 与 `#siteHeader`。换页时被换容器内的 `<script>` 不会重跑：需要跨页生效的逻辑放 `BaseLayout` 持久脚本并监听 `swup:page:view` 重放；DOM 查询在回调内即时进行，监听器只挂 window/document。`BaseLayout` 持久脚本带 `data-swup-ignore-script`，阻止 Swup ScriptsPlugin 换页重放内联脚本（重放会重复注册监听器、顶层声明冲突）。入口链接加 `data-no-swup` 可退回整页加载（如寻墨页、留墨页）。
+- 昼夜双主题：`localStorage("mj-theme")` 存偏好，`<head>` 内联脚本首绘前写入 `html[data-theme]` 避免闪烁；夜色变量集中在 `global.css` 的 `html[data-theme="night"]` 块，切换按钮经 document 级委托 `[data-theme-toggle]` 处理，支持 View Transitions 时新主题从按钮中心圆形扩散，`prefers-reduced-motion` 或不支持时回退瞬时切换。
 - 首载 loader、`#fx` 全局画布动效（花瓣/鼠标墨点/点击墨晕）、滚动进度条、回顶按钮均在 `BaseLayout`；reveal 隐藏态由 `.js` 根类门控，`prefers-reduced-motion` 时画布动效不启动，无 JS 时内容直接可见。
 - 字体由 `src/integrations/font-pipeline.mjs` 在最终 HTML 生成后按实际字符裁切：Fontsource 包仅作构建源，`subset-font` 输出哈希 WOFF2/CSS 并注入字体占位标记，禁止在组件或 `BaseLayout` 直接导入 Fontsource CSS。字体角色统一使用 `data-font-role="serif|cal|hand"`，分配规则只写在 `src/styles/typography.css`。
-- `astro-icon` 的 Material Symbols 图标须在 `astro.config.mjs` 的 `icon({include})` 白名单登记，新增图标未登记会构建报 `Unable to locate`。
+- `astro-icon` 的 Lucide 图标须在 `astro.config.mjs` 的 `icon({include})` 白名单登记，新增图标未登记会构建报 `Unable to locate`。
 
 ## 目录
 
@@ -28,6 +29,12 @@
 - `src/lib/posts.ts`：已发布文章过滤、排序、日期格式化与摘要兜底 `getExcerpt()`。
 - `src/styles/global.css`：全局主题变量、基础样式与 `.reveal` 滚动显现工具类；`src/styles/typography.css`：全站字体分配唯一出处（body 默认 serif、表单继承、文字角色）；`src/assets/`：源码资源。
 - 视觉规则见 [docs/DESIGN.md](docs/DESIGN.md)。
+
+## 组件化与模块化
+
+- 项目按职责组织组件和模块。后续开发中，若拆分能让职责更清晰，并提升维护、复用或扩展效率，应优先沿用现有目录结构拆成独立组件或模块。
+- 单处使用且与所属组件强耦合的结构、样式和脚本应就近共置；避免为形式上的组件化制造空壳组件、单实现抽象或过细文件。
+- 新增实现前先检查现有组件与模块，能复用或扩展既有能力时，不重复创建同类实现。
 
 ## 提交规范
 
@@ -72,16 +79,3 @@ Default five-role vocabulary (`needs-triage` / `needs-info` / `ready-for-agent` 
 ### Domain docs
 
 Single-context layout (`CONTEXT.md` + `docs/adr/` at repo root, created lazily). See `docs/agents/domain.md`.
-
-## Documentation
-
-Full documentation: https://docs.astro.build
-
-Consult these guides before working on related tasks:
-
-- [Adding pages, dynamic routes, or middleware](https://docs.astro.build/en/guides/routing/)
-- [Working with Astro components](https://docs.astro.build/en/basics/astro-components/)
-- [Using React, Vue, Svelte, or other framework components](https://docs.astro.build/en/guides/framework-components/)
-- [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
-- [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
-- [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)
