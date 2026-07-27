@@ -72,6 +72,10 @@ const rssUrl = new URL(`${BASE}rss.xml`, Astro.site).href;
     )}
     <link rel="alternate" type="application/rss+xml" title={siteConfig.name} href={rssUrl} />
     <link rel="icon" type="image/svg+xml" href={`${BASE}favicon.svg`} />
+    {/* Umami 统计：websiteId 未填不注入；脚本随 Swup 驻留 head，pushState 自动计页面浏览 */}
+    {siteConfig.umami.websiteId && (
+      <script is:inline defer src={siteConfig.umami.scriptUrl} data-website-id={siteConfig.umami.websiteId} />
+    )}
     {
       import.meta.env.DEV
         ? <link rel="stylesheet" href={`${BASE}__fonts/fonts.css`} />

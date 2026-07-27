@@ -95,6 +95,12 @@ export const siteConfig = {
     mapping: 'pathname',
   },
 
+  /** Umami 访问统计：websiteId 填好后自动注入脚本；获取见 https://cloud.umami.is（免费档） */
+  umami: {
+    websiteId: '',
+    scriptUrl: 'https://cloud.umami.is/script.js',
+  },
+
   footer: {
     quote: '一纸闲墨，记人间朝暮。',
     tagline: '写日常，也写山川与旧书',
