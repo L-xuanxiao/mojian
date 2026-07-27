@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://l-xuanxiao.github.io/mojian/sitemap-index.xml

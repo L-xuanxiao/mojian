@@ -13,6 +13,7 @@
 - 分类静态页、寻墨搜索页（Pagefind）、留墨页（mailto 书信 + giscus 评论墙预留）
 - Swup 无刷新页面切换，配合原生 WAAPI 墨纸遮幕；无 JavaScript 时核心内容完整可见
 - 文章自动摘要、字数与阅读时长（remark 插件写入 frontmatter）
+- 内置 RSS 订阅源（`/rss.xml`）、站点地图与 canonical / OG / Twitter meta，文章页自动携带发布时间
 
 ## 技术栈
 

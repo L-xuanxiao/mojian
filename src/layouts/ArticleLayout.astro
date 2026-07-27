@@ -23,9 +23,20 @@ const minutes = Number(frontmatter?.minutes) || 0;
 const lqip = post.data.cover
   ? await getImage({ src: post.data.cover, width: 16, format: 'webp', quality: 30 })
   : null;
+
+// OG 图：有封面用封面（1200 宽 jpg），无封面走 BaseLayout 山水默认图
+const ogCover = post.data.cover
+  ? await getImage({ src: post.data.cover, width: 1200, format: 'jpg' })
+  : null;
 ---
 
-<BaseLayout title={post.data.title} description={description || undefined}>
+<BaseLayout
+  title={post.data.title}
+  description={description || undefined}
+  ogType="article"
+  publishedTime={post.data.pubDate}
+  ogImage={ogCover?.src}
+>
   <article class="article-page page-shell">
     <header class="article-header rise-in">
       <p class="meta page-kicker" data-font-role="hand">

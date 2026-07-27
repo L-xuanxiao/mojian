@@ -10,6 +10,7 @@
 - GitHub Pages 站点基路径为 `/mojian/`，路由使用尾斜杠。站内链接和静态资源路径需兼容 `import.meta.env.BASE_URL`。
 - 推送到 `main` 后由 GitHub Actions 构建并部署 Pages。
 - `npm run build` 会在 `astro build` 后自动执行 `pagefind --site dist` 生成搜索索引（`dist/pagefind/`）；`/search/` 寻墨页依赖该索引，仅构建后可用，dev 模式下搜索框不工作。
+- SEO 基础设施内置：`@astrojs/sitemap` 构建期生成站点地图，`src/pages/rss.xml.ts` 输出 RSS 订阅源（`/rss.xml`，site 带 base 使链接指向 `/mojian/` 下）；canonical、OG/Twitter meta 统一由 `BaseLayout` 输出，文章页经 `ArticleLayout` 传 `ogType="article"` 与发布时间，OG 图有封面用封面、缺省山水默认图（构建期裁 1200x630）。
 - 页面切换由 Swup 无刷新驱动，交换容器为 `#main-content` 与 `#siteHeader`。换页时被换容器内的 `<script>` 不会重跑：需要跨页生效的逻辑放 `BaseLayout` 持久脚本并监听 `swup:page:view` 重放；DOM 查询在回调内即时进行，监听器只挂 window/document。`BaseLayout` 持久脚本带 `data-swup-ignore-script`，阻止 Swup ScriptsPlugin 换页重放内联脚本（重放会重复注册监听器、顶层声明冲突）。入口链接加 `data-no-swup` 可退回整页加载（如寻墨页、留墨页）。
 - 昼夜双主题：`localStorage("mj-theme")` 存偏好，`<head>` 内联脚本首绘前写入 `html[data-theme]` 避免闪烁；夜色变量集中在 `global.css` 的 `html[data-theme="night"]` 块，切换按钮经 document 级委托 `[data-theme-toggle]` 处理，支持 View Transitions 时新主题从按钮中心圆形扩散，`prefers-reduced-motion` 或不支持时回退瞬时切换。
 - 首载 loader、`#fx` 全局画布动效（花瓣/鼠标墨点/点击墨晕）、滚动进度条、回顶按钮均在 `BaseLayout`；reveal 隐藏态由 `.js` 根类门控，`prefers-reduced-motion` 时画布动效不启动，无 JS 时内容直接可见。

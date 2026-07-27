@@ -1,4 +1,5 @@
 // @ts-check
+import sitemap from '@astrojs/sitemap';
 import swup from '@swup/astro';
 import { defineConfig } from 'astro/config';
 import icon from 'astro-icon';
@@ -17,6 +18,7 @@ export default defineConfig({
   trailingSlash: 'always',
   integrations: [
     fontPipeline(),
+    sitemap(),
     swup({
       theme: false,
       animationClass: 'transition-swup-',
