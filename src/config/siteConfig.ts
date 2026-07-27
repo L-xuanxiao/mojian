@@ -84,7 +84,7 @@ export const siteConfig = {
   },
 
   /** 留墨页：mailto 收件人（为空时唤起邮件客户端但不预填收件人） */
-  contactEmail: '',
+  contactEmail: 'xuanxiao0311@gmail.com',
 
   /** 留墨墙 giscus：repoId / categoryId 填好后自动启用；获取见 https://giscus.app/zh-CN */
   giscus: {

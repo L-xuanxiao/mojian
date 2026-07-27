@@ -1,40 +1,41 @@
 ---
-// 首页「案头近况」：深墨过渡区，此刻状态 + 一页小记。样式自 index.astro 平移（scoped）。
+// 首页「案头近况」：深墨过渡区，此刻状态 + 一页小记。
+// 状态条目与小记来自「此刻」集合（src/content/now/），文案走 homeContent；无数据时区块不渲染。
+import { getEntry, render } from 'astro:content';
+import { homeContent } from '../../config/homeContent';
+import { formatDateShort } from '../../lib/posts';
+
+const { desk } = homeContent;
+const now = await getEntry('now', 'now');
+const Content = now ? (await render(now)).Content : null;
 ---
 
+{now && Content && (
 <section class="section desk" aria-labelledby="desk-title">
   <div class="shell">
     <div class="section-heading reveal">
       <div>
-        <p class="section-kicker" data-font-role="hand">ON THE DESK</p>
-        <h2 class="section-title" id="desk-title" data-font-role="cal">案头近况</h2>
+        <p class="section-kicker" data-font-role="hand">{desk.kicker}</p>
+        <h2 class="section-title" id="desk-title" data-font-role="cal">{desk.title}</h2>
       </div>
-      <p class="section-note">不只保存已经写完的文章，也留下正在发生的过程。墨色稍深，像夜里案上的一盏灯。</p>
+      <p class="section-note">{desk.note}</p>
     </div>
 
     <div class="desk-grid">
       <article class="now-panel reveal">
         <div class="panel-mark" aria-hidden="true" data-font-role="cal">今</div>
         <div class="now-head">
-          <span>此刻</span>
-          <time datetime="2026-07-15">2026.07.15</time>
+          <span>{desk.nowTitle}</span>
+          <time datetime={now.data.date.toISOString()}>{formatDateShort(now.data.date)}</time>
         </div>
         <div class="now-list">
-          <div class="now-row">
-            <span class="now-label" data-font-role="hand">正在做</span>
-            <strong>继续打磨墨笺的视觉与内容</strong>
-            <span class="now-state">进行中</span>
-          </div>
-          <div class="now-row">
-            <span class="now-label" data-font-role="hand">正在读</span>
-            <strong>山川、旧书与日常写作的零散笔记</strong>
-            <span class="now-state">缓慢读</span>
-          </div>
-          <div class="now-row">
-            <span class="now-label" data-font-role="hand">正在学</span>
-            <strong>用更少的元素，建立更稳定的页面秩序</strong>
-            <span class="now-state">持续中</span>
-          </div>
+          {now.data.items.map((item) => (
+            <div class="now-row">
+              <span class="now-label" data-font-role="hand">{item.label}</span>
+              <strong>{item.text}</strong>
+              <span class="now-state">{item.state}</span>
+            </div>
+          ))}
         </div>
       </article>
 
@@ -58,14 +59,15 @@
           </svg>
         </div>
         <div class="fragment-copy">
-          <p class="fragment-label">一页小记</p>
-          <blockquote>写作并不总是为了给出答案。很多时候，它只是把走过的路重新照亮。</blockquote>
-          <p class="fragment-source">—— 记于墨笺之间</p>
+          <p class="fragment-label">{desk.fragmentLabel}</p>
+          <blockquote><Content /></blockquote>
+          <p class="fragment-source">{desk.fragmentSource}</p>
         </div>
       </article>
     </div>
   </div>
 </section>
+)}
 
 <style>
   .desk {
@@ -246,6 +248,11 @@
     color: rgba(248,246,239,0.88);
     font-size: clamp(1.1rem, 1.8vw, 1.35rem);
     line-height: 1.9;
+  }
+
+  /* 小记正文由 <Content /> 渲染，scoped 样式需 :global 命中其 <p> */
+  .fragment-copy blockquote :global(p) {
+    margin: 0;
   }
 
   .fragment-source {

@@ -18,4 +18,19 @@ const blog = defineCollection({
     }),
 });
 
-export const collections = { blog };
+// 「此刻」集合(术语见 CONTEXT.md):首页案头近况的状态条目,正文为一页小记
+const now = defineCollection({
+  loader: glob({ base: './src/content/now', pattern: '**/*.md' }),
+  schema: z.object({
+    date: z.coerce.date(),
+    items: z.array(
+      z.object({
+        label: z.string().min(1),
+        text: z.string().min(1),
+        state: z.string().min(1),
+      }),
+    ),
+  }),
+});
+
+export const collections = { blog, now };

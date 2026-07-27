@@ -1,5 +1,8 @@
 ---
 // 首页「书斋目录」：分类索引 + 小景 SVG + 笔意分隔线。样式自 index.astro 平移（scoped）。
+import { homeContent } from '../../config/homeContent';
+
+const { study } = homeContent;
 
 interface CategoryItem {
   key: string;
@@ -22,9 +25,9 @@ const BASE = import.meta.env.BASE_URL;
   <div class="shell study-grid">
     <div class="study-intro reveal">
       <div>
-        <p class="section-kicker" data-font-role="hand">THE STUDY INDEX</p>
-        <h2 class="study-title" id="study-title" data-font-role="cal">书斋目录</h2>
-        <p>把日常与见闻，按四条线索慢慢归置。</p>
+        <p class="section-kicker" data-font-role="hand">{study.kicker}</p>
+        <h2 class="study-title" id="study-title" data-font-role="cal">{study.title}</h2>
+        <p>{study.note}</p>
       </div>
       <div class="study-mini-painting" aria-hidden="true">
         <svg viewBox="0 0 360 190" xmlns="http://www.w3.org/2000/svg">

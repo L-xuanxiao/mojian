@@ -18,6 +18,14 @@ const categoryCounts = new Map(
     allPosts.filter((post) => post.data.category === cat.key).length,
   ]),
 );
+// 站点统计（见 CONTEXT.md）：全部由文章数据派生，不手工维护
+const stats = {
+  posts: allPosts.length,
+  categories: siteConfig.categories.length,
+  sinceYear: allPosts.length
+    ? Math.min(...allPosts.map((post) => post.data.pubDate.getFullYear()))
+    : new Date().getFullYear(),
+};
 ---
 
 <style>
@@ -41,7 +49,6 @@ const categoryCounts = new Map(
       grid-template-columns: clamp(210px, 22vw, 280px) minmax(0, 1fr);
       grid-template-areas:
         "study latest"
-        "about latest"
         "desk desk";
     }
   }
@@ -51,8 +58,7 @@ const categoryCounts = new Map(
       width: min(calc(100% - (var(--side-space) * 2)), 1480px);
       grid-template-columns: clamp(240px, 18vw, 280px) minmax(620px, 1fr) clamp(260px, 19vw, 300px);
       grid-template-areas:
-        "study latest desk"
-        "about latest desk";
+        "study latest desk";
     }
   }
 </style>
@@ -64,7 +70,7 @@ const categoryCounts = new Map(
       <StudyIndex categories={siteConfig.categories} counts={categoryCounts} />
       <RecentNotes posts={recentPosts} />
       <DeskNotes />
-      <AboutSection />
     </div>
+    <AboutSection stats={stats} />
   </div>
 </BaseLayout>

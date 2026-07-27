@@ -44,7 +44,9 @@ export default defineConfig({
           'scroll',
           'mountain',
           'feather',
-          'menu'
+          'menu',
+          'github',
+          'mail'
         ]
       }
     })

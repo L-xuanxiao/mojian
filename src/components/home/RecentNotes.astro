@@ -2,6 +2,9 @@
 // 首页「近来所记」：手卷文章流 + 全部文章入口。样式自 index.astro 平移（scoped）。
 import type { CollectionEntry } from 'astro:content';
 import ScrollPostCard from './ScrollPostCard.astro';
+import { homeContent } from '../../config/homeContent';
+
+const { recent } = homeContent;
 
 interface Props {
   posts: CollectionEntry<'blog'>[];
@@ -15,10 +18,10 @@ const BASE = import.meta.env.BASE_URL;
   <div class="shell">
     <div class="section-heading reveal">
       <div>
-        <p class="section-kicker" data-font-role="hand">RECENT NOTES</p>
-        <h2 class="section-title" id="latest-title" data-font-role="cal">近来所记</h2>
+        <p class="section-kicker" data-font-role="hand">{recent.kicker}</p>
+        <h2 class="section-title" id="latest-title" data-font-role="cal">{recent.title}</h2>
       </div>
-      <p class="section-note">新札三卷，横陈案上。行旅、日常与旧书各成一卷，也把远山与墨痕留在纸面。</p>
+      <p class="section-note">{recent.note}</p>
     </div>
 
     <div class="scroll-list" id="archive">
@@ -27,7 +30,7 @@ const BASE = import.meta.env.BASE_URL;
       ))}
     </div>
     <div class="all-posts reveal">
-      <a href={`${BASE}archive/`}>查看全部文章</a>
+      <a href={`${BASE}archive/`}>{recent.allPostsLink}</a>
     </div>
   </div>
 </section>
