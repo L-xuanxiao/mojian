@@ -56,6 +56,8 @@ export const homeContent = {
   profile: {
     name: '拾墨',
     oneLiner: '写字的人，也在字里住着。',
+    /** 名片右缘竖排题签字 */
+    cardLabel: '主人名片',
     github: 'https://github.com/L-xuanxiao',
     emails: [
       { label: 'Gmail', address: 'xuanxiao0311@gmail.com' },

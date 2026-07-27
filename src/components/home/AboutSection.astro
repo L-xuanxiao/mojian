@@ -1,9 +1,10 @@
 ---
-// 首页「关于此间」：页尾全宽收尾区块。左名片列（头像+署名+社链+统计），右文字列（介绍/主题/签名/墨环竹影）。
-// 文案走 homeContent，统计数字由 index.astro 从文章数据派生传入。
+// 首页「关于此间」：页尾全宽收尾区块。左名片列（头像+署名+社链+统计，右缘题签装饰），右文字列（介绍/主题/签名/印章）。
+// 背景层为竹林水墨画（.about-grove，绝对定位不占高、multiply 透纸色）。文案走 homeContent，统计数字由 index.astro 从文章数据派生传入。
 import { Image } from 'astro:assets';
 import { Icon } from 'astro-icon/components';
 import avatar from '../../assets/touxiang.jpg';
+import aboutBamboo from '../../assets/about-bamboo.png';
 import { homeContent } from '../../config/homeContent';
 
 interface Props {
@@ -16,6 +17,19 @@ const { about, profile } = homeContent;
 ---
 
 <section class="section about" id="about" aria-labelledby="about-title">
+  {/* 竹林水墨背景层：铺满板块、绝对定位不占高；blend-mode 透纸色，低透明度不抢正文 */}
+  <div class="about-grove" aria-hidden="true">
+    <Image
+      src={aboutBamboo}
+      alt=""
+      widths={[960, 1440, 1672]}
+      sizes="100vw"
+      loading="lazy"
+    />
+  </div>
+  {/* 纸色纱罩：左实右虚，文字区归于留白，画意让给右侧；var(--paper) 随主题自适应 */}
+  <div class="about-veil" aria-hidden="true"></div>
+
   <div class="shell">
     <div class="section-heading reveal">
       <div>
@@ -26,6 +40,8 @@ const { about, profile } = homeContent;
 
     <div class="about-grid">
       <aside class="profile-card reveal" aria-label="主人名片">
+        {/* 右缘竖排题签：线装书式点缀，字出 homeContent */}
+        <span class="card-label" aria-hidden="true" data-font-role="cal">{profile.cardLabel}</span>
         <div class="profile-head">
           <Image
             class="avatar"
@@ -69,33 +85,6 @@ const { about, profile } = homeContent;
         <div class="about-foot reveal">
           <p class="about-signature">{about.signature}</p>
           <div class="about-seal" aria-hidden="true" data-font-role="cal">{about.seal[0]}<br />{about.seal[1]}</div>
-          <div class="ink-orbit" aria-hidden="true">
-            <div class="ink-circle"></div>
-            <svg class="bamboo" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg">
-              <g fill="none" stroke="#586258" stroke-linecap="round">
-                <path d="M108 294C131 236 151 177 173 78" stroke-width="5" opacity=".72" />
-                <path d="M170 93C204 111 228 135 250 168" stroke-width="2.7" opacity=".58" />
-                <path d="M148 170C114 153 90 132 70 101" stroke-width="2.5" opacity=".5" />
-                <path d="M129 226C160 218 187 221 215 236" stroke-width="2.4" opacity=".5" />
-                <path d="M116 267C92 254 74 237 59 214" stroke-width="2.1" opacity=".42" />
-              </g>
-              <g fill="#586258">
-                <ellipse cx="218" cy="125" rx="9" ry="32" transform="rotate(-42 218 125)" opacity=".44" />
-                <ellipse cx="246" cy="160" rx="8" ry="28" transform="rotate(-30 246 160)" opacity=".37" />
-                <ellipse cx="98" cy="132" rx="9" ry="33" transform="rotate(43 98 132)" opacity=".39" />
-                <ellipse cx="70" cy="101" rx="8" ry="28" transform="rotate(38 70 101)" opacity=".31" />
-                <ellipse cx="181" cy="224" rx="9" ry="33" transform="rotate(-74 181 224)" opacity=".39" />
-                <ellipse cx="212" cy="235" rx="8" ry="28" transform="rotate(-63 212 235)" opacity=".32" />
-                <ellipse cx="87" cy="252" rx="8" ry="28" transform="rotate(51 87 252)" opacity=".32" />
-                <ellipse cx="59" cy="215" rx="7" ry="25" transform="rotate(42 59 215)" opacity=".26" />
-              </g>
-              <g stroke="#f2eee3" stroke-width="1.6" opacity=".42">
-                <path d="M148 169l14 4" />
-                <path d="M160 126l14 4" />
-                <path d="M132 219l13 4" />
-              </g>
-            </svg>
-          </div>
         </div>
       </div>
     </div>
@@ -105,10 +94,39 @@ const { about, profile } = homeContent;
 <style>
   .about {
     overflow: hidden;
+    padding-block: clamp(56px, 6vw, 84px);
     background:
       linear-gradient(180deg, rgba(255,255,255,0.28), transparent 48%),
       var(--paper);
     border-top: 1px solid var(--line);
+  }
+
+  /* 竹林水墨背景层：铺在内容之下，multiply 透纸色（白处见纸、墨处沉色） */
+  .about-grove {
+    position: absolute;
+    inset: 0;
+    opacity: 0.22;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
+
+  .about-grove img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* 纸色纱罩：左实右虚，护住文字区 */
+  .about-veil {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, var(--paper) 22%, transparent 58%);
+    pointer-events: none;
+  }
+
+  .about .shell {
+    position: relative;
+    z-index: 1;
   }
 
   .about-grid {
@@ -145,6 +163,27 @@ const { about, profile } = homeContent;
 
   :global(html[data-theme='night']) .profile-card {
     background: rgb(233 226 208 / 5%);
+  }
+
+  /* 题签：右缘竖排小签，半挂在卡外，如线装书题签 */
+  .card-label {
+    position: absolute;
+    top: 30px;
+    right: -13px;
+    padding: 10px 3px;
+    border: 1px solid var(--cinnabar);
+    color: var(--cinnabar);
+    background: var(--paper-light);
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    line-height: 1.4;
+    text-align: center;
+    writing-mode: vertical-rl;
+    box-shadow: 0 4px 10px -6px var(--shadow);
+  }
+
+  :global(html[data-theme='night']) .card-label {
+    background: #2a2d29;
   }
 
   .profile-head {
@@ -267,13 +306,13 @@ const { about, profile } = homeContent;
     letter-spacing: 0.12em;
   }
 
-  /* 签名、印章、墨环竹影同排收束右列 */
+  /* 签名与印章同排收束右列 */
   .about-foot {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: clamp(20px, 4vw, 44px);
-    margin-top: 38px;
+    margin-top: 24px;
   }
 
   .about-signature {
@@ -301,72 +340,6 @@ const { about, profile } = homeContent;
     box-shadow: inset 0 0 0 4px rgba(255,255,255,0.13);
   }
 
-  /* 墨环竹影：缩小为伴章,不再独占大区块 */
-  .ink-orbit {
-    position: relative;
-    margin-left: auto;
-    width: 220px;
-    aspect-ratio: 1;
-    display: grid;
-    place-items: center;
-  }
-
-  .ink-circle {
-    position: absolute;
-    width: min(100%, 220px);
-    aspect-ratio: 1;
-    border-radius: 50%;
-    border: 12px solid transparent;
-    background:
-      radial-gradient(circle at 51% 49%, var(--paper) 0 57%, transparent 58%),
-      conic-gradient(from 12deg,
-        rgba(44,48,44,0.82),
-        rgba(63,70,64,0.4) 12%,
-        rgba(44,48,44,0.78) 22%,
-        rgba(63,70,64,0.22) 36%,
-        rgba(44,48,44,0.72) 52%,
-        rgba(63,70,64,0.28) 66%,
-        rgba(44,48,44,0.84) 82%,
-        rgba(63,70,64,0.3));
-    filter: blur(0.35px);
-    opacity: 0.72;
-    transform: rotate(-12deg) scaleX(1.02);
-    -webkit-mask: radial-gradient(circle, transparent 0 56%, #000 57% 66%, transparent 67%);
-    mask: radial-gradient(circle, transparent 0 56%, #000 57% 66%, transparent 67%);
-  }
-
-  .ink-circle::before,
-  .ink-circle::after {
-    content: "";
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(46, 51, 47, 0.16);
-    filter: blur(4px);
-  }
-
-  .ink-circle::before {
-    width: 42px;
-    height: 20px;
-    left: -6px;
-    top: 52%;
-    transform: rotate(-20deg);
-  }
-
-  .ink-circle::after {
-    width: 30px;
-    height: 14px;
-    right: 8px;
-    bottom: 20%;
-    transform: rotate(18deg);
-  }
-
-  .bamboo {
-    position: relative;
-    z-index: 2;
-    width: 82%;
-    overflow: visible;
-  }
-
   /* ============ 夜色覆盖 ============ */
   :global(html[data-theme='night']) .about {
     background:
@@ -374,27 +347,11 @@ const { about, profile } = homeContent;
       var(--paper);
   }
 
-  :global(html[data-theme='night']) .ink-circle {
-    background:
-      radial-gradient(circle at 51% 49%, var(--paper) 0 57%, transparent 58%),
-      conic-gradient(from 12deg,
-        rgba(233, 226, 208, 0.7),
-        rgba(163, 155, 133, 0.35) 12%,
-        rgba(233, 226, 208, 0.66) 22%,
-        rgba(163, 155, 133, 0.2) 36%,
-        rgba(233, 226, 208, 0.62) 52%,
-        rgba(163, 155, 133, 0.24) 66%,
-        rgba(233, 226, 208, 0.72) 82%,
-        rgba(163, 155, 133, 0.26));
-  }
-
-  :global(html[data-theme='night']) .ink-circle::before,
-  :global(html[data-theme='night']) .ink-circle::after {
-    background: rgba(233, 226, 208, 0.14);
-  }
-
-  :global(html[data-theme='night']) .bamboo {
-    filter: brightness(1.65);
+  :global(html[data-theme='night']) .about-grove {
+    opacity: 0.16;
+    /* 反色后以 screen 叠印：墨竹化作月白竹影浮在暗纸上，multiply 在暗底会隐没 */
+    mix-blend-mode: screen;
+    filter: invert(0.94) brightness(0.85);
   }
 
   :global(html[data-theme='night']) .about-topics span {
@@ -411,10 +368,6 @@ const { about, profile } = homeContent;
       position: static;
       max-width: 460px;
     }
-
-    .ink-orbit {
-      margin-left: 0;
-    }
   }
 
   @media (max-width: 620px) {
@@ -430,8 +383,9 @@ const { about, profile } = homeContent;
       gap: 18px;
     }
 
-    .ink-orbit {
-      width: 180px;
+    /* 移动端主体偏右：保住右侧立竹 */
+    .about-grove img {
+      object-position: 68% center;
     }
   }
 </style>
