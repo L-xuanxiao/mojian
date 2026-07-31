@@ -109,7 +109,7 @@ const rssUrl = new URL(`${BASE}rss.xml`, Astro.site).href;
         display: none;
         place-items: center;
         background: var(--page-background);
-        transition: opacity 280ms var(--ease-out), visibility 280ms;
+        transition: opacity 180ms var(--ease-out), visibility 180ms;
       }
 
       :global(.js) #loader {
@@ -135,7 +135,7 @@ const rssUrl = new URL(`${BASE}rss.xml`, Astro.site).href;
         border-radius: 50%;
         content: '';
         background: radial-gradient(circle, rgb(38 36 31 / 10%), transparent 70%);
-        animation: inkBloom 1.3s ease-out forwards;
+        animation: inkBloom 680ms ease-out forwards;
       }
 
       :global(html[data-theme='night']) .load-mark::before {
@@ -163,15 +163,15 @@ const rssUrl = new URL(`${BASE}rss.xml`, Astro.site).href;
 
       .load-txt span {
         opacity: 0;
-        animation: chIn 0.5s forwards;
+        animation: chIn 320ms forwards;
       }
 
       .load-txt span:nth-child(1) {
-        animation-delay: 0.25s;
+        animation-delay: 80ms;
       }
 
       .load-txt span:nth-child(2) {
-        animation-delay: 0.5s;
+        animation-delay: 220ms;
       }
 
       .load-sub {
@@ -180,7 +180,7 @@ const rssUrl = new URL(`${BASE}rss.xml`, Astro.site).href;
         font-size: 0.95rem;
         letter-spacing: 0.3em;
         opacity: 0;
-        animation: chIn 0.6s 0.75s forwards;
+        animation: chIn 280ms 360ms forwards;
       }
 
       @keyframes chIn {
@@ -325,38 +325,21 @@ const rssUrl = new URL(`${BASE}rss.xml`, Astro.site).href;
 
       initSearch();
 
-      // 首载动画：完整加载且最短停留后淡出并移除节点；2.6s 兜底强制移除。
-      // body.loaded 供首页 hero 入场动画接力。
+      // 首载动画从导航开始计时，不等待 window.load、字体或非关键图片。
+      // body.loaded 与淡出同时触发，供首页 hero 在遮罩下接力入场。
       (function () {
         const loader = document.getElementById('loader');
         if (!loader) {
           document.body.classList.add('loaded');
           return;
         }
-        const start = performance.now();
-        let finished = false;
-        const finish = () => {
-          if (finished) return;
-          finished = true;
-          const wait = Math.max(0, 900 - (performance.now() - start));
-          setTimeout(() => {
-            loader.classList.add('done');
-            document.body.classList.add('loaded');
-            setTimeout(() => loader.remove(), 320);
-          }, wait);
-        };
-        const pageReady = document.readyState === 'complete'
-          ? Promise.resolve()
-          : new Promise((resolve) => window.addEventListener('load', resolve, { once: true }));
-        const fontsReady = document.fonts?.load
-          ? Promise.all([
-              document.fonts.load('400 1em "Noto Serif SC"', '墨笺正文'),
-              // 书法体按本页 loader 实际用字取样：子集字体只含页面文本，固定字样可能取不到
-              document.fonts.load('400 1em "Ma Shan Zheng"', loader.dataset.loaderText || '墨笺'),
-            ]).catch(() => undefined)
-          : Promise.resolve();
-        Promise.all([pageReady, fontsReady]).then(finish);
-        setTimeout(finish, 2600);
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const wait = Math.max(0, (reduceMotion ? 0 : 700) - performance.now());
+        setTimeout(() => {
+          document.body.classList.add('loaded');
+          loader.classList.add('done');
+          setTimeout(() => loader.remove(), 220);
+        }, wait);
       })();
 
       // 昼夜切换：事件委托（按钮位于 Swup 交换的 header 内，委托到 document 不丢绑定）
