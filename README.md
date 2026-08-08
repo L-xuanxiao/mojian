@@ -29,6 +29,10 @@
 
 ```text
 src/
+├── components/
+│   ├── Header.astro
+│   ├── Footer.astro
+│   └── home/          # 首页区块
 ├── layouts/
 │   └── BaseLayout.astro
 ├── pages/
