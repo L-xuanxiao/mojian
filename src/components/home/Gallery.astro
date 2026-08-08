@@ -1,0 +1,20 @@
+---
+// 占位数据，后续阶段替换为真实内容
+// 第五/六阶段接入真实摄影与 Astro Image（astro:assets 优化图片）
+const works = ['光影 · 一', '光影 · 二', '光影 · 三', '光影 · 四'];
+---
+
+<!-- 「光影集」：特殊在容器用 max-w-wide，画面需要比阅读栏更宽的呼吸空间 -->
+<section class="mx-auto max-w-wide px-5 py-16 md:px-8 md:py-24" aria-labelledby="gallery">
+  <h2 id="gallery">光影集</h2>
+  <p class="mt-4 text-ink-soft">摄影与影像，占位待接入真实作品。</p>
+  <div class="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4">
+    {
+      works.map((title) => (
+        <div class="flex aspect-[4/3] items-center justify-center rounded-sm bg-paper-deep">
+          <span class="text-sm text-ink-soft">{title}</span>
+        </div>
+      ))
+    }
+  </div>
+</section>

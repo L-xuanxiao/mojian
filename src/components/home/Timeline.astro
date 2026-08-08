@@ -1,0 +1,31 @@
+---
+// 占位数据，后续阶段替换为真实内容
+const milestones = [
+  { year: '2026', event: '重建墨笺：以 Astro 重写这个数字空间' },
+  { year: '2023', event: '开始持续记录阅读与折腾笔记' },
+  { year: '2020', event: '写下第一行属于自己的前端代码' },
+  { year: '2018', event: '买下第一个域名，搭起最初的博客' },
+];
+---
+
+<section
+  class="mx-auto max-w-content px-5 py-16 md:px-8 md:py-24"
+  aria-labelledby="timeline-heading"
+>
+  <h2 id="timeline-heading">我的路</h2>
+  <!-- 竖向时间线：ul 左侧 1px 墨线贯穿，朱砂小方块压线如印 -->
+  <ul class="m-0 mt-8 list-none border-l border-line p-0 md:mt-10">
+    {
+      milestones.map(({ year, event }) => (
+        <li class="relative pb-8 pl-6 last:pb-0 md:pl-8">
+          <span
+            aria-hidden="true"
+            class="absolute left-0 top-1.5 size-2 -translate-x-1/2 bg-cinnabar"
+          />
+          <p class="m-0 font-sans text-sm text-ink-soft">{year}</p>
+          <p class="m-0 mt-1 leading-relaxed">{event}</p>
+        </li>
+      ))
+    }
+  </ul>
+</section>

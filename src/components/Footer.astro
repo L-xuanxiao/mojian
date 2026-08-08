@@ -1,0 +1,60 @@
+---
+// 占位数据，后续阶段替换为真实内容
+// href 与 Header 导航保持一致；路由页面将在后续阶段创建
+const navLinks = [
+  { label: '笺录', href: '/journal/' },
+  { label: '器作', href: '/projects/' },
+  { label: '光影', href: '/gallery/' },
+  { label: '此间', href: '/about/' },
+  { label: '留墨', href: '/guestbook/' },
+];
+---
+
+<footer class="border-t border-line">
+  <div class="mx-auto max-w-content px-5 py-12 md:px-8">
+    <div class="flex flex-col gap-8">
+      <!-- 导航链接小字行 -->
+      <nav aria-label="页脚导航">
+        <ul class="m-0 flex list-none flex-wrap gap-x-6 gap-y-2 p-0 text-sm">
+          {
+            navLinks.map(({ label, href }) => (
+              <li>
+                <a
+                  href={href}
+                  class="text-ink-soft no-underline transition-colors ease-ink hover:text-ink"
+                >
+                  {label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <!-- 联系入口行 -->
+      <p class="m-0 text-sm text-ink-soft">
+        留墨于此：
+        <a
+          href="https://github.com/L-xuanxiao/mojian"
+          class="text-cinnabar no-underline transition-colors ease-ink hover:underline">GitHub</a
+        >
+        <span aria-hidden="true" class="mx-2">·</span>
+        <a
+          href="mailto:hi@mojian.example"
+          class="text-cinnabar no-underline transition-colors ease-ink hover:underline">邮件</a
+        >
+      </p>
+
+      <!-- 版权行 + 朱砂印章 -->
+      <div class="flex items-center justify-between">
+        <p class="m-0 text-sm text-ink-soft">© 2026 墨笺</p>
+        <!-- 印章为纯装饰，对辅助技术隐藏 -->
+        <span
+          aria-hidden="true"
+          class="flex h-[2.5em] w-[2.5em] items-center justify-center rounded-sm bg-cinnabar font-display text-xs leading-none text-paper select-none"
+          >墨笺</span
+        >
+      </div>
+    </div>
+  </div>
+</footer>

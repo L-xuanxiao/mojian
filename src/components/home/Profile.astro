@@ -1,0 +1,17 @@
+---
+// 占位数据，后续阶段替换为真实内容
+const intro = ['写字、写代码、拍照片的人。', '在这里安放文章、作品与光影。', '相信克制即是丰盈。'];
+---
+
+<section class="mx-auto max-w-content px-5 py-16 md:px-8 md:py-24" aria-labelledby="profile">
+  <h2 id="profile" class="mb-6">
+    此间主人
+    {/* 朱砂印章：纯装饰视觉锚点，随标题文字流排版 */}
+    <span
+      aria-hidden="true"
+      class="inline-flex items-center justify-center align-middle ml-3 -mt-1 size-[2em] rounded-sm bg-cinnabar text-paper font-display text-[0.9em] leading-none select-none"
+      >墨</span
+    >
+  </h2>
+  {intro.map((paragraph) => <p>{paragraph}</p>)}
+</section>

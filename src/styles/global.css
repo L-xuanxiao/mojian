@@ -19,9 +19,28 @@
   --shadow-color: rgb(37 38 34 / 0.08);
 }
 
-/* 夜：跟随系统，切换器随第三阶段 Header 再接入 */
+/* 昼：手动指定浅色时固定 color-scheme（变量取上方 :root 默认值） */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+/* 夜：手动切换。属性选择器优先级高于媒体查询，值与下方媒体查询块保持一致 */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --paper: #1c1d1a;
+  --paper-deep: #252622;
+  --ink: #e8e3d4;
+  --ink-soft: #a8a496;
+  --line: rgb(232 227 212 / 0.16);
+  --cinnabar: #cf7259;
+  --pine: #8ea395;
+  --bronze: #b39b7d;
+  --shadow-color: rgb(0 0 0 / 0.32);
+}
+
+/* 夜：跟随系统；手动指定浅色时不生效 */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --paper: #1c1d1a;
     --paper-deep: #252622;
     --ink: #e8e3d4;
@@ -85,8 +104,13 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
+  /* 深色噪点：手动切换或跟随系统（未手动指定浅色时），两处值保持一致 */
+  html[data-theme='dark'] body {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
   @media (prefers-color-scheme: dark) {
-    body {
+    html:not([data-theme='light']) body {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
     }
   }

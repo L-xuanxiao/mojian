@@ -1,0 +1,49 @@
+---
+// 占位数据，后续阶段替换为真实内容
+const posts = [
+  {
+    title: '重建墨笺：从零开始的数字空间',
+    date: '2026-08-01',
+    dateLabel: '2026 年 8 月 1 日',
+    excerpt: '推倒旧站，只留纸、墨与字。记录这次以 Astro 重建个人空间的起点。',
+  },
+  {
+    title: '关于留白：页面与心绪的余裕',
+    date: '2026-07-20',
+    dateLabel: '2026 年 7 月 20 日',
+    excerpt: '设计上的留白不只是空，而是让内容得以呼吸的节奏。',
+  },
+  {
+    title: '读《阴翳礼赞》兼论夜间的界面',
+    date: '2026-07-05',
+    dateLabel: '2026 年 7 月 5 日',
+    excerpt: '暗色主题不该是反白的纸，而应是灯火下的另一重墨色。',
+  },
+];
+---
+
+<section class="mx-auto max-w-content px-5 py-16 md:px-8 md:py-24" aria-labelledby="journal">
+  <h2 id="journal">近来所记</h2>
+
+  <ol class="mt-10 list-none p-0 md:mt-12">
+    {
+      posts.map((post, i) => (
+        <li class={i > 0 ? 'border-t border-line' : undefined}>
+          <article class="py-6 md:py-8">
+            <h3 class="mt-0">
+              <a href="#">{post.title}</a>
+            </h3>
+            <p class="mt-2 font-sans text-sm text-ink-soft">
+              <time datetime={post.date}>{post.dateLabel}</time>
+            </p>
+            <p class="mt-3 mb-0 text-ink-soft">{post.excerpt}</p>
+          </article>
+        </li>
+      ))
+    }
+  </ol>
+
+  <p class="mt-8 text-sm">
+    <a href="/journal/">全部文章 →</a>
+  </p>
+</section>

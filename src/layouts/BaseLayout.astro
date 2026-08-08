@@ -1,5 +1,7 @@
 ---
 import { Font } from 'astro:assets';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -15,6 +17,13 @@ const { title = '墨笺', description = '融合东方美学、个人内容与现
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
+    <script is:inline>
+      // 防 FOUC：渲染前恢复手动选择的主题；无存储时不设属性，交给媒体查询
+      const theme = localStorage.getItem('theme');
+      if (theme === 'light' || theme === 'dark') {
+        document.documentElement.dataset.theme = theme;
+      }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
@@ -26,6 +35,8 @@ const { title = '墨笺', description = '融合东方美学、个人内容与现
     <title>{title}</title>
   </head>
   <body>
+    <Header />
     <slot />
+    <Footer />
   </body>
 </html>

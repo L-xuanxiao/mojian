@@ -1,0 +1,30 @@
+---
+// 占位数据，后续阶段替换为真实内容
+const items = [
+  { text: '重构 mojian 站点', meta: '进行中' },
+  { text: '读《天文之书》', meta: '进行中' },
+  { text: '整理去年的胶片照片', meta: '缓慢推进' },
+];
+---
+
+<section class="mx-auto max-w-content px-5 py-16 md:px-8 md:py-24" aria-labelledby="current-status">
+  <h2 id="current-status">正在做什么</h2>
+  <ul class="m-0 mt-8 list-none space-y-4 p-0">
+    {
+      items.map((item) => (
+        <li class="flex items-baseline gap-3">
+          {/* 前置小墨点：克制装饰，仅作列表引导 */}
+          <span
+            class="bg-ink size-1.5 shrink-0 translate-y-[-1px] rounded-full"
+            aria-hidden="true"
+          />
+          <span>
+            {item.text}
+            <span class="text-ink-soft ml-3 text-sm">{item.meta}</span>
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="text-ink-soft mt-10 text-sm">最近更新：2026 年夏</p>
+</section>

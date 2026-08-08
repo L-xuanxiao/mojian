@@ -1,0 +1,25 @@
+---
+// 占位数据，后续阶段替换为真实内容
+const siteName = '墨笺';
+const tagline = '纸上留白，墨分五色——融合东方美学与现代网页体验的个人数字空间';
+const scrollHint = '向下展开长卷';
+---
+
+<!-- 首页第一幕：满屏居中，仅靠字级、留白与墨色分层，不加装饰元素 -->
+<section
+  class="relative flex min-h-svh flex-col items-center justify-center px-5 text-center md:px-8"
+  aria-label="站点首屏"
+>
+  <h1 class="font-display text-6xl font-normal tracking-wide text-ink md:text-8xl">
+    {siteName}
+  </h1>
+  <p class="mx-auto mt-8 max-w-content text-base leading-relaxed text-ink-soft md:mt-10 md:text-lg">
+    {tagline}
+  </p>
+
+  <!-- 滚动提示：纯文字符号，静止不做动画 -->
+  <p class="absolute bottom-10 flex flex-col items-center gap-2 text-sm text-ink-soft">
+    <span>{scrollHint}</span>
+    <span aria-hidden="true">↓</span>
+  </p>
+</section>
