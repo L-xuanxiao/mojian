@@ -1,22 +1,100 @@
-## Development
+# AGENTS.md
 
-When starting the dev server, use background mode:
+用于约束 AI Agent 在 `mojian` 项目中的编码、修改、排错与验证行为。
 
+优先级：
+
+> 用户当前要求 > 项目现有代码、配置与约定 > 本文件 > 规划文档
+
+## 1. 沟通与执行
+
+- 每次回复以“喵内が”开头，默认使用中文，简洁说明结果、验证和必要风险。
+- 修改前先读取相关代码、配置和文档，明确影响范围与完成标准。
+- 优先自行从项目中消除不确定性；涉及可能变化的 API、依赖版本或框架用法时，查阅官方文档，不凭记忆猜测。
+- 聚焦当前任务，不顺手修改无关代码，不以“更优雅”为由扩大范围。
+
+## 2. 当前基线与技术边界
+
+- 判断当前实现状态时，以实际代码、配置、依赖清单和可验证运行结果为准；规划文档不代表能力已经安装或实现。
+- 按任务阶段逐项引入能力，不批量安装规划中的全部依赖。
+- Astro 默认负责页面、路由、布局、SEO、内容与静态渲染。
+- 只有真实需要客户端状态或复杂交互时才引入 React；保持 Island 架构，不改成 React SPA，不引入 React Router。
+- 静态组件优先使用 Astro；不需要客户端 JavaScript 的组件不添加 `client:*`。
+- 动画能力启用后按职责使用：CSS 负责简单和环境动画，Motion 负责 React UI 动画，GSAP 负责复杂时间线与滚动叙事，Lenis 只负责平滑滚动。
+- 同一职责只保留一套主要方案，避免重复框架、重复动画库和重复滚动方案。
+
+## 3. 设计与体验
+
+- 网站定位为具有个人识别度的现代东方数字空间，保持“现代东方水墨书卷”气质：克制、清晰、留白充足、内容优先。
+- 水墨、宣纸、山水、书卷、印章等元素服务于信息层级，不堆砌装饰。
+- 避免红金宫廷风、通用博客模板、SaaS/Dashboard、默认 shadcn 视觉和大量重复圆角卡片。
+- 动画应增强叙事和反馈；简单效果优先 CSS，不为动画引入无意义的 JavaScript。
+- 修改 UI 时同时检查桌面端和移动端；涉及主题或动效时，覆盖深浅主题与 `prefers-reduced-motion`。
+- 保持现有视觉质量和未在任务范围内的页面，不以性能优化为由无依据地削弱设计效果。
+
+## 4. 修改与排错
+
+- 采用满足当前需求的最简单完整方案，避免推测性抽象、配置和间接层。
+- 从可端到端运行的最小版本开始逐层增加能力，每一步都保持项目可用。
+- 保持组件职责清晰；只在存在真实边界时拆分，避免形式化分层和大范围重构。
+- 当前需求未要求兼容时，确认旧实现无内部引用、公开 URL、内容链接或数据迁移需求后直接删除，不无意义叠加兼容层、回退逻辑或迁移分支。
+- 选择可长期维护的最小方案，不采用明知随后需要推翻的临时实现。
+- 排错先复现并定位根因，再做局部修复和回归检查。
+- 优先修正状态、结构或生命周期问题；避免用大量 `!important`、失控的 `z-index`、任意 `setTimeout` 或吞异常掩盖根因。
+- 删除本次修改产生的无用 import、变量和代码；保留原有且与任务无关的内容。
+
+## 5. 依赖管理
+
+- 新增依赖前，先检查项目现有代码、依赖文档、类型定义和已有能力。
+- 仅在能明显降低整体复杂度或提高可靠性时，引入成熟且持续维护的库。
+- 不重复实现已有通用能力，不添加职责重叠的依赖。
+- 不主动批量升级与当前任务无关的依赖；版本和安装结果以 `package.json`、锁文件及实际验证为准。
+
+## 6. 验证
+
+- 验证范围与改动风险匹配，不以“代码已写完”代替结果验证。
+- 仅修改文档时，回读内容并执行差异检查；无需运行项目构建。
+- 修改代码、配置、路由或项目结构时，当前至少执行：
+
+```bash
+pnpm build
 ```
-astro dev --background
+
+- 后续项目新增 `check` 脚本后，代码改动优先执行：
+
+```bash
+pnpm check
+pnpm build
 ```
 
-Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
+- 涉及布局、交互、动画、导航或响应式行为变化时，应在实际浏览器检查受影响路由和必要视口，不能只根据代码判断效果。
+- 启动开发服务器使用后台模式：`astro dev --background`；使用 `astro dev status`、`astro dev logs`、`astro dev stop` 管理。
+- 无法完成某项验证时，明确说明未验证内容和原因，不伪造结果。
 
-## Documentation
+## 7. Git
 
-Full documentation: https://docs.astro.build
+- 修改前后检查 `git status` 和相关 `git diff`，保留用户已有未提交修改。
+- 未经用户明确要求，不提交、不推送、不创建 PR。
+- 不执行 `git reset --hard`、`git clean -fd`、`git checkout .`、`git restore .` 等覆盖工作区的命令。
+- 用户要求提交时，一个提交对应一个明确目标；Commit Message 使用规范前缀和简洁中文描述，如 `fix: 修复移动端画廊溢出`。
 
-Consult these guides before working on related tasks:
+## 8. 项目文档
 
-- [Adding pages, dynamic routes, or middleware](https://docs.astro.build/en/guides/routing/)
-- [Working with Astro components](https://docs.astro.build/en/basics/astro-components/)
-- [Using React, Vue, Svelte, or other framework components](https://docs.astro.build/en/guides/framework-components/)
-- [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
-- [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
-- [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)
+- 涉及产品定位、设计、架构、技术选型、页面规划或开发阶段时，先读 `docs/mojian_plan.md`。该文件是路线图，不是当前依赖清单。
+- 代码和配置与规划不一致时，先以当前用户要求和实际项目状态为准；架构决策变化时同步相关文档。
+- 项目阶段、技术基线或长期约定发生变化时，应及时更新本文件，保持规则与项目现状一致。
+- 详细说明放入对应文档，不继续堆入本文件。
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues for `L-xuanxiao/mojian`. See `docs/agents/issue-tracker.md` before issue operations.
+
+### Triage labels
+
+Use the five default canonical triage labels. See `docs/agents/triage-labels.md` before triage operations.
+
+### Domain docs
+
+Use the single-context domain documentation layout. See `docs/agents/domain.md` before domain modeling or architecture exploration.
