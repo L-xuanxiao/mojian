@@ -1,1 +1,223 @@
 @import 'tailwindcss';
+
+/*
+ * 设计系统：纸上留白，墨分五色
+ * 材料只有三种——纸（底色）、墨（文字与线条）、朱砂（唯一强调色）。
+ * 层级靠字号、字重、留白与 1px 墨线表达，不靠阴影与卡片。
+ */
+
+/* 运行时颜色变量：昼 */
+:root {
+  --paper: #f4efe3;
+  --paper-deep: #e4dac7;
+  --ink: #252622;
+  --ink-soft: #69685f;
+  --line: rgb(37 38 34 / 0.14);
+  --cinnabar: #a44736;
+  --pine: #49574c;
+  --bronze: #8b7355;
+  --shadow-color: rgb(37 38 34 / 0.08);
+}
+
+/* 夜：跟随系统，切换器随第三阶段 Header 再接入 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #1c1d1a;
+    --paper-deep: #252622;
+    --ink: #e8e3d4;
+    --ink-soft: #a8a496;
+    --line: rgb(232 227 212 / 0.16);
+    --cinnabar: #cf7259;
+    --pine: #8ea395;
+    --bronze: #b39b7d;
+    --shadow-color: rgb(0 0 0 / 0.32);
+  }
+}
+
+/* 静态令牌 */
+@theme {
+  /* 阅读栏宽约 40 字/行，宽栏用于将来的画廊与长卷 */
+  --container-content: 42rem;
+  --container-wide: 72rem;
+
+  /* 全站收敛到小圆角 */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+
+  /* 主曲线用于出场与悬停；回弹曲线留给印章式反馈，少量使用 */
+  --ease-ink: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-seal: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* 时长不加令牌：直接使用 duration-150 / duration-250 / duration-400 */
+}
+
+/* 随主题切换的令牌：映射到运行时变量 */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-deep: var(--paper-deep);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-cinnabar: var(--cinnabar);
+  --color-pine: var(--pine);
+  --color-bronze: var(--bronze);
+
+  --font-serif: var(--font-noto-serif);
+  --font-sans: var(--font-noto-sans);
+  --font-display: var(--font-ma-shan-zheng);
+
+  --shadow-sm: 0 1px 2px var(--shadow-color);
+  --shadow-md: 0 4px 16px var(--shadow-color);
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-noto-serif);
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+    /* 宣纸噪点：静态、极低对比，深色主题换为更淡的白色噪点 */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 600;
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-size: 2.25rem;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+  }
+
+  h3 {
+    font-size: 1.375rem;
+  }
+
+  h4 {
+    font-size: 1.125rem;
+  }
+
+  p,
+  ul,
+  ol {
+    margin-block-end: 1em;
+  }
+
+  ul,
+  ol {
+    padding-inline-start: 1.5em;
+  }
+
+  ul {
+    list-style: disc;
+  }
+
+  ol {
+    list-style: decimal;
+  }
+
+  ::marker {
+    color: var(--ink-soft);
+  }
+
+  a {
+    color: var(--cinnabar);
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    transition:
+      color 150ms var(--ease-ink),
+      text-decoration-thickness 150ms var(--ease-ink);
+  }
+
+  a:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  ::selection {
+    background: var(--cinnabar);
+    color: var(--paper);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--cinnabar);
+    outline-offset: 2px;
+  }
+
+  /* 全局减少动态：压缩所有动画与过渡时长，退回原生滚动 */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* 主按钮：墨底纸字，hover 转朱砂，取印章落纸之意 */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.5em 1.25em;
+    border: 1px solid var(--ink);
+    border-radius: var(--radius-sm);
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-noto-sans);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color 150ms var(--ease-ink),
+      border-color 150ms var(--ease-ink),
+      color 150ms var(--ease-ink);
+  }
+
+  .btn:hover {
+    background: var(--cinnabar);
+    border-color: var(--cinnabar);
+    color: var(--paper);
+    text-decoration: none;
+  }
+
+  /* 次按钮：透明底、墨字、1px 墨线 */
+  .btn--ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--line);
+  }
+
+  .btn--ghost:hover {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+}

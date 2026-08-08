@@ -8,6 +8,8 @@
 - React 19（按需使用 Island）
 - TypeScript（严格模式）
 - Tailwind CSS 4 + 原生 CSS
+- 设计令牌与昼夜主题：`src/styles/global.css`（CSS Variables + Tailwind `@theme`）
+- 字体：Astro Fonts 自托管（Noto Serif SC / Noto Sans SC / Ma Shan Zheng）
 - pnpm
 
 动画、内容、搜索和测试能力按开发阶段逐项引入，不在初始化阶段批量安装。
