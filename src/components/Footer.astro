@@ -45,16 +45,63 @@ const navLinks = [
         >
       </p>
 
-      <!-- 版权行 + 朱砂印章 -->
+      <!-- 版权行 + 朱文方印与竖排落款 -->
       <div class="flex items-center justify-between">
         <p class="m-0 text-sm text-ink-soft">© 2026 墨笺</p>
-        <!-- 印章为纯装饰，对辅助技术隐藏 -->
-        <span
-          aria-hidden="true"
-          class="flex h-[2.5em] w-[2.5em] items-center justify-center rounded-sm bg-cinnabar font-display text-xs leading-none text-paper select-none"
-          >墨笺</span
-        >
+        <div class="flex items-center gap-4">
+          <!-- 竖排落款「墨笺藏本」：题跋式装饰，对辅助技术隐藏；移动端隐藏避免挤压版权行 -->
+          <span
+            aria-hidden="true"
+            class="hidden font-display text-xs tracking-[0.3em] text-ink-soft select-none sm:block"
+            style="writing-mode: vertical-rl">墨笺藏本</span
+          >
+          <!-- 朱文方印：外框朱砂 1.5px 描边，内嵌实底白文「墨笺」，双层嵌套仿印泥钤出的边框感。
+               纯装饰，对辅助技术隐藏；data-seal 为钤印动画钩子，ring 承载落印淡墨扩散环 -->
+          <span
+            aria-hidden="true"
+            class="relative flex h-[2.75em] w-[2.75em] items-center justify-center rounded-sm border-[1.5px] border-cinnabar p-[3px] select-none"
+            data-seal
+            ><!-- 淡墨环：落印瞬间扩散一次，仅 JS 动画时显示 -->
+            <span
+              class="pointer-events-none absolute inset-0 rounded-sm border border-ink opacity-0"
+              data-seal-ring></span><span
+              class="flex h-full w-full items-center justify-center rounded-[2px] bg-cinnabar font-display text-xs leading-none text-paper"
+              >墨笺</span
+            ></span
+          >
+        </div>
       </div>
     </div>
   </div>
 </footer>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../scripts/scroll';
+
+  // reduced-motion：不创建任何动画，印章 CSS 默认完整可见
+  if (!prefersReducedMotion) {
+    const footer = document.querySelector<HTMLElement>('footer');
+    const seal = footer?.querySelector('[data-seal]');
+    const ring = footer?.querySelector('[data-seal-ring]');
+
+    if (footer && seal && ring) {
+      // 初始隐藏态只由 JS 设置：无 JS 时印章直达最终态
+      gsap.set(seal, { opacity: 0, rotate: -8, scale: 1.4 });
+      gsap.set(ring, { opacity: 0 });
+
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: footer, start: 'top 92%', once: true },
+      });
+      tl
+        // 钤印：自 rotate(-8°) scale(1.4) 砸落回正，back.out 近似 ease-seal 回弹
+        .to(seal, { opacity: 1, rotate: 0, scale: 1, duration: 0.5, ease: 'back.out(2)' })
+        // 落印瞬间一圈淡墨扩散消隐，只播一次
+        .fromTo(
+          ring,
+          { opacity: 0.5, scale: 0.6 },
+          { opacity: 0, scale: 1.6, duration: 0.6, ease: 'power2.out' },
+          '-=0.2',
+        );
+    }
+  }
+</script>

@@ -1,4 +1,6 @@
 ---
+import SectionHeading from '../SectionHeading.astro';
+
 // 占位数据，后续阶段替换为真实内容
 const items = [
   { text: '重构 mojian 站点', meta: '进行中' },
@@ -7,15 +9,19 @@ const items = [
 ];
 ---
 
-<section class="mx-auto max-w-content px-5 py-16 md:px-8 md:py-24" aria-labelledby="current-status">
-  <h2 id="current-status">正在做什么</h2>
-  <ul class="m-0 mt-8 list-none space-y-4 p-0">
+<section
+  class="mx-auto max-w-content px-5 py-16 md:px-8 md:py-24"
+  aria-labelledby="current-status"
+  data-current-status
+>
+  <SectionHeading id="current-status" title="正在做什么" index="贰" note="NOW" />
+  <ul class="m-0 list-none space-y-4 p-0" data-status-list>
     {
       items.map((item) => (
         <li class="flex items-baseline gap-3">
-          {/* 前置小墨点：克制装饰，仅作列表引导 */}
+          {/* 前置朱砂小方印点：微斜一角取钤印之意，仅作列表引导，克制不抢戏 */}
           <span
-            class="bg-ink size-1.5 shrink-0 translate-y-[-1px] rounded-full"
+            class="bg-cinnabar size-2 shrink-0 translate-y-[-1px] rotate-3 rounded-[1px]"
             aria-hidden="true"
           />
           <span>
@@ -26,5 +32,47 @@ const items = [
       ))
     }
   </ul>
-  <p class="text-ink-soft mt-10 text-sm">最近更新：2026 年夏</p>
+  <p class="text-ink-soft mt-10 text-sm" data-status-updated>最近更新：2026 年夏</p>
 </section>
+
+<script>
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../scripts/scroll';
+
+  // reduced-motion 时不创建任何动画，内容直达最终态
+  if (!prefersReducedMotion) {
+    const section = document.querySelector<HTMLElement>('[data-current-status]');
+
+    if (section) {
+      const items = section.querySelectorAll<HTMLElement>('[data-status-list] li');
+      const updated = section.querySelector<HTMLElement>('[data-status-updated]');
+
+      // 落墨初始态只由 JS 设置：无 JS / reduced-motion 时内容完整可见
+      gsap.set(items, { opacity: 0, y: 14, filter: 'blur(6px)' });
+      gsap.set(updated, { opacity: 0 });
+
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 80%',
+        once: true,
+        onEnter: () => {
+          // 条目依次落墨：上浮 + 墨迹由虚到实
+          gsap.to(items, {
+            opacity: 1,
+            y: 0,
+            filter: 'blur(0px)',
+            duration: 0.7,
+            ease: 'power3.out',
+            stagger: 0.08,
+          });
+          // 「最近更新」行最后淡入，收束整个区块
+          gsap.to(updated, {
+            opacity: 1,
+            duration: 0.6,
+            delay: 0.08 * items.length + 0.3,
+            ease: 'power2.out',
+          });
+        },
+      });
+    }
+  }
+</script>

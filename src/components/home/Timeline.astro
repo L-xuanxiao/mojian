@@ -1,5 +1,7 @@
 ---
 // 占位数据，后续阶段替换为真实内容
+import SectionHeading from '../SectionHeading.astro';
+
 const milestones = [
   { year: '2026', event: '重建墨笺：以 Astro 重写这个数字空间' },
   { year: '2023', event: '开始持续记录阅读与折腾笔记' },
@@ -11,21 +13,95 @@ const milestones = [
 <section
   class="mx-auto max-w-content px-5 py-16 md:px-8 md:py-24"
   aria-labelledby="timeline-heading"
+  data-timeline
 >
-  <h2 id="timeline-heading">我的路</h2>
-  <!-- 竖向时间线：ul 左侧 1px 墨线贯穿，朱砂小方块压线如印 -->
-  <ul class="m-0 mt-8 list-none border-l border-line p-0 md:mt-10">
+  <SectionHeading id="timeline-heading" title="我的路" index="柒" note="JOURNEY" />
+  <!-- 竖向时间线：左侧 1px 墨线贯穿，朱砂小方块压线如印。
+       墨线做成独立元素而非 border，才能被 GSAP scaleY 驱动生长；
+       末端 mask 渐隐如收笔，随 scaleY 生长始终带枯笔意；
+       初始态只由 JS 设置，无 JS / reduced-motion 时保持完整可见 -->
+  <ul class="relative m-0 mt-8 list-none p-0 md:mt-10" data-timeline-list>
+    <span
+      aria-hidden="true"
+      class="absolute inset-y-0 left-0 w-px bg-line [mask-image:linear-gradient(to_bottom,black_85%,transparent)]"
+      data-timeline-line></span>
     {
       milestones.map(({ year, event }) => (
         <li class="relative pb-8 pl-6 last:pb-0 md:pl-8">
+          {/* 节点：朱砂小方印，圆角 1px + 纸色内描边，取白文印的印泥感 */}
           <span
             aria-hidden="true"
-            class="absolute left-0 top-1.5 size-2 -translate-x-1/2 bg-cinnabar"
+            class="absolute left-0 top-1.5 size-2 -translate-x-1/2 rounded-[1px] bg-cinnabar shadow-[inset_0_0_0_1px_var(--paper)]"
+            data-timeline-node
           />
-          <p class="m-0 font-sans text-sm text-ink-soft">{year}</p>
-          <p class="m-0 mt-1 leading-relaxed">{event}</p>
+          <p class="m-0 font-sans text-sm text-ink-soft" data-timeline-text>
+            {year}
+          </p>
+          <p class="m-0 mt-1 leading-relaxed" data-timeline-text>
+            {event}
+          </p>
         </li>
       ))
     }
   </ul>
 </section>
+
+<script>
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '../../scripts/scroll';
+
+  // reduced-motion 时不创建任何动画，时间线保持最终态
+  if (!prefersReducedMotion) {
+    const list = document.querySelector<HTMLElement>('[data-timeline-list]');
+
+    if (list) {
+      // 墨线生长：随滚动 scrub，从顶端向下长出
+      const line = list.querySelector<HTMLElement>('[data-timeline-line]');
+      if (line) {
+        gsap.set(line, { scaleY: 0, transformOrigin: 'top center' });
+        gsap.to(line, {
+          scaleY: 1,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: list,
+            start: 'top 80%',
+            end: 'bottom 60%',
+            scrub: true,
+          },
+        });
+      }
+
+      // 节点落印 + 文字落墨：各 li 进入视口时触发一次
+      list.querySelectorAll<HTMLElement>('li').forEach((li) => {
+        const node = li.querySelector<HTMLElement>('[data-timeline-node]');
+        const texts = li.querySelectorAll<HTMLElement>('[data-timeline-text]');
+
+        gsap.set(node, { opacity: 0, rotate: -8, scale: 1.4 });
+        gsap.set(texts, { opacity: 0, y: 10 });
+
+        ScrollTrigger.create({
+          trigger: li,
+          start: 'top 82%',
+          once: true,
+          onEnter: () => {
+            // 钤印：带回弹地砸落
+            gsap.to(node, {
+              opacity: 1,
+              rotate: 0,
+              scale: 1,
+              duration: 0.55,
+              ease: 'back.out(2)',
+            });
+            // 落墨：年份与事件随节点稍后淡入
+            gsap.to(texts, {
+              opacity: 1,
+              y: 0,
+              duration: 0.6,
+              delay: 0.08,
+              ease: 'power3.out',
+            });
+          },
+        });
+      });
+    }
+  }
+</script>

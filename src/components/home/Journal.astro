@@ -1,4 +1,6 @@
 ---
+import SectionHeading from '../SectionHeading.astro';
+
 // 占位数据，后续阶段替换为真实内容
 const posts = [
   {
@@ -23,20 +25,28 @@ const posts = [
 ---
 
 <section class="mx-auto max-w-content px-5 py-16 md:px-8 md:py-24" aria-labelledby="journal">
-  <h2 id="journal">近来所记</h2>
+  <SectionHeading id="journal" title="近来所记" index="伍" note="JOURNAL" />
 
-  <ol class="mt-10 list-none p-0 md:mt-12">
+  <ol class="mt-10 list-none p-0 md:mt-12" data-reveal-group>
     {
       posts.map((post, i) => (
         <li class={i > 0 ? 'border-t border-line' : undefined}>
           <article class="py-6 md:py-8">
-            <h3 class="mt-0">
-              <a href="#">{post.title}</a>
-            </h3>
-            <p class="mt-2 font-sans text-sm text-ink-soft">
-              <time datetime={post.date}>{post.dateLabel}</time>
-            </p>
-            <p class="mt-3 mb-0 text-ink-soft">{post.excerpt}</p>
+            <div class="entry">
+              {/* 淡墨序号：纯装饰，取书卷目录页码之意；ol 本身已含顺序语义，故 aria-hidden */}
+              <span class="entry-index" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <div class="entry-body">
+                <h3 class="mt-0">
+                  <a href="#">{post.title}</a>
+                </h3>
+                <p class="mt-2 font-sans text-sm text-ink-soft">
+                  <time datetime={post.date}>{post.dateLabel}</time>
+                </p>
+                <p class="mt-3 mb-0 text-ink-soft">{post.excerpt}</p>
+              </div>
+            </div>
           </article>
         </li>
       ))
@@ -44,6 +54,54 @@ const posts = [
   </ol>
 
   <p class="mt-8 text-sm">
-    <a href="/journal/">全部文章 →</a>
+    <a class="ink-link" href="/journal/">全部文章 →</a>
   </p>
 </section>
+
+<style>
+  /* 序号与标题基线对齐：如目录页码与条目题名同处一行 */
+  .entry {
+    display: flex;
+    align-items: baseline;
+    gap: 1.25rem;
+  }
+
+  /* 大号淡墨序号：display 字体、color-mix 淡 ink，有气势而不抢正文 */
+  .entry-index {
+    flex: none;
+    width: 2.5rem;
+    font-family: var(--font-ma-shan-zheng);
+    font-size: 1.5rem;
+    line-height: 1;
+    color: color-mix(in srgb, var(--ink) 22%, transparent);
+    user-select: none;
+  }
+
+  .entry-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* 墨迹生长下划线：hover 时墨线自左向右写出，只动 transform */
+  .ink-link {
+    position: relative;
+    text-decoration: none;
+  }
+
+  .ink-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.15em;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 400ms var(--ease-ink);
+  }
+
+  .ink-link:hover::after {
+    transform: scaleX(1);
+  }
+</style>

@@ -1,4 +1,6 @@
 ---
+import SectionHeading from '../SectionHeading.astro';
+
 // 占位数据，后续阶段替换为真实内容
 const projects = [
   {
@@ -23,19 +25,77 @@ const projects = [
 ---
 
 <section class="mx-auto max-w-content px-5 py-16 md:px-8 md:py-24" aria-labelledby="projects">
-  <h2 id="projects">器作</h2>
-  <ul class="mt-10 list-none p-0 md:mt-12">
+  <SectionHeading id="projects" title="器作" index="叁" note="WORKS" />
+  <ul class="mt-10 list-none p-0 md:mt-12" data-reveal-group>
     {
-      projects.map((project) => (
+      projects.map((project, i) => (
         <li class="border-t border-line py-8 first:border-t-0 first:pt-0 md:py-10">
-          <h3 class="text-xl">{project.name}</h3>
-          <p class="mt-3 mb-0 text-ink-soft">{project.description}</p>
-          <p class="mt-3 mb-0 font-sans text-sm text-ink-soft">{project.tags}</p>
-          <p class="mt-4 mb-0">
-            <a href={project.href}>查看</a>
-          </p>
+          <div class="entry">
+            {/* 淡墨序号：纯装饰，取书卷目录页码之意；列表本身已含顺序语义，故 aria-hidden */}
+            <span class="entry-index" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <div class="entry-body">
+              <h3 class="text-xl">{project.name}</h3>
+              <p class="mt-3 mb-0 text-ink-soft">{project.description}</p>
+              <p class="mt-3 mb-0 font-sans text-sm text-ink-soft">{project.tags}</p>
+              <p class="mt-4 mb-0">
+                <a class="ink-link" href={project.href}>
+                  查看
+                </a>
+              </p>
+            </div>
+          </div>
         </li>
       ))
     }
   </ul>
 </section>
+
+<style>
+  /* 序号与标题基线对齐：如目录页码与条目题名同处一行 */
+  .entry {
+    display: flex;
+    align-items: baseline;
+    gap: 1.25rem;
+  }
+
+  /* 大号淡墨序号：display 字体、color-mix 淡 ink，有气势而不抢正文 */
+  .entry-index {
+    flex: none;
+    width: 2.5rem;
+    font-family: var(--font-ma-shan-zheng);
+    font-size: 1.5rem;
+    line-height: 1;
+    color: color-mix(in srgb, var(--ink) 22%, transparent);
+    user-select: none;
+  }
+
+  .entry-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* 墨迹生长下划线：hover 时墨线自左向右写出，只动 transform */
+  .ink-link {
+    position: relative;
+    text-decoration: none;
+  }
+
+  .ink-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.15em;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 400ms var(--ease-ink);
+  }
+
+  .ink-link:hover::after {
+    transform: scaleX(1);
+  }
+</style>

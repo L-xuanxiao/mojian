@@ -1,24 +1,47 @@
 ---
-// 占位数据，后续阶段替换为真实内容
-const intro = ['长卷将于第四阶段随滚动展开，此处先立其位。'];
+import SectionHeading from '../SectionHeading.astro';
 
-// 第四阶段在此接 GSAP ScrollTrigger 滚动叙事：
-// 届时下方占位山水替换为真实画卷素材，随滚动横向展开
+// 占位数据，后续阶段替换为真实内容
+const intro = ['长卷缓展，山色随云影移；行到卷尾，钤一方小印为记。'];
 ---
 
-<section class="bg-paper-deep" aria-labelledby="scroll-journey">
+<section class="scroll-journey bg-paper-deep" aria-labelledby="scroll-journey" data-journey>
   <div class="mx-auto max-w-wide px-5 py-24 md:px-8 md:py-32">
-    <h2 id="scroll-journey" class="mb-6">山水长卷</h2>
+    <SectionHeading id="scroll-journey" title="山水长卷" index="肆" note="SCROLL" />
     {intro.map((paragraph) => <p class="max-w-content text-ink-soft">{paragraph}</p>)}
 
-    {/* 占位山水：第四阶段在此接 GSAP ScrollTrigger 滚动叙事 */}
-    <div
-      aria-hidden="true"
-      class="relative mt-12 h-[40vh] overflow-hidden rounded-sm border border-line md:mt-16"
-    >
-      <div class="ridge ridge--far"></div>
-      <div class="ridge ridge--mid"></div>
-      <div class="ridge ridge--near"></div>
+    {/* 装裱框架：天杆/地杆比画卷略宽，罩在舞台外侧，随 section 一起 pin */}
+    <div class="relative mt-12 md:mt-16">
+      {/* 天杆：装裱上杆，深墨细杆两端朱砂轴头 */}
+      <div class="scroll-rod scroll-rod--top" aria-hidden="true"></div>
+
+      {/* 展卷舞台：桌面端 pin 住本节，scrub 驱动山移、云漂、诗现、印落 */}
+      <div
+        aria-hidden="true"
+        class="relative h-[40vh] overflow-hidden rounded-sm border border-line"
+        data-journey-stage
+      >
+        <div class="ridge ridge--far" data-journey-far></div>
+        <div class="ridge ridge--mid" data-journey-mid></div>
+        <div class="ridge ridge--near" data-journey-near></div>
+        {/* 云雾三层：柔边椭圆模糊层，反向慢漂衬出山势移动；c 层更淡更慢 */}
+        <div class="mist mist--a" data-journey-mist-a></div>
+        <div class="mist mist--b" data-journey-mist-b></div>
+        <div class="mist mist--c" data-journey-mist-c></div>
+        {/* 卷首题跋：竖排小字，随展卷前段淡入；移动端与无 JS 时静态显示 */}
+        <span class="scroll-inscription font-serif" data-journey-inscription>云山烟树 墨戏于此</span
+        >
+        {/* 中段诗句：落墨式浮现再隐去；初始隐藏态只由 JS 设置 */}
+        <p class="scroll-poem font-display" data-journey-poem>行到水穷处，坐看云起时</p>
+        {/* 卷尾钤印：朱砂小印带回弹砸落并停留到 pin 结束 */}
+        <div class="scroll-seal-wrap" data-journey-seal>
+          <span class="scroll-seal rounded-sm bg-cinnabar font-serif text-paper">山水</span>
+          <span class="scroll-seal-ring rounded-sm" data-journey-seal-ring></span>
+        </div>
+      </div>
+
+      {/* 地杆：装裱下杆，与天杆同构，收住卷尾 */}
+      <div class="scroll-rod scroll-rod--bottom" aria-hidden="true"></div>
     </div>
   </div>
 </section>
@@ -27,10 +50,15 @@ const intro = ['长卷将于第四阶段随滚动展开，此处先立其位。'
   /*
    * 三层远山剪影：纯 CSS 叠形，不用图片与 JS。
    * 越远越淡、越近越浓，取水墨空气透视之意；颜色走运行时变量，昼夜自动切换。
+   * 山体加宽到 150%、上下各外溢 8%：横向展卷（xPercent 最大 -30）与移动端
+   * 纵向视差平移时不露出容器边缘空白；clip-path 随元素等比拉伸，山势更缓，更合长卷意。
    */
   .ridge {
     position: absolute;
-    inset: 0;
+    top: -8%;
+    bottom: -8%;
+    left: 0;
+    width: 150%;
   }
 
   .ridge--far {
@@ -82,4 +110,217 @@ const intro = ['长卷将于第四阶段随滚动展开，此处先立其位。'
       0% 100%
     );
   }
+
+  /* 云雾：paper/ink 极低透明度 + 大半径模糊，只做静态柔边，不动滤镜动画 */
+  .mist {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(42px);
+    pointer-events: none;
+  }
+
+  .mist--a {
+    top: 10%;
+    left: 4%;
+    width: 55%;
+    height: 46%;
+    background: color-mix(in oklab, var(--paper) 55%, transparent);
+  }
+
+  .mist--b {
+    top: 32%;
+    right: -4%;
+    width: 60%;
+    height: 52%;
+    background: color-mix(in oklab, var(--ink) 8%, transparent);
+  }
+
+  /* 第三层云气：最淡最慢，横贯卷面中段，补足长卷的空气感 */
+  .mist--c {
+    top: 18%;
+    left: 22%;
+    width: 70%;
+    height: 38%;
+    background: color-mix(in oklab, var(--paper) 32%, transparent);
+  }
+
+  /* 天杆/地杆：深墨细杆比画卷两端各外伸 0.6rem，取装裱卷轴之意 */
+  .scroll-rod {
+    position: absolute;
+    left: -0.6rem;
+    right: -0.6rem;
+    height: 0.375rem;
+    border-radius: 9999px;
+    background: color-mix(in oklab, var(--ink) 85%, transparent);
+    box-shadow: 0 1px 2px color-mix(in oklab, var(--ink) 25%, transparent);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .scroll-rod--top {
+    top: -0.5rem;
+  }
+
+  .scroll-rod--bottom {
+    bottom: -0.5rem;
+  }
+
+  /* 轴头：杆两端朱砂小球，卷轴收束处的唯一艳色点缀 */
+  .scroll-rod::before,
+  .scroll-rod::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 9999px;
+    background: var(--cinnabar);
+    transform: translateY(-50%);
+  }
+
+  .scroll-rod::before {
+    left: -0.2rem;
+  }
+
+  .scroll-rod::after {
+    right: -0.2rem;
+  }
+
+  /* 卷首题跋：竖排淡墨小字居左上；淡入动画只由 JS 在桌面端设置 */
+  .scroll-inscription {
+    position: absolute;
+    top: 10%;
+    left: 5%;
+    writing-mode: vertical-rl;
+    font-size: 0.85rem;
+    letter-spacing: 0.35em;
+    color: var(--ink-soft);
+  }
+
+  /* 诗句居中偏上；opacity/blur 初始态由 JS 设置，此处只负责排版定位 */
+  .scroll-poem {
+    position: absolute;
+    top: 20%;
+    right: 0;
+    left: 0;
+    margin: 0;
+    text-align: center;
+    font-size: clamp(1.5rem, 3.2vw, 2.4rem);
+    letter-spacing: 0.18em;
+    color: var(--ink);
+    text-shadow: 0 0 1em color-mix(in oklab, var(--paper) 70%, transparent);
+  }
+
+  /* 印章 2.5em 见方，落卷尾右下；transform 初始态由 JS 设置 */
+  .scroll-seal-wrap {
+    position: absolute;
+    right: 8%;
+    bottom: 12%;
+    width: 2.5em;
+    height: 2.5em;
+    font-size: clamp(1.4rem, 2.6vw, 2rem);
+  }
+
+  .scroll-seal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    letter-spacing: 0;
+    line-height: 1;
+    font-size: 0.9em;
+    writing-mode: vertical-rl;
+  }
+
+  /* 印外一圈淡墨：静态时也只是淡边装饰，扩散动画由 JS 驱动 */
+  .scroll-seal-ring {
+    position: absolute;
+    inset: -0.35em;
+    border: 1px solid color-mix(in oklab, var(--ink) 28%, transparent);
+    pointer-events: none;
+  }
 </style>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../scripts/scroll';
+
+  // reduced-motion 时不创建任何动画：山体、诗句、印章全部保持 CSS 最终态
+  if (!prefersReducedMotion) {
+    const section = document.querySelector<HTMLElement>('[data-journey]');
+
+    if (section) {
+      const q = gsap.utils.selector(section);
+      const mm = gsap.matchMedia();
+
+      // 桌面端：pin 住整个 section，约 200% 滚动距离 scrub 驱动一场展卷
+      mm.add('(min-width: 768px)', () => {
+        // 初始隐藏态只在这里用 JS 设置；无 JS / reduced-motion / 移动端直达最终态
+        gsap.set(q('[data-journey-poem]'), { autoAlpha: 0, y: 24, filter: 'blur(10px)' });
+        gsap.set(q('[data-journey-inscription]'), { autoAlpha: 0 });
+        gsap.set(q('[data-journey-seal]'), { autoAlpha: 0, scale: 1.4, rotate: -8 });
+        gsap.set(q('[data-journey-seal-ring]'), { autoAlpha: 0, scale: 0.6 });
+
+        // 时间轴总长 10（单位任意，scrub 按滚动进度映射），山移全程贯穿
+        const tl = gsap.timeline({
+          defaults: { ease: 'none' },
+          scrollTrigger: {
+            trigger: section,
+            start: 'top top',
+            end: '+=200%',
+            scrub: true,
+            pin: true,
+            anticipatePin: 1,
+          },
+        });
+
+        tl
+          // 展卷：三层远山近快远慢横向平移
+          .to(q('[data-journey-near]'), { xPercent: -30, duration: 10 }, 0)
+          .to(q('[data-journey-mid]'), { xPercent: -18, duration: 10 }, 0)
+          .to(q('[data-journey-far]'), { xPercent: -8, duration: 10 }, 0)
+          // 云雾反向慢漂，衬出山移；c 层最淡，漂移幅度最小
+          .to(q('[data-journey-mist-a]'), { xPercent: 10, duration: 10 }, 0)
+          .to(q('[data-journey-mist-b]'), { xPercent: 5, duration: 10 }, 0)
+          .to(q('[data-journey-mist-c]'), { xPercent: 3, duration: 10 }, 0)
+          // 卷首题跋随展卷前段淡入，先于诗句现身
+          .to(q('[data-journey-inscription]'), { autoAlpha: 1, duration: 1 }, 1.5)
+          // 卷首标题随滚动推进渐出（作用于整组标题容器，与 reveal.ts 的 clip 揭示属性不重叠）
+          .to(q('.section-heading'), { autoAlpha: 0, y: -20, duration: 1.2 }, 0.4)
+          // 中段诗句落墨式浮现，停留后隐去
+          .to(
+            q('[data-journey-poem]'),
+            { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 1.4, ease: 'power2.out' },
+            3,
+          )
+          .to(q('[data-journey-poem]'), { autoAlpha: 0, y: -20, duration: 1 }, 6)
+          // 卷尾钤印：rotate -8→0、scale 1.4→1，带回弹砸落，停留到 pin 结束
+          .to(
+            q('[data-journey-seal]'),
+            { autoAlpha: 1, scale: 1, rotate: 0, duration: 0.8, ease: 'back.out(1.7)' },
+            8,
+          )
+          // 印落伴一圈淡墨扩散
+          .to(q('[data-journey-seal-ring]'), { autoAlpha: 0.5, scale: 1.8, duration: 0.7 }, 8.15)
+          .to(q('[data-journey-seal-ring]'), { autoAlpha: 0, duration: 0.5 }, 8.6);
+      });
+
+      // 移动端：不 pin，退化为随滚动的轻度纵向视差
+      mm.add('(max-width: 767px)', () => {
+        const tl = gsap.timeline({
+          defaults: { ease: 'none' },
+          scrollTrigger: {
+            trigger: section.querySelector<HTMLElement>('[data-journey-stage]'),
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true,
+          },
+        });
+
+        tl.fromTo(q('[data-journey-near]'), { yPercent: -4 }, { yPercent: 4 }, 0)
+          .fromTo(q('[data-journey-mid]'), { yPercent: -2.5 }, { yPercent: 2.5 }, 0)
+          .fromTo(q('[data-journey-far]'), { yPercent: -1 }, { yPercent: 1 }, 0);
+      });
+    }
+  }
+</script>

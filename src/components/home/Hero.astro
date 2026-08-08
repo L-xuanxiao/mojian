@@ -1,25 +1,246 @@
 ---
 // 占位数据，后续阶段替换为真实内容
+const charMo = '墨';
+const charJian = '笺';
 const siteName = '墨笺';
 const tagline = '纸上留白，墨分五色——融合东方美学与现代网页体验的个人数字空间';
 const scrollHint = '向下展开长卷';
+const inscription = '纸上留白 墨分五色';
 ---
 
-<!-- 首页第一幕：满屏居中，仅靠字级、留白与墨色分层，不加装饰元素 -->
+<!-- 首页第一幕：满屏居中，字级、留白与墨色分层为主，装饰为环境墨点、飞白笔触与落款引首印 -->
 <section
-  class="relative flex min-h-svh flex-col items-center justify-center px-5 text-center md:px-8"
+  class="relative flex min-h-svh flex-col items-center justify-center overflow-hidden px-5 text-center md:px-8"
   aria-label="站点首屏"
 >
-  <h1 class="font-display text-6xl font-normal tracking-wide text-ink md:text-8xl">
-    {siteName}
+  <!-- 环境墨点：极淡墨迹缓慢漂浮，纯装饰，置于内容之下 -->
+  <span class="hero-ink hero-ink--1" aria-hidden="true"></span>
+  <span class="hero-ink hero-ink--2" aria-hidden="true"></span>
+  <span class="hero-ink hero-ink--3" aria-hidden="true"></span>
+
+  <!-- 落墨墨滴：仅开场动画使用，CSS 态即终态（隐去），由 JS 唤起 -->
+  <span class="hero-drop" aria-hidden="true"></span>
+
+  <!-- 题名逐字揭示：h1 保留完整可读文本供辅助技术，字 span 仅作动画单元 -->
+  <h1
+    class="hero-title font-display text-6xl font-normal tracking-wide text-ink md:text-8xl"
+    aria-label={siteName}
+  >
+    <span class="hero-title-char" aria-hidden="true">{charMo}</span><span
+      class="hero-title-char"
+      aria-hidden="true">{charJian}</span
+    >
   </h1>
-  <p class="mx-auto mt-8 max-w-content text-base leading-relaxed text-ink-soft md:mt-10 md:text-lg">
+
+  <!-- 飞白笔触：题名下一笔横画收束视觉，主笔 + 断续枯笔双路径，开场时自左向右书写画出 -->
+  <svg
+    class="hero-brush mt-5 w-40 md:mt-6 md:w-56"
+    viewBox="0 0 220 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <!-- 主笔：中锋横画，两端略提、行笔微颤 -->
+    <path
+      class="hero-brush-path"
+      d="M10 14 C 48 9, 96 12, 138 10 C 168 8.5, 196 10, 211 12"
+      stroke="var(--ink)"
+      stroke-width="7"
+      stroke-linecap="round"
+      pathLength="100"></path>
+    <!-- 枯笔：三段断续细线悬于主笔之上，模拟飞白露纸 -->
+    <path
+      class="hero-brush-path hero-brush-path--dry"
+      d="M22 10.5 C 44 7.5, 70 9, 92 8 M 108 8 C 130 7, 152 7.5, 170 7 M 182 8 C 194 8, 204 9, 208 10"
+      stroke="var(--ink)"
+      stroke-width="2"
+      stroke-linecap="round"
+      pathLength="100"></path>
+  </svg>
+
+  <p
+    class="hero-tagline mx-auto mt-8 max-w-content text-base leading-relaxed text-ink-soft md:mt-10 md:text-lg"
+  >
     {tagline}
   </p>
 
-  <!-- 滚动提示：纯文字符号，静止不做动画 -->
-  <p class="absolute bottom-10 flex flex-col items-center gap-2 text-sm text-ink-soft">
+  <!-- 竖排落款与引首印：取手卷题跋之意，仅桌面端呈现，随开场末尾淡入 -->
+  <div
+    class="hero-sign absolute top-1/2 right-[7%] hidden -translate-y-1/2 items-start gap-3 md:flex"
+  >
+    <span class="hero-sign-text font-serif text-sm text-ink-soft">{inscription}</span>
+    <!-- 引首小印：朱砂长方白文，钤于题字上首，取长卷引首章之意 -->
+    <span class="hero-sign-seal mt-1 inline-flex items-center justify-center rounded-sm font-serif"
+      >墨</span
+    >
+  </div>
+
+  <!-- 滚动提示：纯文字符号，仅随开场淡入一次 -->
+  <p class="hero-hint absolute bottom-10 flex flex-col items-center gap-2 text-sm text-ink-soft">
     <span>{scrollHint}</span>
     <span aria-hidden="true">↓</span>
   </p>
 </section>
+
+<style>
+  /* 开场墨滴：最终态为晕开消隐，故无 JS / reduced-motion 时保持隐去、页面直达终态 */
+  .hero-drop {
+    position: absolute;
+    left: 50%;
+    top: 38%;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background: var(--ink);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* 逐字揭示的字单元需独立变换，故inline-block */
+  .hero-title-char {
+    display: inline-block;
+  }
+
+  /* 枯笔飞白稍淡，与主笔拉开墨色层次 */
+  .hero-brush-path--dry {
+    opacity: 0.45;
+  }
+
+  /* 竖排落款：letter-spacing 放宽，仿题跋字距疏朗 */
+  .hero-sign-text {
+    writing-mode: vertical-rl;
+    letter-spacing: 0.4em;
+  }
+
+  /* 引首小印：朱砂为地、纸色为文（白文），长方取引首章形制 */
+  .hero-sign-seal {
+    width: 1.1rem;
+    height: 1.5rem;
+    background: var(--cinnabar);
+    color: var(--paper);
+    font-size: 0.7rem;
+    line-height: 1;
+    /* 印文微凹感：内阴影模拟钤印压痕，仅滤镜外的静态效果 */
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--paper) 35%, transparent);
+  }
+
+  /* 环境墨点：radial-gradient 做出墨晕软边，避免常驻 filter 的开销 */
+  .hero-ink {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .hero-ink--1 {
+    left: 8%;
+    top: 18%;
+    width: 16rem;
+    height: 16rem;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--ink) 7%, transparent),
+      transparent 70%
+    );
+    animation: hero-drift-a 64s ease-in-out infinite alternate;
+  }
+
+  .hero-ink--2 {
+    right: 10%;
+    top: 55%;
+    width: 10rem;
+    height: 10rem;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--cinnabar) 6%, transparent),
+      transparent 70%
+    );
+    animation: hero-drift-b 82s ease-in-out infinite alternate;
+    /* 负延迟错开相位，三粒墨点不同步 */
+    animation-delay: -27s;
+  }
+
+  .hero-ink--3 {
+    left: 22%;
+    bottom: 12%;
+    width: 8rem;
+    height: 8rem;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--ink) 5%, transparent),
+      transparent 70%
+    );
+    animation: hero-drift-a 96s ease-in-out infinite alternate;
+    animation-delay: -53s;
+  }
+
+  /* 漂浮只动 transform，幅度克制，alternate 往返即循环 */
+  @keyframes hero-drift-a {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(2rem, -1.5rem, 0);
+    }
+  }
+
+  @keyframes hero-drift-b {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-1.75rem, 1.25rem, 0);
+    }
+  }
+
+  /* 无限循环动画需在 reduced-motion 下显式停止（全局只压缩时长） */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-ink {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../scripts/scroll';
+
+  // reduced-motion 时不创建任何动画：CSS 无隐藏态，页面已是完整终态
+  if (!prefersReducedMotion) {
+    const drop = document.querySelector<HTMLElement>('.hero-drop');
+    const chars = gsap.utils.toArray<HTMLElement>('.hero-title-char');
+    const brushPaths = gsap.utils.toArray<SVGPathElement>('.hero-brush-path');
+    const tagline = document.querySelector<HTMLElement>('.hero-tagline');
+    const sign = document.querySelector<HTMLElement>('.hero-sign');
+    const hint = document.querySelector<HTMLElement>('.hero-hint');
+
+    if (drop && chars.length && brushPaths.length && tagline && hint) {
+      // 初始隐藏态只由 JS 设置：墨滴悬于屏顶待坠，文字隐于纸下，笔触收敛未书
+      gsap.set(drop, { xPercent: -50, yPercent: -50, y: '-48vh', opacity: 1 });
+      gsap.set(chars, { opacity: 0, scale: 1.04, filter: 'blur(12px)' });
+      // pathLength=100 归一化，dasharray/offset 仅由 JS 设置，无 JS 时笔触完整可见
+      gsap.set(brushPaths, { strokeDasharray: 100, strokeDashoffset: 100 });
+      gsap.set(tagline, { opacity: 0, y: 16, filter: 'blur(4px)' });
+      gsap.set(sign, { opacity: 0, y: 8 });
+      gsap.set(hint, { opacity: 0 });
+
+      // ≈ cubic-bezier(0.22, 1, 0.36, 1)，与 --ease-ink 同向
+      const EASE_INK = 'expo.out';
+
+      // 「落墨 → 晕开 → 逐字题名 → 飞白收笔 → 定位语 → 落款 → 提示」，总时长 ≈2.0s
+      const tl = gsap.timeline({ defaults: { ease: EASE_INK } });
+      tl.to(drop, { y: 0, duration: 0.45, ease: 'power2.in' }) // 墨滴加速坠落
+        // 触纸瞬间晕开：放大数倍 + 模糊扩散 + 消隐
+        .to(drop, { scale: 16, opacity: 0, filter: 'blur(10px)', duration: 0.5 }, 0.45)
+        // 「墨」「笺」错位 0.15s 由虚到实，与晕开交叠
+        .to(
+          chars,
+          { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.7, stagger: 0.15 },
+          0.55,
+        )
+        // 题字既出，飞白一笔自左向右书写收束，枯笔稍滞后于主笔
+        .to(brushPaths, { strokeDashoffset: 0, duration: 0.8, stagger: 0.08 }, 1.1)
+        .to(tagline, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.45 }, 1.15)
+        // 落款与引首印随开场末尾淡入
+        .to(sign, { opacity: 1, y: 0, duration: 0.4 }, 1.55)
+        .to(hint, { opacity: 1, duration: 0.3 }, 1.7);
+    }
+  }
+</script>

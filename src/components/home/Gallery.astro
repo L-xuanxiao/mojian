@@ -1,20 +1,66 @@
 ---
 // 占位数据，后续阶段替换为真实内容
 // 第五/六阶段接入真实摄影与 Astro Image（astro:assets 优化图片）
+import SectionHeading from '../SectionHeading.astro';
+
 const works = ['光影 · 一', '光影 · 二', '光影 · 三', '光影 · 四'];
 ---
 
 <!-- 「光影集」：特殊在容器用 max-w-wide，画面需要比阅读栏更宽的呼吸空间 -->
 <section class="mx-auto max-w-wide px-5 py-16 md:px-8 md:py-24" aria-labelledby="gallery">
-  <h2 id="gallery">光影集</h2>
+  <SectionHeading id="gallery" title="光影集" index="陆" note="GALLERY" />
   <p class="mt-4 text-ink-soft">摄影与影像，占位待接入真实作品。</p>
-  <div class="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4">
+  <div class="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4" data-reveal-group>
     {
       works.map((title) => (
-        <div class="flex aspect-[4/3] items-center justify-center rounded-sm bg-paper-deep">
-          <span class="text-sm text-ink-soft">{title}</span>
+        <div class="gallery-item relative aspect-[4/3] overflow-hidden rounded-sm bg-paper-deep">
+          {/* 题跋式落款：作品名移至右下角作题字，缀 3px 朱砂印点，取代原居中小字避免重复 */}
+          <span class="colophon absolute bottom-2 right-3 font-serif text-xs text-ink-soft">
+            {title}
+            <i class="seal-dot" aria-hidden="true" />
+          </span>
         </div>
       ))
     }
   </div>
 </section>
+
+<style>
+  /* hover 墨迹：朱砂与淡墨自中心晕开，纯 CSS 过渡，reduced-motion 由全局重置压平 */
+  .gallery-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at center,
+      color-mix(in oklab, var(--cinnabar) 22%, transparent),
+      color-mix(in oklab, var(--ink) 8%, transparent) 72%
+    );
+    transform: scale(0);
+    transition: transform 500ms var(--ease-ink);
+    pointer-events: none;
+  }
+
+  .gallery-item:hover::before {
+    transform: scale(1.15);
+  }
+
+  /* 朱砂印点：题跋末尾的 3px 小印，取画作落款后钤印之意 */
+  .seal-dot {
+    display: inline-block;
+    width: 3px;
+    height: 3px;
+    margin-left: 0.35em;
+    border-radius: 9999px;
+    background: var(--cinnabar);
+    vertical-align: middle;
+  }
+
+  .gallery-item span {
+    transition: color 300ms var(--ease-ink);
+  }
+
+  .gallery-item:hover span {
+    color: var(--ink);
+  }
+</style>

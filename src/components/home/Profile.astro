@@ -1,17 +1,85 @@
 ---
+import SectionHeading from '../SectionHeading.astro';
+
 // 占位数据，后续阶段替换为真实内容
 const intro = ['写字、写代码、拍照片的人。', '在这里安放文章、作品与光影。', '相信克制即是丰盈。'];
 ---
 
-<section class="mx-auto max-w-content px-5 py-16 md:px-8 md:py-24" aria-labelledby="profile">
-  <h2 id="profile" class="mb-6">
-    此间主人
-    {/* 朱砂印章：纯装饰视觉锚点，随标题文字流排版 */}
+<section
+  class="mx-auto max-w-content px-5 py-16 md:px-8 md:py-24"
+  aria-labelledby="profile"
+  data-profile
+>
+  {/* 标题行：共享章节标题 + 落款印章；印章置于行尾，取书画「题款后钤印」之意 */}
+  <div class="flex items-center gap-3">
+    <div class="flex-1">
+      <SectionHeading id="profile" title="此间主人" index="壹" note="PROFILE" />
+    </div>
+    {/* 朱砂印章：纯装饰视觉锚点；外层 relative 承载落印时的淡墨扩散环 */}
     <span
       aria-hidden="true"
-      class="inline-flex items-center justify-center align-middle ml-3 -mt-1 size-[2em] rounded-sm bg-cinnabar text-paper font-display text-[0.9em] leading-none select-none"
-      >墨</span
+      class="relative mb-8 inline-flex size-[2.6em] shrink-0 items-center justify-center rounded-sm bg-cinnabar font-display text-lg leading-none text-paper select-none"
+      data-seal
+      >{/* 淡墨环：落印瞬间扩散一次，仅 JS 动画时显示 */}
+      <span
+        class="pointer-events-none absolute inset-0 rounded-sm border border-ink opacity-0"
+        data-seal-ring></span>墨</span
     >
-  </h2>
-  {intro.map((paragraph) => <p>{paragraph}</p>)}
+  </div>
+  {/* 不对称布局：正文列占约 2/3 偏左，右侧竖排淡墨饰列（移动端隐藏） */}
+  <div class="md:flex md:gap-12">
+    <div class="md:w-2/3">
+      {intro.map((paragraph) => <p data-intro-line>{paragraph}</p>)}
+    </div>
+    {/* 竖排饰列：从正文提炼的三事，作卷边题跋式点缀，纯装饰 */}
+    <div aria-hidden="true" class="hidden flex-1 items-start justify-end md:flex">
+      <span
+        class="text-ink-soft font-serif text-sm tracking-[0.5em] select-none [writing-mode:vertical-rl]"
+        >写字 写代码 拍照片</span
+      >
+    </div>
+  </div>
 </section>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../scripts/scroll';
+
+  // reduced-motion：不创建任何动画，CSS 默认即完整最终态
+  if (!prefersReducedMotion) {
+    const section = document.querySelector<HTMLElement>('[data-profile]');
+    const lines = section?.querySelectorAll('[data-intro-line]');
+    const seal = section?.querySelector('[data-seal]');
+    const ring = section?.querySelector('[data-seal-ring]');
+
+    if (section && lines?.length && seal && ring) {
+      // 初始隐藏态只由 JS 设置：无 JS 时内容直达最终态
+      gsap.set(lines, { opacity: 0, y: 12, filter: 'blur(8px)' });
+      gsap.set(seal, { opacity: 0, rotate: -8, scale: 1.4 });
+      gsap.set(ring, { opacity: 0 });
+
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: section, start: 'top 78%', once: true },
+      });
+      tl
+        // 落墨：介绍段落逐行现身
+        .to(lines, {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 0.6,
+          ease: 'power3.out',
+          stagger: 0.1,
+        })
+        // 钤印：段落后落印，形成落款节奏；back.out 近似 ease-seal 的回弹曲线
+        .addLabel('stamp')
+        .to(seal, { opacity: 1, rotate: 0, scale: 1, duration: 0.5, ease: 'back.out(2)' }, 'stamp')
+        // 落印瞬间伴一圈淡墨扩散，只播一次
+        .fromTo(
+          ring,
+          { opacity: 0.5, scale: 0.6 },
+          { opacity: 0, scale: 1.6, duration: 0.6, ease: 'power2.out' },
+          'stamp+=0.3',
+        );
+    }
+  }
+</script>

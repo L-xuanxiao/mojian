@@ -1,0 +1,64 @@
+---
+// 章节标题：朱砂白文小印编号 + h2 + 英文侧注，全站首页各区块统一使用
+interface Props {
+  id: string;
+  title: string;
+  /** 小印编号：壹/贰/叁… */
+  index: string;
+  /** 英文小字侧注，如 PROFILE */
+  note?: string;
+}
+
+const { id, title, index, note } = Astro.props;
+---
+
+<div class="section-heading">
+  <span class="index-seal" aria-hidden="true">{index}</span>
+  <h2 id={id}>{title}</h2>
+  {
+    note && (
+      <span class="note" aria-hidden="true">
+        {note}
+      </span>
+    )
+  }
+</div>
+
+<style>
+  .section-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-block-end: 2rem;
+  }
+
+  /* 白文小印：朱砂底、纸色字，与标题基线对齐 */
+  .index-seal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.4em;
+    height: 1.4em;
+    border-radius: var(--radius-sm);
+    background: var(--cinnabar);
+    color: var(--paper);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: 1.1rem;
+    line-height: 1;
+    transform: translateY(0.12em);
+  }
+
+  .section-heading h2 {
+    margin: 0;
+  }
+
+  /* 英文侧注：淡铜色、大写字距拉开，取现代书籍目录之意 */
+  .note {
+    margin-left: auto;
+    font-family: var(--font-noto-sans);
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--bronze);
+  }
+</style>

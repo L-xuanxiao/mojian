@@ -8,18 +8,33 @@ import ScrollJourney from '../components/home/ScrollJourney.astro';
 import Journal from '../components/home/Journal.astro';
 import Gallery from '../components/home/Gallery.astro';
 import Timeline from '../components/home/Timeline.astro';
+import Divider from '../components/Divider.astro';
 ---
 
 <BaseLayout>
   <!-- 首页骨架：只做布局，动画第四阶段接入 -->
   <main>
     <Hero />
+    <!-- 分隔带：卷轴段落间的「隔水」，只落在长叙事段落交界处，避免滥用成模板感 -->
+    <div class="my-8 md:my-12">
+      <Divider />
+    </div>
     <Profile />
     <CurrentStatus />
     <Projects />
     <ScrollJourney />
+    <div class="my-8 md:my-12">
+      <Divider />
+    </div>
     <Journal />
     <Gallery />
     <Timeline />
+    <div class="my-8 md:my-12">
+      <Divider />
+    </div>
   </main>
+  <!-- 第四阶段：统一的书写揭示 + 落墨 stagger（打包 module 脚本，可 import 共享底座） -->
+  <script>
+    import '../scripts/reveal';
+  </script>
 </BaseLayout>

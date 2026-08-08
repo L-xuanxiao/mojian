@@ -3,7 +3,7 @@
 /*
  * 设计系统：纸上留白，墨分五色
  * 材料只有三种——纸（底色）、墨（文字与线条）、朱砂（唯一强调色）。
- * 层级靠字号、字重、留白与 1px 墨线表达，不靠阴影与卡片。
+ * 层级以字号、字重、留白与 1px 墨线为主；允许极淡阴影、纸张纹理与东方饰件服务精致感。
  */
 
 /* 运行时颜色变量：昼 */
@@ -100,18 +100,30 @@
     font-family: var(--font-noto-serif);
     line-height: 1.8;
     -webkit-font-smoothing: antialiased;
-    /* 宣纸噪点：静态、极低对比，深色主题换为更淡的白色噪点 */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    /* 宣纸三层肌理：四角极淡暗边（fixed 定帧）+ 横向纤维 + 细噪点；深色主题整体换为更淡的白色版 */
+    background-image:
+      radial-gradient(ellipse 120% 90% at 50% 40%, transparent 55%, rgb(37 38 34 / 0.05) 100%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006 0.09' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23f)'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-attachment: fixed, fixed, fixed;
   }
 
-  /* 深色噪点：手动切换或跟随系统（未手动指定浅色时），两处值保持一致 */
+  /* 深色肌理：手动切换或跟随系统（未手动指定浅色时），两处值保持一致 */
   html[data-theme='dark'] body {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-image:
+      radial-gradient(ellipse 120% 90% at 50% 40%, transparent 50%, rgb(0 0 0 / 0.28) 100%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006 0.09' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.03 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23f)'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-attachment: fixed, fixed, fixed;
   }
 
   @media (prefers-color-scheme: dark) {
     html:not([data-theme='light']) body {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-image:
+        radial-gradient(ellipse 120% 90% at 50% 40%, transparent 50%, rgb(0 0 0 / 0.28) 100%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006 0.09' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.03 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23f)'/%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-attachment: fixed, fixed, fixed;
     }
   }
 
@@ -204,8 +216,11 @@
 }
 
 @layer components {
-  /* 主按钮：墨底纸字，hover 转朱砂，取印章落纸之意 */
+  /* 主按钮：墨底纸字，hover 时朱砂自中心晕开，取印泥漫纸之意 */
   .btn {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
@@ -220,27 +235,44 @@
     text-decoration: none;
     cursor: pointer;
     transition:
-      background-color 150ms var(--ease-ink),
       border-color 150ms var(--ease-ink),
-      color 150ms var(--ease-ink);
+      color 300ms var(--ease-ink);
+  }
+
+  /* 晕染层：椭圆放大两倍足以盖满按钮；负 z-index 使其压过底色但沉于文字之下 */
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    z-index: -1;
+    border-radius: 50%;
+    background: var(--cinnabar);
+    transform: scale(0);
+    transition: transform 400ms var(--ease-ink);
   }
 
   .btn:hover {
-    background: var(--cinnabar);
     border-color: var(--cinnabar);
     color: var(--paper);
     text-decoration: none;
   }
 
-  /* 次按钮：透明底、墨字、1px 墨线 */
+  .btn:hover::before {
+    transform: scale(1);
+  }
+
+  /* 次按钮：透明底、墨字、1px 墨线，hover 同步晕墨 */
   .btn--ghost {
     background: transparent;
     color: var(--ink);
     border-color: var(--line);
   }
 
-  .btn--ghost:hover {
+  .btn--ghost::before {
     background: var(--ink);
+  }
+
+  .btn--ghost:hover {
     border-color: var(--ink);
     color: var(--paper);
   }

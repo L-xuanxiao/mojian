@@ -10,9 +10,10 @@
 - Tailwind CSS 4 + 原生 CSS
 - 设计令牌与昼夜主题：`src/styles/global.css`（CSS Variables + Tailwind `@theme`）
 - 字体：Astro Fonts 自托管（Noto Serif SC / Noto Sans SC / Ma Shan Zheng）
+- 动画：GSAP + ScrollTrigger + Lenis（首个 React Island 出现时再引入 Motion）
 - pnpm
 
-动画、内容、搜索和测试能力按开发阶段逐项引入，不在初始化阶段批量安装。
+内容、搜索和测试能力按开发阶段逐项引入，不批量提前安装。
 
 ## 常用命令
 

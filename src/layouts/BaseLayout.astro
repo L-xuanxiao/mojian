@@ -38,5 +38,9 @@ const { title = '墨笺', description = '融合东方美学、个人内容与现
     <Header />
     <slot />
     <Footer />
+    <script>
+      // 全站平滑滚动底座（prefers-reduced-motion 时内部自动跳过 Lenis）
+      import '../scripts/scroll';
+    </script>
   </body>
 </html>
