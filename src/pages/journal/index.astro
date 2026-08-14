@@ -1,0 +1,128 @@
+---
+import { getCollection } from 'astro:content';
+import folioArtwork from '../../assets/art/folio-ink-relief.webp';
+import PageIntro from '../../components/PageIntro.astro';
+import EntryList from '../../components/journal/EntryList.astro';
+import JournalSearch from '../../components/journal/JournalSearch';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { withBase } from '../../site.config';
+
+const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+);
+---
+
+<BaseLayout title="笺录 · 墨笺" description="文章与随笔：设计、营造与阅读的记录。">
+  <main class="mx-auto max-w-stage px-5 md:px-8 lg:px-10">
+    <PageIntro
+      id="journal"
+      title="笺录"
+      note="JOURNAL FOLIO"
+      description="关于设计、营造、阅读与日常的长短记录。文字不求喧哗，只求经得起再次翻阅。"
+      variant="folio"
+      scene="reading"
+      artwork={folioArtwork}
+      artworkAlt="层叠宣纸与墨晕构成的纸本残片"
+    >
+      <p slot="meta" class="m-0">
+        共 {posts.length} 篇 · <a class="ink-link" href={withBase('/journal/archive/')}>年谱归档</a>
+        <span aria-hidden="true"> · </span>
+        <a class="ink-link" href={withBase('/journal/tags/')}>标签总览</a>
+        <span aria-hidden="true"> · </span>
+        <a class="ink-link" href={withBase('/rss.xml')}>RSS</a>
+      </p>
+    </PageIntro>
+
+    <section class="journal-issue" aria-labelledby="journal-issue-title">
+      <div class="journal-issue__lead">
+        <p class="folio-label" id="journal-issue-title">本期主稿</p>
+        <EntryList posts={posts.slice(0, 1)} variant="feature" />
+      </div>
+
+      <aside class="journal-issue__search" aria-label="检索与索引" data-ink-avoid>
+        <div class="journal-issue__search-head">
+          <p class="folio-label">查字寻篇</p>
+          <span>PAGEFIND</span>
+        </div>
+        <p>输入题名、正文或标签，在这册笺录里寻一处旧墨。</p>
+        <div data-pagefind-ignore>
+          <JournalSearch client:visible />
+        </div>
+      </aside>
+    </section>
+
+    <section class="journal-catalog" aria-labelledby="journal-catalog-title">
+      <header>
+        <p class="folio-label" id="journal-catalog-title">其余篇目</p>
+        <span>{String(Math.max(posts.length - 1, 0)).padStart(2, '0')} 篇</span>
+      </header>
+      <EntryList posts={posts.slice(1)} variant="catalog" startIndex={1} />
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .journal-issue {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(18rem, 4fr);
+    gap: clamp(4rem, 9vw, 9rem);
+    align-items: start;
+    padding-block: clamp(4rem, 8vw, 7rem);
+  }
+
+  .journal-issue__lead > .folio-label {
+    margin: 0 0 1rem;
+  }
+
+  .journal-issue__search {
+    margin-top: clamp(2rem, 8vw, 7rem);
+    padding: 1.75rem;
+    border-top: 2px solid var(--ink);
+    background: color-mix(in oklab, var(--paper-deep) 48%, transparent);
+  }
+
+  .journal-issue__search-head,
+  .journal-catalog > header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.68rem;
+  }
+
+  .journal-issue__search-head p,
+  .journal-catalog > header p {
+    margin: 0;
+  }
+
+  .journal-issue__search > p {
+    margin: 1.5rem 0 2rem;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+  }
+
+  .journal-catalog {
+    max-width: 58rem;
+    margin-left: auto;
+    padding-block: 2rem clamp(6rem, 12vw, 11rem);
+  }
+
+  .journal-catalog > header {
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 767px) {
+    .journal-issue {
+      display: block;
+    }
+
+    .journal-issue__search {
+      margin-top: 4rem;
+    }
+
+    .journal-catalog {
+      padding-bottom: 6rem;
+    }
+  }
+</style>

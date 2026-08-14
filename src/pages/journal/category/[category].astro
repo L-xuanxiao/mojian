@@ -1,0 +1,53 @@
+---
+// 分类聚合页：某分类下的全部文章
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageIntro from '../../../components/PageIntro.astro';
+import EntryList from '../../../components/journal/EntryList.astro';
+import { withBase } from '../../../site.config';
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection('journal', ({ data }) => !data.draft);
+  const categories = [...new Set(posts.map((post) => post.data.category))];
+  return categories.map((category) => ({
+    params: { category },
+    props: {
+      category,
+      posts: posts
+        .filter((post) => post.data.category === category)
+        .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()),
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { category, posts } = Astro.props;
+---
+
+<BaseLayout title={`${category} · 笺录`} description={`「${category}」分类下的全部文章。`}>
+  <main class="mx-auto max-w-stage px-5 md:px-8 lg:px-10">
+    <PageIntro
+      id="category"
+      title={category}
+      note="CATEGORY"
+      description={`归入「${category}」一章的文字，共 ${posts.length} 篇。`}
+      variant="compact"
+    >
+      <p slot="meta" class="m-0">
+        <a class="page-backlink" href={withBase('/journal/')}>返回笺录</a>
+      </p>
+    </PageIntro>
+
+    <div class="aggregation-list">
+      <EntryList posts={posts} variant="catalog" />
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .aggregation-list {
+    max-width: 58rem;
+    margin-left: auto;
+    padding-block: 2rem clamp(6rem, 12vw, 10rem);
+  }
+</style>

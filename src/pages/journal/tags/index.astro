@@ -1,0 +1,104 @@
+---
+import { getCollection } from 'astro:content';
+import PageIntro from '../../../components/PageIntro.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { withBase } from '../../../site.config';
+
+const posts = await getCollection('journal', ({ data }) => !data.draft);
+const counts = new Map<string, number>();
+for (const post of posts) {
+  for (const tag of post.data.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1);
+}
+const tags = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+---
+
+<BaseLayout title="标签总览 · 笺录" description="全部文章标签。">
+  <main class="mx-auto max-w-stage px-5 md:px-8 lg:px-10">
+    <PageIntro
+      id="tags"
+      title="标签总览"
+      note="INDEX OF MARKS"
+      description="像翻一册印谱，从反复出现的主题重新进入文章。"
+      variant="compact"
+    >
+      <p slot="meta" class="m-0">
+        共 {tags.length} 枚 · <a class="page-backlink" href={withBase('/journal/')}>返回笺录</a>
+      </p>
+    </PageIntro>
+
+    <ol class="tag-index" data-reveal-group>
+      {
+        tags.map(([tag, count], index) => (
+          <li>
+            <a href={withBase(`/journal/tags/${tag}/`)}>
+              <span class="tag-index__number" aria-hidden="true">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span class="tag-index__name">{tag}</span>
+              <span class="tag-index__count">{String(count).padStart(2, '0')} 篇</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </main>
+</BaseLayout>
+
+<style>
+  .tag-index {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 3rem;
+    margin: 0 0 clamp(6rem, 12vw, 10rem);
+    padding: 2rem 0 0;
+    border-top: 2px solid var(--ink);
+    list-style: none;
+  }
+
+  .tag-index li {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .tag-index a {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: baseline;
+    padding-block: 1.7rem;
+    color: var(--ink);
+    text-decoration: none;
+    transition: transform 250ms var(--ease-ink);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .tag-index a:hover {
+      transform: translateX(0.35rem);
+    }
+  }
+
+  .tag-index__number {
+    color: var(--bronze);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: 1.2rem;
+  }
+
+  .tag-index__name {
+    font-size: clamp(1.2rem, 2.8vw, 1.8rem);
+  }
+
+  .tag-index__count {
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.68rem;
+  }
+
+  @media (max-width: 639px) {
+    .tag-index {
+      display: block;
+    }
+
+    .tag-index a {
+      grid-template-columns: 2rem minmax(0, 1fr) auto;
+    }
+  }
+</style>

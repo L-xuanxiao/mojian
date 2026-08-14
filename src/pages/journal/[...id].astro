@@ -1,0 +1,442 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import InscriptionTip from '../../components/InscriptionTip';
+import { formatDate, formatDateISO } from '../../utils/date';
+import { readingStats } from '../../utils/reading';
+import { withBase } from '../../site.config';
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection('journal', ({ data }) => !data.draft);
+  return posts.map((post) => {
+    // 续卷：同分类计两分，每个共享标签计一分；有分者按分高、日期新排序，取前三篇
+    const score = (candidate: (typeof posts)[number]) =>
+      (candidate.data.category === post.data.category ? 2 : 0) +
+      candidate.data.tags.filter((tag) => post.data.tags.includes(tag)).length;
+    const related = posts
+      .filter((candidate) => candidate.id !== post.id && score(candidate) > 0)
+      .sort((a, b) => score(b) - score(a) || b.data.pubDate.getTime() - a.data.pubDate.getTime())
+      .slice(0, 3);
+    return { params: { id: post.id }, props: { post, related } };
+  });
+}) satisfies GetStaticPaths;
+
+const { post, related } = Astro.props;
+const { Content } = await render(post);
+const stats = readingStats(post.body ?? '');
+---
+
+<BaseLayout
+  title={`${post.data.title} · 墨笺`}
+  description={post.data.description}
+  type="article"
+  pubDate={post.data.pubDate}
+  tags={post.data.tags}
+>
+  <span class="reading-progress" aria-hidden="true" data-reading-progress></span>
+
+  <main class="mx-auto max-w-stage px-5 md:px-8 lg:px-10" data-ink-scene="reading">
+    <article data-pagefind-body data-reading-article>
+      <header class="article-header" data-ink-avoid>
+        <div class="article-header__folio" aria-hidden="true">
+          <span>JOURNAL</span>
+          <span>墨笺藏本</span>
+        </div>
+
+        <div class="article-header__meta" data-pagefind-ignore>
+          <time datetime={formatDateISO(post.data.pubDate)}>{formatDate(post.data.pubDate)}</time>
+          <a class="chapter" href={withBase(`/journal/category/${post.data.category}/`)}>
+            {post.data.category}
+          </a>
+        </div>
+
+        <div class="article-header__title">
+          <p class="folio-label">ARTICLE / {post.data.category}</p>
+          <h1 class="font-display" data-reveal-title>{post.data.title}</h1>
+          <p>{post.data.description}</p>
+          <span aria-hidden="true" data-reveal-line></span>
+        </div>
+
+        <div class="article-header__tags" data-pagefind-ignore>
+          {post.data.tags.map((tag) => <a href={withBase(`/journal/tags/${tag}/`)}>{tag}</a>)}
+        </div>
+      </header>
+
+      <div class="article-layout">
+        <aside class="article-aside" data-pagefind-ignore>
+          <a class="page-backlink" href={withBase('/journal/')}>返回笺录</a>
+          <dl>
+            <div>
+              <dt>刊载</dt>
+              <dd>{formatDate(post.data.pubDate)}</dd>
+            </div>
+            <div>
+              <dt>归入</dt>
+              <dd>{post.data.category}</dd>
+            </div>
+          </dl>
+          <p aria-hidden="true">读至卷尾，仍可循墨迹返回。</p>
+        </aside>
+
+        <div class="prose-ink article-prose" data-ink-avoid>
+          <Content />
+        </div>
+      </div>
+
+      <footer class="article-ending" data-pagefind-ignore>
+        <InscriptionTip text="收笔钤印 · 此篇终" client:idle>
+          <span class="article-ending__seal" aria-hidden="true">终</span>
+        </InscriptionTip>
+        <div>
+          <p>此篇至此收笔。全篇约 {stats.words} 字 · 可读 {stats.minutes} 分钟。</p>
+          <a class="page-backlink" href={withBase('/journal/')}>返回笺录</a>
+        </div>
+      </footer>
+
+      {
+        related.length > 0 && (
+          <nav class="article-related" aria-label="续卷" data-pagefind-ignore>
+            <p class="folio-label">续卷 · 可循此再读</p>
+            <ul>
+              {related.map((entry) => (
+                <li>
+                  <a href={withBase(`/journal/${entry.id}/`)}>
+                    <span class="article-related__meta">
+                      {entry.data.category} · {formatDate(entry.data.pubDate)}
+                    </span>
+                    <span class="article-related__title">{entry.data.title}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )
+      }
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .reading-progress {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 50;
+    display: none;
+    height: 2px;
+    background: linear-gradient(90deg, var(--ink), var(--cinnabar));
+    transform-origin: left center;
+  }
+
+  /* 墨条末端垂一粒墨滴，随进度前行 */
+  .reading-progress::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    right: -1px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--cinnabar);
+  }
+
+  :global(html.js) .reading-progress {
+    display: block;
+    transform: scaleX(0);
+  }
+
+  .article-header {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 1rem clamp(1rem, 3vw, 2rem);
+    padding-block: clamp(5rem, 10vw, 9rem) clamp(4rem, 9vw, 8rem);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .article-header__folio {
+    grid-column: 1 / span 2;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    color: var(--bronze);
+    font-family: var(--font-noto-sans);
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    writing-mode: vertical-rl;
+  }
+
+  .article-header__meta {
+    grid-column: 3 / span 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.72rem;
+  }
+
+  .chapter {
+    padding: 0.05rem 0.45rem;
+    border: 1px solid var(--cinnabar);
+    color: var(--cinnabar);
+    text-decoration: none;
+  }
+
+  .article-header__title {
+    grid-column: 5 / span 7;
+  }
+
+  .article-header__title > .folio-label {
+    margin: 0 0 1.25rem;
+  }
+
+  .article-header h1 {
+    max-width: 10em;
+    margin: 0;
+    font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 400;
+    line-height: 1.12;
+    letter-spacing: 0.035em;
+  }
+
+  .article-header__title > p:not(.folio-label) {
+    max-width: 34rem;
+    margin: 2rem 0 0;
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+  }
+
+  .article-header__title > span {
+    display: block;
+    width: min(100%, 28rem);
+    height: 1px;
+    margin-top: 2.5rem;
+    background: linear-gradient(90deg, var(--ink), transparent);
+  }
+
+  .article-header__tags {
+    grid-column: 5 / span 7;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 1rem;
+  }
+
+  .article-header__tags a {
+    padding: 0.08rem 0.5rem;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.68rem;
+    text-decoration: none;
+    transition: transform 200ms var(--ease-ink);
+  }
+
+  .article-header__tags a:hover {
+    color: var(--ink);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .article-header__tags a:hover {
+      transform: translateY(-1px);
+    }
+  }
+
+  .article-layout {
+    display: grid;
+    grid-template-columns: minmax(10rem, 2fr) minmax(0, 7fr) minmax(0, 2fr);
+    gap: clamp(2.5rem, 7vw, 7rem);
+    padding-block: clamp(4rem, 9vw, 8rem);
+  }
+
+  .article-aside {
+    position: sticky;
+    top: 7rem;
+    align-self: start;
+  }
+
+  .article-aside dl {
+    display: grid;
+    gap: 1.3rem;
+    margin: 2.5rem 0 0;
+  }
+
+  .article-aside dt {
+    color: var(--bronze);
+    font-family: var(--font-noto-sans);
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+  }
+
+  .article-aside dd {
+    margin: 0.25rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+  }
+
+  .article-aside > p {
+    max-width: 9rem;
+    margin: 3rem 0 0;
+    color: color-mix(in oklab, var(--ink) 38%, transparent);
+    font-size: 0.76rem;
+    writing-mode: vertical-rl;
+  }
+
+  .article-prose {
+    grid-column: 2;
+    min-width: 0;
+    max-width: 42rem;
+  }
+
+  .article-ending {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding-block: 3rem clamp(6rem, 12vw, 10rem);
+    border-top: 1px solid var(--line);
+  }
+
+  .article-ending__seal {
+    display: inline-flex;
+    width: 2.75rem;
+    height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    background: var(--cinnabar);
+    color: var(--paper);
+    font-family: var(--font-ma-shan-zheng);
+    transform: rotate(-3deg);
+  }
+
+  .article-ending p {
+    margin: 0 0 0.35rem;
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+  }
+
+  /* 跋文区后接续卷时收拢间距，避免双重留白 */
+  .article-ending:has(+ .article-related) {
+    padding-bottom: 3rem;
+  }
+
+  /* 续卷：卷签式条目，题名列前、分类日期为款 */
+  .article-related {
+    padding-block: 0 clamp(6rem, 12vw, 10rem);
+  }
+
+  .article-related > .folio-label {
+    margin: 0 0 1.5rem;
+  }
+
+  .article-related ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: 1px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--line);
+    background: var(--line);
+    list-style: none;
+  }
+
+  .article-related li {
+    background: var(--paper);
+  }
+
+  .article-related a {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1.4rem 1.5rem 1.6rem;
+    color: var(--ink);
+    text-decoration: none;
+    transition: transform 200ms var(--ease-ink);
+  }
+
+  .article-related__meta {
+    color: var(--bronze);
+    font-family: var(--font-noto-sans);
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+  }
+
+  .article-related__title {
+    font-size: 1.08rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .article-related a:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .article-header {
+      display: block;
+      padding-block: 4rem 3.5rem;
+    }
+
+    .article-header__folio {
+      display: none;
+    }
+
+    .article-header__meta {
+      flex-direction: row;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .article-header h1 {
+      font-size: clamp(2.8rem, 14vw, 4.4rem);
+    }
+
+    .article-layout {
+      display: block;
+      padding-block: 3.5rem 5rem;
+    }
+
+    .article-aside {
+      position: static;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 3rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .article-aside dl,
+    .article-aside > p {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reading-progress {
+      display: none !important;
+    }
+  }
+</style>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../scripts/scroll';
+
+  if (!prefersReducedMotion) {
+    const article = document.querySelector<HTMLElement>('[data-reading-article]');
+    const progress = document.querySelector<HTMLElement>('[data-reading-progress]');
+    if (article && progress) {
+      gsap.to(progress, {
+        scaleX: 1,
+        ease: 'none',
+        scrollTrigger: { trigger: article, start: 'top top', end: 'bottom bottom', scrub: true },
+      });
+    }
+  }
+</script>

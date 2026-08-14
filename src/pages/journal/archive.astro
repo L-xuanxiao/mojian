@@ -1,0 +1,91 @@
+---
+// 年谱归档：文章按年份分组，取谱牒编年之意
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import EntryList from '../../components/journal/EntryList.astro';
+import { withBase } from '../../site.config';
+
+const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+);
+
+// 按年份倒序分组
+const byYear = new Map<number, typeof posts>();
+for (const post of posts) {
+  const year = post.data.pubDate.getFullYear();
+  const group = byYear.get(year);
+  if (group) group.push(post);
+  else byYear.set(year, [post]);
+}
+const years = [...byYear.keys()].sort((a, b) => b - a);
+---
+
+<BaseLayout title="年谱归档 · 笺录" description="全部文章按年份编年。">
+  <main class="mx-auto max-w-stage px-5 md:px-8 lg:px-10">
+    <PageIntro
+      id="archive"
+      title="年谱归档"
+      note="CHRONICLE"
+      description="按年份重新翻阅旧墨。每一篇都有它落纸的时节。"
+      variant="compact"
+    >
+      <p slot="meta" class="m-0">
+        共 {posts.length} 篇 · <a class="ink-link" href={withBase('/journal/')}>返回笺录</a>
+      </p>
+    </PageIntro>
+
+    <div class="archive-years">
+      {
+        years.map((year) => (
+          <section class="archive-year" aria-labelledby={`year-${year}`}>
+            <div class="archive-year__title">
+              <p class="folio-label">ANNO</p>
+              <h2 id={`year-${year}`} data-reveal-title>
+                {year}
+              </h2>
+            </div>
+            <EntryList posts={byYear.get(year)!} variant="compact" />
+          </section>
+        ))
+      }
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .archive-years {
+    padding-block: 2rem clamp(6rem, 12vw, 10rem);
+  }
+
+  .archive-year {
+    display: grid;
+    grid-template-columns: minmax(10rem, 3fr) minmax(0, 8fr);
+    gap: clamp(2rem, 7vw, 7rem);
+    padding-block: clamp(3rem, 6vw, 5rem);
+    border-top: 1px solid var(--line);
+  }
+
+  .archive-year__title > .folio-label {
+    margin: 0 0 1rem;
+  }
+
+  .archive-year h2 {
+    margin: 0;
+    color: color-mix(in oklab, var(--ink) 48%, transparent);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: clamp(3.5rem, 8vw, 6.5rem);
+    font-weight: 400;
+    line-height: 0.9;
+  }
+
+  @media (max-width: 767px) {
+    .archive-year {
+      display: block;
+    }
+
+    .archive-year__title {
+      margin-bottom: 2.5rem;
+    }
+  }
+</style>

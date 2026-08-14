@@ -1,0 +1,55 @@
+---
+// 单标签聚合页：某标签下的全部文章
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageIntro from '../../../components/PageIntro.astro';
+import EntryList from '../../../components/journal/EntryList.astro';
+import { withBase } from '../../../site.config';
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection('journal', ({ data }) => !data.draft);
+  const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
+  return tags.map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: posts
+        .filter((post) => post.data.tags.includes(tag))
+        .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()),
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { tag, posts } = Astro.props;
+---
+
+<BaseLayout title={`${tag} · 笺录`} description={`标签「${tag}」下的全部文章。`}>
+  <main class="mx-auto max-w-stage px-5 md:px-8 lg:px-10">
+    <PageIntro
+      id="tag"
+      title={tag}
+      note="TAG INDEX"
+      description={`留下「${tag}」印记的篇目，共 ${posts.length} 篇。`}
+      variant="compact"
+    >
+      <p slot="meta" class="m-0">
+        <a class="page-backlink" href={withBase('/journal/tags/')}>全部标签</a>
+        <span aria-hidden="true"> · </span>
+        <a class="ink-link" href={withBase('/journal/')}>笺录总目</a>
+      </p>
+    </PageIntro>
+
+    <div class="aggregation-list">
+      <EntryList posts={posts} variant="catalog" />
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .aggregation-list {
+    max-width: 58rem;
+    margin-left: auto;
+    padding-block: 2rem clamp(6rem, 12vw, 10rem);
+  }
+</style>
