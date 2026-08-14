@@ -1,0 +1,261 @@
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: start;
+  gap: clamp(3.5rem, 7vw, 7rem) clamp(1rem, 3vw, 2.5rem);
+}
+
+.gallery-entry {
+  position: relative;
+  grid-column: span 7;
+  margin: 0;
+}
+
+.gallery-entry--portrait {
+  grid-column: span 5;
+}
+
+.gallery-entry--wide {
+  grid-column: 1 / -1;
+}
+
+.gallery-entry:nth-child(2) {
+  grid-column: 9 / -1;
+  margin-top: 8rem;
+}
+
+.gallery-entry:nth-child(3) {
+  grid-column: 2 / span 4;
+}
+
+.gallery-entry:nth-child(4) {
+  grid-column: 7 / -1;
+  margin-top: 3rem;
+}
+
+.gallery-entry:last-child:not(.gallery-entry--wide) {
+  grid-column: 4 / span 7;
+}
+
+.gallery-entry__number {
+  position: absolute;
+  top: -1.7rem;
+  left: 0;
+  color: var(--bronze);
+  font-family: var(--font-ma-shan-zheng);
+  font-size: 1.1rem;
+}
+
+.gallery-entry__image {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  /* 装裱绫边：外缘淡墨线 + 宣纸内衬 */
+  border: 1px solid color-mix(in oklab, var(--ink) 26%, transparent);
+  padding: clamp(0.55rem, 1.2vw, 0.9rem);
+  background: var(--paper);
+  box-shadow: var(--shadow-lg);
+  cursor: zoom-in;
+}
+
+/* 立轴装裱：竖幅天头略窄、地头略宽 */
+.gallery-entry--portrait .gallery-entry__image {
+  padding-block: clamp(0.8rem, 1.6vw, 1.25rem) clamp(1.05rem, 2vw, 1.5rem);
+}
+
+/* 暗室内的装裱：绫边保持宣纸色（昼夜一致），如暗室里托画的白卡；投影改用实黑 */
+.darkroom .gallery-entry__image {
+  border-color: rgb(244 239 227 / 0.26);
+  background: #f4efe3;
+  box-shadow: 0 18px 48px rgb(0 0 0 / 0.42);
+}
+
+.gallery-entry__image img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  transition:
+    transform 700ms var(--ease-ink),
+    filter 500ms var(--ease-ink);
+}
+
+.gallery-entry--portrait .gallery-entry__image img {
+  aspect-ratio: 4 / 5;
+}
+
+.gallery-entry--wide .gallery-entry__image img {
+  aspect-ratio: 16 / 7;
+}
+
+/* 显影：有 JS 且允许动效时画面预置暗态，入视口后组件加 .is-developed 渐次显影；
+   无 JS / reduced-motion 直达清晰；:not() 限定前态，揭示后 hover 提亮不受优先级干扰 */
+@media (prefers-reduced-motion: no-preference) {
+  html.js .gallery-entry:not(.is-developed) .gallery-entry__image img {
+    filter: brightness(0.45) contrast(0.82);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* 揭帘：画面微亮微显，如掀开覆画薄纱 */
+  .gallery-entry__image:hover img {
+    transform: scale(1.035);
+    filter: contrast(1.05) brightness(1.04);
+  }
+}
+
+.gallery-entry__zoom {
+  position: absolute;
+  right: 0.8rem;
+  bottom: 0.8rem;
+  display: inline-flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(244 239 227 / 0.5);
+  background: rgb(28 29 26 / 0.58);
+  color: #f4efe3;
+  font-family: var(--font-noto-sans);
+  font-size: 0.68rem;
+  opacity: 0;
+  transform: translateY(0.4rem);
+  transition:
+    opacity 250ms var(--ease-ink),
+    transform 250ms var(--ease-ink);
+  pointer-events: none;
+}
+
+.gallery-entry__image:hover .gallery-entry__zoom,
+.gallery-entry__image:focus-visible .gallery-entry__zoom {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.gallery-entry figcaption {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: start;
+  margin-top: 1rem;
+}
+
+.gallery-entry h2 {
+  margin: 0;
+  font-size: clamp(1.125rem, 2vw, 1.4rem);
+}
+
+.gallery-entry figcaption p {
+  margin: 0.35rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+/* 暗室少字：桌面端说明小字平时隐去，hover / 聚焦时显现；触屏常显 */
+@media (hover: hover) and (pointer: fine) {
+  .darkroom .gallery-entry figcaption > div > p {
+    opacity: 0;
+    transform: translateY(0.3rem);
+    transition:
+      opacity 350ms var(--ease-ink),
+      transform 350ms var(--ease-ink);
+  }
+
+  .darkroom .gallery-entry:hover figcaption > div > p,
+  .darkroom .gallery-entry:focus-within figcaption > div > p {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 题跋竖行：年份与媒材竖排于画侧，仿画上题款；窄屏回退横排 */
+.gallery-entry__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0.25rem 0.85rem;
+  font-family: var(--font-noto-sans);
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+}
+
+.gallery-entry__meta a {
+  color: var(--ink);
+}
+
+/* 暗室：极深墨底上覆一层微弱纸纹，非纯黑 */
+.ink-lightbox {
+  --yarl__color_backdrop: rgb(17 18 16 / 0.97);
+  --yarl__color_button: #eee9de;
+  --yarl__color_button_active: #ffffff;
+  --yarl__button_filter: none;
+  backdrop-filter: blur(14px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.ink-lightbox .yarl__slide_image {
+  border-radius: 2px;
+}
+
+.ink-lightbox__caption {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.75rem 1rem;
+  color: #eee9de;
+  font-family: var(--font-noto-serif);
+  text-align: center;
+  pointer-events: none;
+}
+
+.ink-lightbox__caption span {
+  color: rgb(238 233 222 / 0.68);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 767px) {
+  .gallery-grid {
+    display: block;
+  }
+
+  .gallery-entry + .gallery-entry {
+    margin-top: 3.5rem;
+  }
+
+  .gallery-entry:nth-child(2),
+  .gallery-entry:nth-child(3),
+  .gallery-entry:nth-child(4),
+  .gallery-entry:last-child:not(.gallery-entry--wide) {
+    margin-top: 3.5rem;
+  }
+
+  .gallery-entry figcaption {
+    display: block;
+  }
+
+  .gallery-entry__meta {
+    justify-content: flex-start;
+    margin-top: 0.75rem !important;
+    writing-mode: horizontal-tb;
+  }
+
+  .ink-lightbox__caption {
+    bottom: 0.75rem;
+    display: block;
+  }
+
+  .ink-lightbox__caption span {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-entry__image img {
+    transition: none;
+  }
+}
