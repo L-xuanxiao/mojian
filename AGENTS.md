@@ -1,0 +1,115 @@
+# AGENTS.md
+
+用于约束 AI Agent 在 `mojian` 项目中的编码、修改、排错与验证行为。
+
+优先级：
+
+> 用户当前要求 > 项目现有代码、配置与约定 > 本文件 > 规划文档
+
+## 当前进度
+
+- 第一阶段 项目初始化：✅ 完成（`fe00fef`）
+- 第二阶段 设计系统：✅ 完成（`0c239d0`）
+- 第三阶段 首页骨架：✅ 完成（`5f0786b`）
+- 第四阶段 首页动画与视觉精致化：✅ 完成（`72aaede`）
+- 第五阶段 博客：✅ 完成（`6af130a`）
+- 第六阶段 作品系统：✅ 完成（Projects、Project Detail、Gallery、Embla Carousel、Yet Another React Lightbox，`5c72752`）
+- 全站视觉重构：✅ 完成（书卷展览版式、原创纸墨视觉、显式动效语义与原生 View Transitions，`5c72752` + `0c385c2`）
+- 第七阶段 个人页面：🔶 第一批完成（About 此间、Guestbook 留墨页面与版式，`5b8ab6e`；giscus、Formspree 待外部服务开通后填入 `src/site.config.ts` 即生效）+ 个人身份层（自述 / 行年 / 站点史 / 署名改为数据入口与空态，占位演示文案已清除，待主人填写真实内容）
+- 第八阶段 SEO：🔶 基础设施完成（Seo 组件、canonical/OG/Twitter Card、WebSite+Article JSON-LD、@astrojs/sitemap、动态 robots.txt、site.webmanifest，`8d0c5d7`；`site` 已指向 `https://l-xuanxiao.github.io`，base 路径属第十阶段）
+- 全站视觉沉浸深化：✅ 完成（墨迹页面过渡、Hero 题字/钤印/视差/云气微尘、Footer 竹影云气、毛笔尖光标、题跋 Tooltip（@base-ui-components/react）、hover 门控统一；reduced-motion 静止降级与无 JS 兜底保留）
+- 全站设计深化四批次：✅ 完成（笺录续卷/跋文/题签/墨条进度、年谱墨线生长与节点落墨、光影装裱绫边/题跋竖行/暗室灯箱、404「此处无卷」与外部服务向导 `scripts/setup-external-services.sh`）
+- 四章视觉节奏差异化：✅ 完成（器作展签景深、笺录刊物目录与阅读时长、光影暗室显影（`.darkroom` 固定深墨 + 作用域 token 重映射，首页与 `/gallery/` 均入暗）、此间起笔朱砂与云气，`15086ec`–`a7cb6be`）
+- Header/Footer 精修：✅ 完成（页眉刊物化——Lucide 静态 SVG 导航图标（当前页图标落朱砂）、品牌 MOJIAN 拉丁小字、卷头细线滚动写出、昼夜印钮；页尾 Colophon 四拍——「山高水长」收束、往来行（GitHub/RSS/回卷首）、墨线写出、版权钤印行）
+- 全站视觉 QA 收口：✅ 完成（修复移动端 CurrentFolio 题字重叠折行、窄屏导航末项裁切、年谱闲笔移动端叙事倒置；小字号收敛为 0.62/0.68/0.72 语义三档；Hero 比例、朱砂密度、高潮分布、easing 体系审查后确认保持）
+- 全站 2.5D 水墨动效深化：✅ 完成（单例 Canvas 2D 水墨粒子、Hero / 长卷三层景深、PageIntro 四场景节奏、阅读避让，以及低动态 / 无 JS 降级；待提交）
+
+## 1. 沟通与执行
+
+- 每次回复以“喵内が”开头，默认使用中文，简洁说明结果、验证和必要风险。
+- 修改前先读取相关代码、配置和文档，明确影响范围与完成标准。
+- 优先自行从项目中消除不确定性；涉及可能变化的 API、依赖版本或框架用法时，查阅官方文档，不凭记忆猜测。
+- 聚焦当前任务，不顺手修改无关代码，不以“更优雅”为由扩大范围。
+
+## 2. 当前基线与技术边界
+
+- 判断当前实现状态时，以实际代码、配置、依赖清单和可验证运行结果为准；规划文档不代表能力已经安装或实现。
+- 按任务阶段逐项引入能力，不批量安装规划中的全部依赖。
+- Astro 默认负责页面、路由、布局、SEO、内容与静态渲染。
+- React 用于状态驱动的交互界面与精致 React UI 动画（如搜索、灯箱、轮播）；保持 Island 架构，不改成 React SPA，不引入 React Router。
+- 静态内容优先使用 Astro；纯展示组件不添加 `client:*`，也不为单纯展示引入 React。
+- 动画能力启用后按职责使用：CSS 负责简单和环境动画，Motion 负责 React UI 动画，GSAP 负责复杂时间线与滚动叙事，Lenis 只负责平滑滚动。
+- 同一职责只保留一套主要方案，避免重复框架、重复动画库和重复滚动方案。
+
+## 3. 设计与体验
+
+- 网站定位为具有个人识别度的现代东方数字空间，保持“现代东方水墨书卷”气质：内容优先、层次清晰，追求精致与工艺感，不强制保守克制。
+- 水墨、宣纸、山水、云纹、印章、题跋、篆刻等元素可用于营造氛围与细节，但每个装饰必须有出处与意图，拒绝无意义堆砌。
+- 避免红金宫廷风、通用博客模板、SaaS/Dashboard、默认 shadcn 视觉和大量重复圆角卡片。
+- 动画应增强叙事和反馈；简单效果优先 CSS，不为动画引入无意义的 JavaScript。
+- 修改 UI 时同时检查桌面端和移动端；涉及主题或动效时，覆盖深浅主题与 `prefers-reduced-motion`。
+- 保持现有视觉质量和未在任务范围内的页面，不以性能优化为由无依据地削弱设计效果。
+
+## 4. 修改与排错
+
+- 采用满足当前需求的最简单完整方案，避免推测性抽象、配置和间接层。
+- 从可端到端运行的最小版本开始逐层增加能力，每一步都保持项目可用。
+- 保持组件职责清晰；只在存在真实边界时拆分，避免形式化分层和大范围重构。
+- 组件目录按使用范围组织：全站共享组件（如 Header、Footer）放 `src/components/` 根级；页面或功能专属组件放对应子目录（如 `src/components/home/`）；不建空目录、不提前占位。
+- 当前需求未要求兼容时，确认旧实现无内部引用、公开 URL、内容链接或数据迁移需求后直接删除，不无意义叠加兼容层、回退逻辑或迁移分支。
+- 选择可长期维护的最小方案，不采用明知随后需要推翻的临时实现。
+- 排错先复现并定位根因，再做局部修复和回归检查。
+- 优先修正状态、结构或生命周期问题；避免用大量 `!important`、失控的 `z-index`、任意 `setTimeout` 或吞异常掩盖根因。
+- 删除本次修改产生的无用 import、变量和代码；保留原有且与任务无关的内容。
+
+## 5. 依赖管理
+
+- 新增依赖前，先检查项目现有代码、依赖文档、类型定义和已有能力。
+- 仅在能明显降低整体复杂度或提高可靠性时，引入成熟且持续维护的库。
+- 不重复实现已有通用能力，不添加职责重叠的依赖。
+- 不主动批量升级与当前任务无关的依赖；版本和安装结果以 `package.json`、锁文件及实际验证为准。
+
+## 6. 验证
+
+- 验证范围与改动风险匹配，不以“代码已写完”代替结果验证。
+- 仅修改文档时，回读内容并执行差异检查；无需运行项目构建。
+- 修改代码、配置、路由或项目结构时，至少执行：
+
+```bash
+pnpm check
+pnpm build
+```
+
+- 改动提交前执行 `pnpm format:check`（格式不符时先 `pnpm format` 自动修复）。
+- 涉及布局、交互、动画、导航或响应式行为变化时，应在实际浏览器检查受影响路由和必要视口，不能只根据代码判断效果。
+- 启动开发服务器使用后台模式：`astro dev --background`；使用 `astro dev status`、`astro dev logs`、`astro dev stop` 管理。
+- 无法完成某项验证时，明确说明未验证内容和原因，不伪造结果。
+
+## 7. Git
+
+- 修改前后检查 `git status` 和相关 `git diff`，保留用户已有未提交修改。
+- 未经用户明确要求，不提交、不推送、不创建 PR。
+- 不执行 `git reset --hard`、`git clean -fd`、`git checkout .`、`git restore .` 等覆盖工作区的命令。
+- 用户要求提交时，一个提交对应一个明确目标；Commit Message 使用规范前缀和简洁中文描述，如 `fix: 修复移动端画廊溢出`。
+
+## 8. 项目文档
+
+- 涉及产品定位、设计、架构、技术选型、页面规划或开发阶段时，先读 `docs/mojian_plan.md`。该文件是路线图，不是当前依赖清单。
+- 代码和配置与规划不一致时，先以当前用户要求和实际项目状态为准；架构决策变化时同步相关文档。
+- 项目阶段、技术基线或长期约定发生变化时，应及时更新本文件，保持规则与项目现状一致。
+- 每完成一个开发阶段、里程碑或影响后续阶段的决策后，立即更新本文件的「当前进度」一节，不积压到下次会话。
+- 详细说明放入对应文档，不继续堆入本文件。
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues for `L-xuanxiao/mojian`. See `docs/agents/issue-tracker.md` before issue operations.
+
+### Triage labels
+
+Use the five default canonical triage labels. See `docs/agents/triage-labels.md` before triage operations.
+
+### Domain docs
+
+Use the single-context domain documentation layout. See `docs/agents/domain.md` before domain modeling or architecture exploration.
