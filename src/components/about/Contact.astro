@@ -1,0 +1,246 @@
+---
+import { site, withBase } from '../../site.config';
+import SectionHeading from '../SectionHeading.astro';
+
+const { email, github } = site;
+const endpoint = site.formspree.endpoint;
+---
+
+<section class="contact" aria-labelledby="contact-heading">
+  <SectionHeading id="contact-heading" title="往来" note="CORRESPONDENCE" />
+
+  <div class="contact__grid">
+    <div class="contact__channels">
+      <p class="folio-label">鱼雁所至</p>
+      <p class="contact__note">
+        有信自远方来，不论是商榷文字、请益代码，或只是道一声看过，皆欢迎。
+      </p>
+      <ul class="contact__list" data-reveal-group>
+        {
+          email && (
+            <li>
+              <span>邮箱</span>
+              <a class="ink-link" href={`mailto:${email}`}>
+                {email}
+              </a>
+            </li>
+          )
+        }
+        <li>
+          <span>GitHub</span>
+          <a class="ink-link" href={github}>L-xuanxiao/mojian</a>
+        </li>
+        <li>
+          <span>订阅</span>
+          <a class="ink-link" href={withBase('/rss.xml')}>RSS</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="contact__form-wrap">
+      {
+        endpoint ? (
+          <form class="contact__form" action={endpoint} method="POST">
+            <p class="folio-label">投书</p>
+            <div class="contact__field">
+              <label for="contact-name">称呼</label>
+              <input id="contact-name" name="name" type="text" required autocomplete="name" />
+            </div>
+            <div class="contact__field">
+              <label for="contact-email">回信邮箱</label>
+              <input id="contact-email" name="email" type="email" required autocomplete="email" />
+            </div>
+            <div class="contact__field">
+              <label for="contact-message">所言</label>
+              <textarea id="contact-message" name="message" rows="5" required />
+            </div>
+            {/* Formspree honeypot 反滥用：真人不可见，勿填 */}
+            <input
+              type="text"
+              name="_gotcha"
+              class="contact__gotcha"
+              tabindex="-1"
+              autocomplete="off"
+              aria-hidden="true"
+            />
+            <button type="submit" class="contact__submit">
+              封缄寄出
+            </button>
+            <p class="contact__privacy">私信经 Formspree 转递，仅主人可见，不会公开于本站。</p>
+          </form>
+        ) : (
+          <div class="contact__pending">
+            <p class="folio-label">投书</p>
+            <p class="contact__pending-mark" aria-hidden="true">
+              邮路未通
+            </p>
+            <p>
+              私人信箱尚在置办中。
+              {email ? '在此之前，可先以邮件相访。' : '在此之前，可经 GitHub 相访。'}
+            </p>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: clamp(3rem, 8vw, 8rem);
+    align-items: start;
+  }
+
+  .contact__channels > .folio-label {
+    margin: 0 0 1.5rem;
+  }
+
+  .contact__note {
+    max-width: 24rem;
+    margin: 0;
+    color: var(--ink-soft);
+  }
+
+  .contact__list {
+    margin: 2.5rem 0 0;
+    padding: 0;
+    border-top: 2px solid var(--ink);
+    list-style: none;
+  }
+
+  .contact__list li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-block: 1.1rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .contact__list span {
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+  }
+
+  .contact__form,
+  .contact__pending {
+    padding: 2rem;
+    border-top: 2px solid var(--ink);
+    background: color-mix(in oklab, var(--paper-deep) 52%, transparent);
+    box-shadow: var(--shadow-md);
+  }
+
+  .contact__form > .folio-label,
+  .contact__pending > .folio-label {
+    margin: 0 0 1.75rem;
+  }
+
+  .contact__field {
+    margin-bottom: 1.5rem;
+  }
+
+  .contact__field label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+  }
+
+  .contact__field input,
+  .contact__field textarea {
+    width: 100%;
+    padding: 0.55rem 0.1rem;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--font-noto-serif);
+    font-size: 0.95rem;
+    transition: border-color 200ms var(--ease-ink);
+  }
+
+  .contact__field textarea {
+    resize: vertical;
+    min-height: 6rem;
+  }
+
+  .contact__field input:focus-visible,
+  .contact__field textarea:focus-visible {
+    outline: none;
+    border-bottom-color: var(--ink);
+  }
+
+  .contact__gotcha {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .contact__submit {
+    margin-top: 0.5rem;
+    padding: 0.65rem 1.9rem;
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    font-family: var(--font-noto-serif);
+    font-size: 0.88rem;
+    letter-spacing: 0.22em;
+    transition:
+      background-color 250ms var(--ease-ink),
+      color 250ms var(--ease-ink),
+      transform 160ms var(--ease-ink);
+  }
+
+  .contact__submit:active {
+    transform: scale(0.97);
+  }
+
+  .contact__submit:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .contact__privacy {
+    margin: 1.5rem 0 0;
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.68rem;
+  }
+
+  .contact__pending-mark {
+    margin: 0 0 1.25rem;
+    color: color-mix(in oklab, var(--ink) 30%, transparent);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    letter-spacing: 0.12em;
+    transform: rotate(-2deg);
+  }
+
+  .contact__pending p:not(.folio-label):not(.contact__pending-mark) {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+  }
+
+  @media (max-width: 767px) {
+    .contact__grid {
+      display: block;
+    }
+
+    .contact__form,
+    .contact__pending {
+      margin-top: 3rem;
+      padding: 1.5rem;
+    }
+  }
+</style>

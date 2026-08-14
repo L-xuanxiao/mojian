@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageIntro from '../components/PageIntro.astro';
+import GiscusWall from '../components/guestbook/GiscusWall.astro';
+---
+
+<BaseLayout title="留墨 · 墨笺" description="留墨墙：路过此间，不妨题字一行。">
+  <main class="mx-auto max-w-stage px-5 md:px-8 lg:px-10">
+    <PageIntro
+      id="guestbook"
+      title="留墨"
+      note="GUESTBOOK"
+      description="路过此间，不妨题字一行。问候、读后感、或只是证明曾到此一游，皆是纸上墨痕。"
+      scene="personal"
+    >
+      <p slot="meta" class="m-0">公开题写 · 经 GitHub 账号</p>
+    </PageIntro>
+
+    <div class="guestbook-stage" data-reveal-group>
+      <div class="guestbook-stage__aside">
+        <p class="folio-label">题写之礼</p>
+        <ul class="m-0 list-none p-0">
+          <li>题字公开可见，请慎留私人信息。</li>
+          <li>与某篇文章相关的讨论，宜移步该篇之下。</li>
+          <li>私人事务请转「此间 · 往来」投书。</li>
+        </ul>
+      </div>
+
+      <GiscusWall />
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .guestbook-stage {
+    display: grid;
+    grid-template-columns: minmax(13rem, 3fr) minmax(0, 8fr);
+    gap: clamp(3rem, 8vw, 8rem);
+    align-items: start;
+    padding-block: 2rem clamp(7rem, 14vw, 12rem);
+  }
+
+  .guestbook-stage__aside > .folio-label {
+    margin: 0 0 1.5rem;
+  }
+
+  .guestbook-stage__aside li {
+    padding-block: 0.85rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+  }
+
+  .guestbook-stage__aside li:first-child {
+    border-top: 2px solid var(--ink);
+  }
+
+  @media (max-width: 767px) {
+    .guestbook-stage {
+      display: block;
+    }
+
+    .guestbook-stage__aside {
+      margin-bottom: 3rem;
+    }
+  }
+</style>

@@ -1,0 +1,142 @@
+---
+import { site } from '../../site.config';
+
+const giscus = site.giscus;
+const configured = Boolean(giscus.repo && giscus.repoId && giscus.category && giscus.categoryId);
+---
+
+<section class="giscus-wall" aria-labelledby="giscus-wall-heading">
+  <h2 id="giscus-wall-heading" class="giscus-wall__heading">留墨墙</h2>
+
+  {
+    configured ? (
+      <div
+        class="giscus-wall__stage"
+        data-giscus-wall
+        data-repo={giscus.repo}
+        data-repo-id={giscus.repoId}
+        data-category={giscus.category}
+        data-category-id={giscus.categoryId}
+      >
+        <noscript>
+          <p class="giscus-wall__noscript">
+            留言墙需要启用 JavaScript 方能展卷；留言经由 GitHub Discussions 保存。
+          </p>
+        </noscript>
+      </div>
+    ) : (
+      <div class="giscus-wall__pending">
+        <p class="giscus-wall__pending-mark" aria-hidden="true">
+          尚未开卷
+        </p>
+        <p>留言墙待仓库开启 Discussions 并接入 giscus 后启用。主人备妥纸墨，此处便可题字。</p>
+      </div>
+    )
+  }
+
+  <p class="giscus-wall__privacy">
+    留墨须知：留言以 GitHub 账号题写、公开可见，保存于本站仓库的 Discussions；页面将自 giscus.app 与
+    github.com 加载资源。
+  </p>
+</section>
+
+<style>
+  .giscus-wall__heading {
+    margin: 0 0 2.5rem;
+    font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  .giscus-wall__stage {
+    min-height: 12rem;
+  }
+
+  .giscus-wall__noscript {
+    color: var(--ink-soft);
+  }
+
+  .giscus-wall__pending {
+    padding: clamp(2.5rem, 6vw, 4rem) 2rem;
+    border-top: 2px solid var(--ink);
+    background: color-mix(in oklab, var(--paper-deep) 52%, transparent);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+  }
+
+  .giscus-wall__pending-mark {
+    margin: 0 0 1.5rem;
+    color: color-mix(in oklab, var(--ink) 30%, transparent);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    letter-spacing: 0.14em;
+    transform: rotate(-2deg);
+  }
+
+  .giscus-wall__pending p:not(.giscus-wall__pending-mark) {
+    max-width: 30rem;
+    margin: 0 auto;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+  }
+
+  .giscus-wall__privacy {
+    max-width: 40rem;
+    margin: 2.5rem 0 0;
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.68rem;
+    line-height: 1.9;
+  }
+</style>
+
+<script>
+  // giscus 留言墙：运行时注入 client.js，主题跟随站点昼夜（含手动切换）
+  const stage = document.querySelector<HTMLElement>('[data-giscus-wall]');
+  if (stage) {
+    const GISCUS_ORIGIN = 'https://giscus.app';
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const resolveTheme = () => {
+      const t = document.documentElement.dataset.theme;
+      return t === 'dark' || t === 'light' ? t : media.matches ? 'dark' : 'light';
+    };
+
+    const syncTheme = () => {
+      const iframe = stage.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
+      iframe?.contentWindow?.postMessage(
+        { giscus: { setConfig: { theme: resolveTheme() } } },
+        GISCUS_ORIGIN,
+      );
+    };
+
+    const script = document.createElement('script');
+    script.src = `${GISCUS_ORIGIN}/client.js`;
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+    const attrs: Record<string, string> = {
+      repo: stage.dataset.repo ?? '',
+      'repo-id': stage.dataset.repoId ?? '',
+      category: stage.dataset.category ?? '',
+      'category-id': stage.dataset.categoryId ?? '',
+      mapping: 'pathname',
+      strict: '0',
+      'reactions-enabled': '1',
+      'emit-metadata': '0',
+      'input-position': 'top',
+      lang: 'zh-CN',
+      theme: resolveTheme(),
+    };
+    for (const [key, value] of Object.entries(attrs)) {
+      script.setAttribute(`data-${key}`, value);
+    }
+    stage.appendChild(script);
+
+    // 手动切换主题（Header 写入 html[data-theme]）与系统主题变化时同步 iframe
+    new MutationObserver(syncTheme).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+    media.addEventListener('change', syncTheme);
+  }
+</script>

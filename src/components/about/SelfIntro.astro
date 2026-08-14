@@ -1,0 +1,142 @@
+---
+import { site } from '../../site.config';
+import SectionHeading from '../SectionHeading.astro';
+import InscriptionTip from '../InscriptionTip';
+
+/**
+ * 自述数据入口（待主人落笔）：
+ * - lead：一句明确的自我定位，渲染为首段大字（首字自动落朱砂）
+ * - paragraphs：长文自述，建议依次承担——平时主要在做什么 / Mojian 因何而订 / 希望长期记录什么
+ * 风格：第一人称、简洁克制、如实；为空时渲染空态说明，不虚构经历
+ */
+const selfIntro: { lead: string; paragraphs: string[] } = {
+  lead: '',
+  paragraphs: [],
+};
+
+// 署名：site.profile.displayName 为空时落款保持「待主人自题」
+const displayName = site.profile.displayName;
+---
+
+<section class="self-intro" aria-labelledby="self-intro-heading">
+  <span class="mist mist--b self-intro__mist" aria-hidden="true"></span>
+  <SectionHeading id="self-intro-heading" title="其人" note="PORTRAIT" />
+
+  <div class="self-intro__grid">
+    <div class="self-intro__column">
+      {
+        selfIntro.lead && (
+          <p class="self-intro__lead" data-reveal-title>
+            {selfIntro.lead}
+          </p>
+        )
+      }
+      {
+        selfIntro.paragraphs.length > 0 ? (
+          <div class="self-intro__body" data-reveal-group>
+            {selfIntro.paragraphs.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+        ) : (
+          <p class="self-intro__empty">
+            主人尚未落笔自叙。在此之前，笺录、器作与光影三卷，即其作答。
+          </p>
+        )
+      }
+      <InscriptionTip
+        text={displayName ? `题跋 · ${displayName}` : '题跋 · 待主人自题'}
+        client:idle
+      >
+        <span class="self-intro__signature" aria-hidden="true">{displayName || '待主人自题'}</span>
+      </InscriptionTip>
+    </div>
+  </div>
+</section>
+
+<style>
+  .self-intro {
+    position: relative;
+    overflow: clip;
+  }
+
+  /* 云气：自叙区一团流岚，浅色主题为淡墨、深色自动转淡白雾 */
+  .self-intro__mist {
+    top: -12%;
+    right: -6%;
+    width: 30rem;
+    height: 22rem;
+  }
+
+  /* 内容压在云气之上 */
+  .self-intro > :global(.section-heading),
+  .self-intro__grid {
+    position: relative;
+    z-index: 1;
+  }
+
+  .self-intro__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 8fr) minmax(0, 3fr);
+  }
+
+  .self-intro__column {
+    position: relative;
+    padding-bottom: clamp(4rem, 8vw, 7rem);
+  }
+
+  .self-intro__lead {
+    max-width: 16em;
+    margin: 0;
+    font-size: clamp(1.5rem, 3vw, 2.4rem);
+    line-height: 1.7;
+    letter-spacing: 0.02em;
+  }
+
+  /* 起笔落朱砂：自叙首字着一点朱砂，如开卷第一笔 */
+  .self-intro__lead::first-letter {
+    color: var(--cinnabar);
+  }
+
+  .self-intro__body,
+  .self-intro__empty {
+    max-width: 36rem;
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    margin-left: clamp(0rem, 10vw, 9rem);
+    color: var(--ink-soft);
+  }
+
+  .self-intro__body p {
+    margin: 0;
+  }
+
+  .self-intro__body p + p {
+    margin-top: 1.4em;
+  }
+
+  .self-intro__signature {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    color: color-mix(in oklab, var(--ink) 26%, transparent);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: clamp(1.8rem, 4vw, 3.4rem);
+    letter-spacing: 0.14em;
+    transform: rotate(-2deg);
+  }
+
+  @media (max-width: 767px) {
+    .self-intro__grid {
+      display: block;
+    }
+
+    .self-intro__body,
+    .self-intro__empty {
+      margin-left: 0;
+    }
+
+    .self-intro__signature {
+      font-size: 1.9rem;
+    }
+  }
+</style>

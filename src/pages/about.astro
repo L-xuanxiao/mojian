@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageIntro from '../components/PageIntro.astro';
+import SelfIntro from '../components/about/SelfIntro.astro';
+import AboutTimeline from '../components/about/AboutTimeline.astro';
+import Contact from '../components/about/Contact.astro';
+import artwork from '../assets/art/journey-paper-scroll.webp';
+---
+
+<BaseLayout title="此间 · 墨笺" description="关于此间主人：其人、行年与往来方式。">
+  <main class="mx-auto max-w-stage px-5 md:px-8 lg:px-10">
+    <PageIntro
+      id="about"
+      title="此间"
+      note="ABOUT / COLOPHON"
+      description="关于此间主人：所来之路、逐年所记，以及鱼雁往来之处。"
+      variant="folio"
+      scene="personal"
+      artwork={artwork}
+      artworkAlt="纸墨长卷，山水行旅"
+    >
+      <p slot="meta" class="m-0">其人 · 行年 · 往来</p>
+    </PageIntro>
+
+    <div class="about-stage">
+      <SelfIntro />
+      <AboutTimeline />
+      <Contact />
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .about-stage {
+    display: grid;
+    gap: clamp(6rem, 12vw, 10rem);
+    padding-block: 2rem clamp(7rem, 14vw, 12rem);
+  }
+</style>
