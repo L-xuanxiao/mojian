@@ -1,0 +1,258 @@
+---
+import { getImage } from 'astro:assets';
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import ProjectCarousel from '../../components/projects/ProjectCarousel';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { withBase } from '../../site.config';
+
+export const getStaticPaths = (async () => {
+  const projects = await getCollection('projects', ({ data }) => !data.draft);
+  return projects.map((project) => ({ params: { id: project.id }, props: { project } }));
+}) satisfies GetStaticPaths;
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const slides = await Promise.all(
+  project.data.gallery.map(async (item) => {
+    const optimized = await getImage({ src: item.src, format: 'avif', quality: 85 });
+    return {
+      src: optimized.src,
+      alt: item.alt,
+      caption: item.caption,
+      width: item.src.width,
+      height: item.src.height,
+    };
+  }),
+);
+---
+
+<BaseLayout title={`${project.data.title} · 器作 · 墨笺`} description={project.data.summary}>
+  <main class="mx-auto max-w-stage px-5 md:px-8 lg:px-10" data-ink-scene="paper">
+    <article>
+      <header class="project-hero" data-ink-avoid>
+        <div class="project-hero__copy">
+          <a class="page-backlink" href={withBase('/projects/')}>返回器作</a>
+          <p class="folio-label project-hero__kicker">WORK / {project.data.year}</p>
+          <h1 class="font-display" data-reveal-title>{project.data.title}</h1>
+          <p class="project-hero__summary">{project.data.summary}</p>
+
+          <dl class="project-hero__facts">
+            <div><dt>状态</dt><dd>{project.data.status}</dd></div>
+            <div><dt>职责</dt><dd>{project.data.role}</dd></div>
+          </dl>
+        </div>
+
+        <div class="project-hero__media" style={`view-transition-name: project-${project.id};`}>
+          <ProjectCarousel title={project.data.title} slides={slides} client:visible />
+        </div>
+
+        <span class="project-hero__folio" aria-hidden="true">器作 · {project.data.year}</span>
+      </header>
+
+      <div class="project-story-layout">
+        <aside aria-label="项目技术">
+          <p class="folio-label">BUILT WITH</p>
+          <ul class="m-0 list-none p-0">
+            {project.data.stack.map((item) => <li>{item}</li>)}
+          </ul>
+          <span aria-hidden="true">作品记录</span>
+        </aside>
+
+        <div class="prose-ink project-story" data-ink-avoid>
+          <Content />
+        </div>
+      </div>
+
+      <footer class="project-ending">
+        <a class="page-backlink" href={withBase('/projects/')}>返回全部器作</a>
+        <span aria-hidden="true">墨笺 · WORK FOLIO</span>
+      </footer>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .project-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2rem clamp(1.5rem, 4vw, 4rem);
+    align-items: center;
+    min-height: calc(100svh - 4rem);
+    padding-block: clamp(4rem, 8vw, 7rem);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .project-hero__copy {
+    position: relative;
+    z-index: 2;
+    grid-column: 1 / span 5;
+  }
+
+  .project-hero__kicker {
+    margin: clamp(3rem, 7vw, 6rem) 0 1rem;
+  }
+
+  .project-hero h1 {
+    margin: 0;
+    font-size: clamp(4rem, 9vw, 8rem);
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: 0.04em;
+  }
+
+  .project-hero__summary {
+    max-width: 30rem;
+    margin: 2rem 0 0;
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+  }
+
+  .project-hero__facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    margin: 3rem 0 0;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .project-hero__facts dt,
+  .project-story-layout aside > .folio-label {
+    color: var(--bronze);
+    font-family: var(--font-noto-sans);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+  }
+
+  .project-hero__facts dd {
+    margin: 0.3rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.86rem;
+  }
+
+  .project-hero__media {
+    grid-column: 6 / -1;
+    min-width: 0;
+  }
+
+  .project-hero__folio {
+    position: absolute;
+    right: 0;
+    bottom: 1.5rem;
+    color: var(--bronze);
+    font-family: var(--font-noto-sans);
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+  }
+
+  .project-story-layout {
+    display: grid;
+    grid-template-columns: minmax(12rem, 3fr) minmax(0, 7fr) minmax(0, 1fr);
+    gap: clamp(3rem, 8vw, 8rem);
+    padding-block: clamp(5rem, 10vw, 9rem);
+  }
+
+  .project-story-layout aside {
+    position: sticky;
+    top: 7rem;
+    align-self: start;
+  }
+
+  .project-story-layout aside > .folio-label {
+    margin: 0 0 1.5rem;
+  }
+
+  .project-story-layout aside li {
+    padding-block: 0.55rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.78rem;
+  }
+
+  .project-story-layout aside > span {
+    display: block;
+    margin-top: 3rem;
+    color: color-mix(in oklab, var(--ink) 28%, transparent);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: 2.4rem;
+    letter-spacing: 0.12em;
+    writing-mode: vertical-rl;
+  }
+
+  .project-story {
+    grid-column: 2;
+    max-width: 42rem;
+  }
+
+  .project-ending {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    padding-block: 2rem clamp(6rem, 12vw, 10rem);
+    border-top: 1px solid var(--line);
+  }
+
+  .project-ending > span {
+    color: var(--bronze);
+    font-family: var(--font-noto-sans);
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+  }
+
+  @media (max-width: 900px) {
+    .project-hero {
+      display: flex;
+      min-height: 0;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .project-hero__copy {
+      order: 1;
+    }
+
+    .project-hero__media {
+      order: 2;
+      margin-top: 2rem;
+    }
+
+    .project-story-layout {
+      grid-template-columns: minmax(10rem, 2fr) minmax(0, 6fr);
+    }
+
+    .project-story {
+      grid-column: 2;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .project-hero {
+      padding-block: 3.5rem 4rem;
+    }
+
+    .project-hero h1 {
+      font-size: clamp(3.8rem, 20vw, 6rem);
+    }
+
+    .project-story-layout {
+      display: block;
+      padding-block: 4rem 6rem;
+    }
+
+    .project-story-layout aside {
+      position: static;
+      margin-bottom: 3.5rem;
+    }
+
+    .project-story-layout aside > span {
+      display: none;
+    }
+
+    .project-ending > span {
+      display: none;
+    }
+  }
+</style>

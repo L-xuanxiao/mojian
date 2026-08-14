@@ -1,0 +1,134 @@
+.project-carousel {
+  --carousel-gap: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+.project-carousel__viewport {
+  overflow: hidden;
+  cursor: grab;
+}
+
+.project-carousel__viewport:active {
+  cursor: grabbing;
+}
+
+.project-carousel__track {
+  display: flex;
+  gap: var(--carousel-gap);
+  touch-action: pan-y pinch-zoom;
+}
+
+.project-carousel__slide {
+  flex: 0 0 min(90%, 68rem);
+  min-width: 0;
+  margin: 0;
+}
+
+.project-carousel__slide img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: var(--paper-deep);
+  box-shadow: var(--shadow-lg);
+}
+
+.project-carousel__slide figcaption {
+  max-width: 46rem;
+  margin-top: 0.75rem;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+.project-carousel__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-family: var(--font-noto-sans);
+  color: var(--ink-soft);
+}
+
+.project-carousel__buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.project-carousel__buttons button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--line);
+  background: color-mix(in oklab, var(--paper) 72%, transparent);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    opacity 200ms var(--ease-ink),
+    transform 200ms var(--ease-ink);
+}
+
+.project-carousel__buttons button:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .project-carousel__buttons button:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+}
+
+.project-carousel__buttons button:disabled {
+  cursor: not-allowed;
+  opacity: 0.32;
+}
+
+.project-carousel__buttons svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.project-carousel__controls p {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+}
+
+.project-carousel__progress {
+  flex: 1;
+  max-width: 18rem;
+  height: 1px;
+  margin-inline: auto;
+  overflow: hidden;
+  background: var(--line);
+}
+
+.project-carousel__progress span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--cinnabar);
+  transform-origin: left center;
+  transition: transform 420ms var(--ease-ink);
+}
+
+@media (max-width: 767px) {
+  .project-carousel__slide {
+    flex-basis: 91%;
+  }
+
+  .project-carousel__slide img {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-carousel__buttons button {
+    transition: none;
+  }
+
+  .project-carousel__progress span {
+    transition: none;
+  }
+}

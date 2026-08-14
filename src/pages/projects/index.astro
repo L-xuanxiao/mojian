@@ -1,0 +1,274 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import { withBase } from '../../site.config';
+
+const projects = (await getCollection('projects', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+
+<BaseLayout title="器作 · 墨笺" description="数字作品与概念实践：设计、营造与交互的完整记录。">
+  <main class="mx-auto max-w-stage px-5 md:px-8 lg:px-10">
+    <PageIntro
+      id="projects"
+      title="器作"
+      note="SELECTED WORKS"
+      description="从一个问题出发，经由结构、视觉与代码，留下可以继续生长的作品。"
+      scene="exhibition"
+      artwork={projects[0]?.data.cover}
+      artworkAlt={projects[0]?.data.coverAlt}
+    >
+      <p slot="meta" class="m-0">共 {String(projects.length).padStart(2, '0')} 件 · 2026</p>
+    </PageIntro>
+
+    <ol class="project-index list-none p-0" data-reveal-group data-ink-avoid>
+      {
+        projects.map((project, index) => (
+          <li
+            class:list={[
+              'project-index__item',
+              index === 0 && 'project-index__item--lead',
+              index === 1 && 'project-index__item--counter',
+              index >= 2 && 'project-index__item--panorama',
+            ]}
+          >
+            <span class="project-index__number" aria-hidden="true">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <a
+              class="project-index__media media-reveal"
+              href={withBase(`/projects/${project.id}/`)}
+              tabindex="-1"
+              style={`view-transition-name: project-${project.id};`}
+            >
+              <Image
+                src={project.data.cover}
+                alt={project.data.coverAlt}
+                widths={[640, 960, 1440]}
+                sizes={
+                  index >= 2 ? '(min-width: 768px) 100vw, 100vw' : '(min-width: 768px) 66vw, 100vw'
+                }
+                quality={85}
+                loading={index === 0 ? 'eager' : 'lazy'}
+              />
+            </a>
+            <div class="project-index__copy">
+              <h2>
+                <a class="ink-link" href={withBase(`/projects/${project.id}/`)}>
+                  {project.data.title}
+                </a>
+              </h2>
+              <p>{project.data.summary}</p>
+              <div class="project-index__label">
+                <p class="project-index__meta">
+                  <span>{project.data.year}</span>
+                  <span>{project.data.status}</span>
+                </p>
+                <p class="project-index__stack">
+                  <span class="project-index__stack-label">技法</span>
+                  {project.data.stack.join(' / ')}
+                </p>
+              </div>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </main>
+</BaseLayout>
+
+<style>
+  .project-index {
+    display: grid;
+    gap: clamp(5rem, 10vw, 9rem);
+    padding-block: 2rem clamp(7rem, 14vw, 12rem);
+  }
+
+  .project-index__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: end;
+    gap: 1.5rem clamp(1.5rem, 4vw, 3.5rem);
+  }
+
+  .project-index__number {
+    position: absolute;
+    top: -1.2rem;
+    left: 0;
+    z-index: 3;
+    color: color-mix(in oklab, var(--ink) 24%, transparent);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    line-height: 1;
+    transform: translateY(-50%);
+    transition: color 500ms var(--ease-ink);
+  }
+
+  .project-index__media {
+    grid-column: 1 / span 8;
+    display: block;
+    overflow: hidden;
+    background: var(--paper-deep);
+    box-shadow: var(--shadow-lg);
+    transition:
+      transform 500ms var(--ease-ink),
+      box-shadow 500ms var(--ease-ink);
+  }
+
+  .project-index__media :global(img) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    transition:
+      transform 700ms var(--ease-ink),
+      filter 500ms var(--ease-ink);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .project-index__media:hover :global(img) {
+      transform: scale(1.028);
+      filter: contrast(1.045);
+    }
+
+    /* 景深：整件展品浮起，编号落朱砂，展签朱砂复笔自左写出 */
+    .project-index__item:hover .project-index__media,
+    .project-index__item:focus-within .project-index__media {
+      transform: translateY(-4px);
+      box-shadow: 0 28px 64px var(--shadow-color);
+    }
+
+    .project-index__item:hover .project-index__number,
+    .project-index__item:focus-within .project-index__number {
+      color: color-mix(in oklab, var(--cinnabar) 62%, transparent);
+    }
+
+    .project-index__item:hover .project-index__label::after,
+    .project-index__item:focus-within .project-index__label::after {
+      transform: scaleX(1);
+    }
+  }
+
+  .project-index__copy {
+    grid-column: 9 / -1;
+    padding-bottom: 0.5rem;
+  }
+
+  .project-index__item--counter .project-index__media {
+    grid-column: 5 / -1;
+  }
+
+  .project-index__item--counter .project-index__copy {
+    grid-row: 1;
+    grid-column: 1 / span 4;
+  }
+
+  .project-index__item--panorama .project-index__media {
+    grid-column: 1 / -1;
+  }
+
+  .project-index__item--panorama .project-index__media :global(img) {
+    aspect-ratio: 16 / 7;
+  }
+
+  .project-index__item--panorama .project-index__copy {
+    grid-column: 2 / span 6;
+  }
+
+  .project-index__copy h2 {
+    margin: 0;
+    font-size: clamp(1.7rem, 4vw, 2.75rem);
+    font-weight: 400;
+  }
+
+  .project-index__copy > p:not(.project-index__meta, .project-index__stack) {
+    margin: 1rem 0 0;
+    color: var(--ink-soft);
+  }
+
+  /* 展签：题名与摘要之下以细线隔出铭牌区；朱砂复笔 ::after 平时收起，hover 时写出 */
+  .project-index__label {
+    position: relative;
+    margin-top: 1.5rem;
+    padding-top: 0.85rem;
+  }
+
+  .project-index__label::before,
+  .project-index__label::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+  }
+
+  .project-index__label::before {
+    background: var(--line);
+  }
+
+  .project-index__label::after {
+    background: var(--cinnabar);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 550ms var(--ease-ink);
+  }
+
+  .project-index__meta,
+  .project-index__stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin: 0;
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.75rem;
+  }
+
+  /* 展签内年份与状态以细栅相隔 */
+  .project-index__meta span + span {
+    padding-left: 1rem;
+    border-left: 1px solid var(--line);
+  }
+
+  .project-index__stack {
+    margin-top: 0.5rem;
+  }
+
+  .project-index__stack-label {
+    color: var(--bronze);
+    letter-spacing: 0.18em;
+  }
+
+  @media (max-width: 767px) {
+    .project-index__item,
+    .project-index__item--counter,
+    .project-index__item--panorama {
+      display: block;
+    }
+
+    .project-index__copy {
+      margin-top: 1.5rem;
+      padding: 0;
+    }
+
+    .project-index__number {
+      top: 0;
+      transform: translateY(-60%);
+    }
+
+    .project-index__item--panorama .project-index__media :global(img) {
+      aspect-ratio: 3 / 2;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .project-index__media :global(img) {
+      transition: none;
+    }
+  }
+</style>
