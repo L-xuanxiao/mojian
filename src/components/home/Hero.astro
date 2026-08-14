@@ -68,7 +68,7 @@ import { withBase } from '../../site.config';
     <div class="hero__copy" data-ink-avoid>
       <p class="folio-label hero__eyebrow">个人数字书卷</p>
       <h1 class="hero__title font-display" aria-label="墨笺">
-        <span class="hero-title-mask"><span class="hero-title-line">墨</span></span>
+        <span class="hero-title-mask"><span class="hero-title-line hero-title-line--cinnabar">墨</span></span>
         <span class="hero-title-mask hero-title-mask--offset"
           ><span class="hero-title-line">笺</span></span
         >
@@ -268,6 +268,11 @@ import { withBase } from '../../site.config';
     line-height: 0.9;
   }
 
+  /* 首字落砂：题名首字如落款朱砂 */
+  .hero-title-line--cinnabar {
+    color: var(--cinnabar);
+  }
+
   .hero-title-mask--offset {
     margin-top: 0.22em;
   }
@@ -303,7 +308,7 @@ import { withBase } from '../../site.config';
     gap: 0.9rem;
     writing-mode: vertical-rl;
     transform: translateY(-50%);
-    color: var(--ink-soft);
+    color: var(--ink);
     font-size: 0.72rem;
     letter-spacing: 0.35em;
   }
@@ -311,8 +316,12 @@ import { withBase } from '../../site.config';
   .hero__seal {
     position: relative;
     display: inline-flex;
-    width: 1.45rem;
-    height: 1.45rem;
+    width: 2.6rem;
+    height: 2.6rem;
+    font-size: 1.5rem;
+    box-shadow:
+      0 0 0 0.3rem var(--paper),
+      0 0 0 calc(0.3rem + 1px) var(--cinnabar);
     align-items: center;
     justify-content: center;
     background: var(--cinnabar);

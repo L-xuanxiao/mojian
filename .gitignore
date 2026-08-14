@@ -28,3 +28,6 @@ pnpm-debug.log*
 
 # playwright-cli 会话产物
 .playwright-cli/
+
+# impeccable 设计工具产物（含 live 会话状态）
+.impeccable/
