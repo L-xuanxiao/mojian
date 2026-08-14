@@ -1,0 +1,207 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import SectionHeading from '../SectionHeading.astro';
+import { withBase } from '../../site.config';
+
+const projects = (await getCollection('projects', ({ data }) => !data.draft && data.featured))
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
+---
+
+<section
+  class="mx-auto max-w-stage px-5 py-20 md:px-8 md:py-32 lg:px-10"
+  aria-labelledby="projects"
+>
+  <SectionHeading id="projects" title="器作" index="贰" note="WORKS" />
+  <ol class="project-preview mt-10 list-none p-0 md:mt-14" data-reveal-group>
+    {
+      projects.map((project, index) => (
+        <li class:list={['project-preview__item', `project-preview__item--${index + 1}`]}>
+          <span class="project-preview__folio" aria-hidden="true">
+            展品 {String(index + 1).padStart(2, '0')}
+          </span>
+          <a
+            class="project-preview__image media-reveal"
+            href={withBase(`/projects/${project.id}/`)}
+            tabindex="-1"
+            style={`view-transition-name: project-${project.id};`}
+          >
+            <Image
+              src={project.data.cover}
+              alt={project.data.coverAlt}
+              widths={[480, 760, 1080]}
+              sizes="(min-width: 768px) 58vw, 100vw"
+              quality={82}
+            />
+          </a>
+          <div class="project-preview__copy">
+            <p class="project-preview__meta">
+              <span>{project.data.year}</span>
+              <span>{project.data.status}</span>
+            </p>
+            <h3>
+              <a class="ink-link" href={withBase(`/projects/${project.id}/`)}>
+                {project.data.title}
+              </a>
+            </h3>
+            <p>{project.data.summary}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+  <p class="mt-10 mb-0 text-right font-sans text-sm md:mt-14">
+    <a class="ink-link" href={withBase('/projects/')}>查看全部器作</a>
+  </p>
+</section>
+
+<style>
+  .project-preview {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: clamp(3rem, 7vw, 6rem) clamp(1rem, 3vw, 2rem);
+    align-items: start;
+  }
+
+  .project-preview__item {
+    position: relative;
+    margin: 0;
+  }
+
+  .project-preview__folio {
+    position: absolute;
+    top: 0;
+    right: calc(100% + 1rem);
+    color: var(--bronze);
+    font-family: var(--font-noto-sans);
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    writing-mode: vertical-rl;
+    transition: color 400ms var(--ease-ink);
+  }
+
+  .project-preview__item--1 {
+    grid-column: 1 / span 7;
+  }
+
+  .project-preview__item--2 {
+    grid-column: 8 / -1;
+    margin-top: 7rem;
+  }
+
+  .project-preview__item--3 {
+    grid-column: 3 / span 8;
+  }
+
+  .project-preview__image {
+    display: block;
+    overflow: hidden;
+    background: var(--paper-deep);
+    box-shadow: var(--shadow-md);
+    transition: box-shadow 500ms var(--ease-ink);
+  }
+
+  .project-preview__image :global(img) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    transition:
+      transform 700ms var(--ease-ink),
+      filter 500ms var(--ease-ink);
+  }
+
+  .project-preview__item--2 .project-preview__image :global(img) {
+    aspect-ratio: 4 / 5;
+  }
+
+  .project-preview__item--3 .project-preview__image :global(img) {
+    aspect-ratio: 16 / 7;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .project-preview__image:hover :global(img) {
+      transform: scale(1.026);
+      filter: contrast(1.04);
+    }
+
+    /* 景深：展品浮起，竖签落朱砂 */
+    .project-preview__item:hover .project-preview__image,
+    .project-preview__item:focus-within .project-preview__image {
+      box-shadow: var(--shadow-lg);
+    }
+
+    .project-preview__item:hover .project-preview__folio,
+    .project-preview__item:focus-within .project-preview__folio {
+      color: var(--cinnabar);
+    }
+  }
+
+  .project-preview__copy {
+    max-width: 34rem;
+    margin-top: 1.25rem;
+  }
+
+  .project-preview__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 1rem;
+    margin: 0;
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.75rem;
+  }
+
+  /* 状态小签：描边铭牌样式，与笺录的纯文本 meta 拉开 */
+  .project-preview__meta span:last-child {
+    padding: 0.08rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    letter-spacing: 0.1em;
+  }
+
+  .project-preview h3 {
+    margin: 0.65rem 0 0;
+    font-size: clamp(1.6rem, 3.5vw, 2.7rem);
+    font-weight: 400;
+  }
+
+  .project-preview__copy > p:last-child {
+    margin: 0.75rem 0 0;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 767px) {
+    .project-preview {
+      display: block;
+    }
+
+    .project-preview__item + .project-preview__item {
+      margin-top: 3.5rem;
+    }
+
+    .project-preview__item--2 {
+      margin-top: 3.5rem;
+    }
+
+    .project-preview__folio {
+      position: static;
+      display: block;
+      margin-bottom: 0.7rem;
+      writing-mode: horizontal-tb;
+    }
+
+    .project-preview__item--2 .project-preview__image :global(img),
+    .project-preview__item--3 .project-preview__image :global(img) {
+      aspect-ratio: 3 / 2;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .project-preview__image :global(img) {
+      transition: none;
+    }
+  }
+</style>

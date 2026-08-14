@@ -1,0 +1,196 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import SectionHeading from '../SectionHeading.astro';
+import { withBase } from '../../site.config';
+
+const works = (await getCollection('gallery', ({ data }) => !data.draft && data.featured))
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 4);
+---
+
+<section class="darkroom home-gallery" aria-labelledby="gallery" data-ink-scene="darkroom">
+  <span class="mist mist--a home-gallery__mist" aria-hidden="true"></span>
+  <div class="home-gallery__inner mx-auto max-w-stage px-5 py-20 md:px-8 md:py-32 lg:px-10">
+    <SectionHeading id="gallery" title="光影集" index="伍" note="GALLERY" />
+    <p class="mt-4 max-w-[32rem] text-ink-soft">以光为墨，收存纸张、山水与四时一瞬。</p>
+    <ol class="gallery-preview mt-10 list-none p-0 md:mt-14" data-reveal-group>
+      {
+        works.map((work, index) => (
+          <li class:list={['gallery-preview__item', `gallery-preview__item--${index + 1}`]}>
+            <span class="gallery-preview__folio" aria-hidden="true">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <a
+              href={withBase('/gallery/')}
+              class="gallery-preview__image media-reveal"
+              data-gallery-parallax
+            >
+              <Image
+                src={work.data.image}
+                alt={work.data.alt}
+                widths={[420, 720, 1080]}
+                sizes="(min-width: 768px) 48vw, 100vw"
+                quality={80}
+              />
+            </a>
+            <p>
+              <span>{work.data.title}</span>
+              <span>{work.data.year}</span>
+            </p>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="mt-10 mb-0 text-right font-sans text-sm md:mt-14">
+      <a class="ink-link" href={withBase('/gallery/')}>展开全部光影</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  /* 暗室内内容压在云气之上 */
+  .home-gallery__inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 云气在暗室里呈淡白微光，如暗室浮尘 */
+  .home-gallery__mist {
+    top: 8%;
+    right: -6%;
+    width: 34rem;
+    height: 24rem;
+  }
+
+  .gallery-preview {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: clamp(2.5rem, 6vw, 5rem) clamp(1rem, 3vw, 2rem);
+    align-items: start;
+  }
+
+  .gallery-preview__item--1 {
+    position: relative;
+    grid-column: 1 / span 7;
+  }
+
+  .gallery-preview__item--2 {
+    position: relative;
+    grid-column: 9 / span 4;
+    margin-top: 5rem;
+  }
+
+  .gallery-preview__item--3 {
+    position: relative;
+    grid-column: 2 / span 4;
+  }
+
+  .gallery-preview__item--4 {
+    position: relative;
+    grid-column: 7 / span 6;
+    margin-top: 3rem;
+  }
+
+  .gallery-preview__image {
+    display: block;
+    overflow: hidden;
+    background: var(--paper-deep);
+    box-shadow: var(--shadow-md);
+  }
+
+  .gallery-preview__folio {
+    position: absolute;
+    top: -1.55rem;
+    left: 0;
+    color: var(--bronze);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: 1rem;
+  }
+
+  .gallery-preview__image :global(img) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    transition:
+      transform 700ms var(--ease-ink),
+      filter 500ms var(--ease-ink);
+  }
+
+  .gallery-preview__item--2 .gallery-preview__image :global(img) {
+    aspect-ratio: 4 / 5;
+  }
+
+  .gallery-preview__item--4 .gallery-preview__image :global(img) {
+    aspect-ratio: 16 / 9;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .gallery-preview__image:hover :global(img) {
+      transform: scale(1.028);
+      filter: contrast(1.045);
+    }
+  }
+
+  .gallery-preview__item > p {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0.75rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.875rem;
+  }
+
+  .gallery-preview__item > p span:last-child {
+    font-family: var(--font-noto-sans);
+    font-size: 0.75rem;
+  }
+
+  @media (max-width: 767px) {
+    .gallery-preview {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2.5rem 1rem;
+    }
+
+    .gallery-preview__item--1,
+    .gallery-preview__item--2,
+    .gallery-preview__item--3,
+    .gallery-preview__item--4 {
+      grid-column: auto;
+      margin-top: 0;
+    }
+
+    .gallery-preview__item--2 .gallery-preview__image :global(img) {
+      aspect-ratio: 3 / 4;
+    }
+
+    .gallery-preview__item--4 .gallery-preview__image :global(img) {
+      aspect-ratio: 3 / 2;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-preview__image :global(img) {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../scripts/scroll';
+
+  if (!prefersReducedMotion && window.matchMedia('(min-width: 768px)').matches) {
+    document.querySelectorAll<HTMLElement>('[data-gallery-parallax]').forEach((media, index) => {
+      gsap.fromTo(
+        media,
+        { yPercent: index % 2 === 0 ? 2 : -2 },
+        {
+          yPercent: index % 2 === 0 ? -3 : 3,
+          ease: 'none',
+          scrollTrigger: { trigger: media, start: 'top bottom', end: 'bottom top', scrub: true },
+        },
+      );
+    });
+  }
+</script>

@@ -1,0 +1,182 @@
+---
+import { getCollection } from 'astro:content';
+import SectionHeading from '../SectionHeading.astro';
+
+// 演示数据：案头三事待主人按近况更新，条目即改即生效
+const statusItems = [
+  { text: '重构 mojian 站点', meta: '进行中' },
+  { text: '读《天文之书》', meta: '案头' },
+  { text: '整理去年的胶片照片', meta: '缓慢推进' },
+];
+
+// 最近更新：自动取笺录最新文章的月份；无文章时不渲染该行
+const latestPost = (await getCollection('journal', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+)[0];
+const latestUpdate = latestPost
+  ? `${latestPost.data.pubDate.getFullYear()} 年 ${latestPost.data.pubDate.getMonth() + 1} 月`
+  : '';
+---
+
+<section class="current-folio" aria-labelledby="current-folio">
+  <div class="mx-auto max-w-stage px-5 py-20 md:px-8 md:py-32 lg:px-10">
+    <SectionHeading id="current-folio" title="此间近况" index="壹" note="PORTRAIT / NOW" />
+
+    <div class="current-folio__grid">
+      <div class="current-folio__portrait">
+        <p class="current-folio__lead" data-reveal-title>
+          写字、写代码、拍照片。<br />在这里安放文章、作品与光影。
+        </p>
+        <p class="current-folio__note">
+          相信克制不是减少，而是让每一处存在都有缘由。如今正在把旧站重新装订成一册可以慢慢翻阅的数字书卷。
+        </p>
+        <span class="current-folio__inscription" aria-hidden="true">写字 · 造物 · 观照</span>
+      </div>
+
+      <aside class="current-folio__status" aria-label="正在做什么">
+        <div class="current-folio__status-head">
+          <p class="folio-label">案头三事</p>
+          {/* 季节标记：手动维护，随案头三事一并更新 */}
+          <span>2026 · 夏</span>
+        </div>
+        <ol class="m-0 list-none p-0" data-reveal-group>
+          {
+            statusItems.map((item, index) => (
+              <li>
+                <span class="current-folio__number" aria-hidden="true">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <p>{item.text}</p>
+                  <span>{item.meta}</span>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+        {latestUpdate && <p class="current-folio__updated">最近更新：{latestUpdate}</p>}
+      </aside>
+    </div>
+  </div>
+</section>
+
+<style>
+  .current-folio {
+    position: relative;
+  }
+
+  .current-folio__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(18rem, 4fr);
+    gap: clamp(4rem, 10vw, 10rem);
+    align-items: start;
+  }
+
+  .current-folio__portrait {
+    position: relative;
+    padding-block: clamp(1rem, 4vw, 3rem) clamp(4rem, 8vw, 7rem);
+  }
+
+  .current-folio__lead {
+    max-width: 13em;
+    margin: 0;
+    font-size: clamp(1.75rem, 4vw, 3.5rem);
+    line-height: 1.55;
+    letter-spacing: 0.02em;
+  }
+
+  .current-folio__note {
+    max-width: 34rem;
+    margin: 2.5rem 0 0 clamp(0rem, 8vw, 7rem);
+    color: var(--ink-soft);
+  }
+
+  .current-folio__inscription {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    color: color-mix(in oklab, var(--ink) 26%, transparent);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    letter-spacing: 0.14em;
+  }
+
+  .current-folio__status {
+    padding: 2rem;
+    border-top: 2px solid var(--ink);
+    background: color-mix(in oklab, var(--paper-deep) 52%, transparent);
+    box-shadow: var(--shadow-md);
+  }
+
+  .current-folio__status-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1.4rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .current-folio__status-head p,
+  .current-folio__status-head span {
+    margin: 0;
+  }
+
+  .current-folio__status-head span,
+  .current-folio__updated {
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.68rem;
+  }
+
+  .current-folio__status li {
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    gap: 1rem;
+    padding-block: 1.4rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .current-folio__number {
+    color: var(--bronze);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: 1.1rem;
+  }
+
+  .current-folio__status li p {
+    margin: 0;
+  }
+
+  .current-folio__status li div > span {
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.68rem;
+  }
+
+  .current-folio__updated {
+    margin: 1.5rem 0 0;
+  }
+
+  @media (max-width: 767px) {
+    .current-folio__grid {
+      display: block;
+    }
+
+    .current-folio__portrait {
+      padding-bottom: 6.5rem;
+    }
+
+    .current-folio__note {
+      margin-left: 0;
+    }
+
+    /* 移动端收窄题字并禁折行，避免与上方 note 正文交叠 */
+    .current-folio__inscription {
+      font-size: 1.6rem;
+      white-space: nowrap;
+    }
+
+    .current-folio__status {
+      padding: 1.5rem;
+    }
+  }
+</style>

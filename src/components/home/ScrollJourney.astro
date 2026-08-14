@@ -1,0 +1,421 @@
+---
+import { Image } from 'astro:assets';
+import journeyArtwork from '../../assets/art/journey-paper-scroll.webp';
+import journeyFar from '../../assets/art/layers/journey-mountain-far.webp';
+import journeyMid from '../../assets/art/layers/journey-mountain-mid.webp';
+import journeyNear from '../../assets/art/layers/journey-mountain-near.webp';
+import SectionHeading from '../SectionHeading.astro';
+---
+
+<section class="journey" aria-labelledby="scroll-journey" data-journey data-ink-scene="journey">
+  <div class="journey__sticky">
+    <div class="mx-auto w-full max-w-stage px-5 md:px-8 lg:px-10">
+      <header class="journey__header" data-journey-header>
+        <SectionHeading id="scroll-journey" title="山水长卷" index="叁" note="SCROLL FOLIO" />
+        <p>一卷不必讲完故事。山势缓移，水路留白，行至卷尾只钤一方小印。</p>
+      </header>
+
+      <div class="journey__frame">
+        <div class="journey__art media-reveal" data-journey-art>
+          <Image
+            class="journey__fallback"
+            src={journeyArtwork}
+            alt="层叠纸山与留白水路组成的横向长卷"
+            widths={[960, 1400, 1838]}
+            sizes="(min-width: 768px) 120vw, 100vw"
+            quality={88}
+          />
+          <div class="journey__layers" aria-hidden="true">
+            <div class="journey__layer journey__layer--far" data-journey-layer="far">
+              <Image
+                src={journeyFar}
+                alt=""
+                widths={[960, 1400, 1838]}
+                sizes="(min-width: 768px) 140vw, 190vw"
+                quality={86}
+              />
+            </div>
+            <div class="journey__layer journey__layer--mid" data-journey-layer="mid">
+              <Image
+                src={journeyMid}
+                alt=""
+                widths={[960, 1400, 1838]}
+                sizes="(min-width: 768px) 140vw, 190vw"
+                quality={88}
+              />
+            </div>
+            <div class="journey__layer journey__layer--near" data-journey-layer="near">
+              <Image
+                src={journeyNear}
+                alt=""
+                widths={[960, 1400, 1838]}
+                sizes="(min-width: 768px) 140vw, 190vw"
+                quality={88}
+              />
+            </div>
+          </div>
+        </div>
+
+        <p class="journey__inscription" data-journey-inscription>起笔处，山色尚轻</p>
+        <p class="journey__poem font-display" data-journey-poem>行到水穷处，坐看云起时</p>
+        <div class="journey__ending" data-journey-ending>
+          <span>卷尾 · 二〇二六</span>
+          <span class="journey__seal">山水</span>
+        </div>
+      </div>
+
+      <div class="journey__progress" aria-hidden="true">
+        <span data-journey-progress></span>
+        <div><span>卷首</span><span>行旅</span><span>卷尾</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .journey {
+    position: relative;
+    height: 260svh;
+    background: color-mix(in oklab, var(--paper-deep) 62%, var(--paper));
+  }
+
+  .journey__sticky {
+    position: sticky;
+    top: 0;
+    display: flex;
+    min-height: 100svh;
+    align-items: center;
+    overflow: hidden;
+    padding-block: 4.5rem 3rem;
+  }
+
+  .journey__header {
+    position: relative;
+    z-index: 3;
+  }
+
+  .journey__header > p {
+    max-width: 36rem;
+    margin: -1rem 0 2rem;
+    color: var(--ink-soft);
+  }
+
+  .journey__frame {
+    position: relative;
+    height: clamp(24rem, 55svh, 39rem);
+    overflow: hidden;
+    border-block: 1px solid var(--line);
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--paper-deep) 46%, var(--paper)),
+        var(--paper) 62%
+      ),
+      var(--paper);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .journey__art {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 140%;
+    height: 100%;
+  }
+
+  .journey__art :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .journey__fallback {
+    position: relative;
+    z-index: 0;
+  }
+
+  .journey__layers {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  :global(html.js) .journey__layers {
+    display: block;
+  }
+
+  :global(html.js) .journey__fallback {
+    opacity: 0;
+  }
+
+  .journey__layer {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+  }
+
+  .journey__layer :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .journey__layer--far {
+    z-index: 1;
+    opacity: 0.82;
+  }
+
+  .journey__layer--mid {
+    z-index: 2;
+  }
+
+  .journey__layer--near {
+    z-index: 3;
+  }
+
+  .journey__art::after {
+    z-index: 6;
+  }
+
+  .journey__frame::before,
+  .journey__frame::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+    width: clamp(1.25rem, 4vw, 3.5rem);
+    background: linear-gradient(90deg, var(--paper), transparent);
+    pointer-events: none;
+  }
+
+  .journey__frame::before {
+    left: 0;
+  }
+
+  .journey__frame::after {
+    right: 0;
+    transform: rotate(180deg);
+  }
+
+  .journey__inscription,
+  .journey__poem,
+  .journey__ending {
+    position: absolute;
+    z-index: 4;
+    text-shadow: 0 0 1.2rem var(--paper);
+  }
+
+  .journey__inscription {
+    top: 13%;
+    left: 7%;
+    color: var(--ink-soft);
+    font-size: 0.78rem;
+    letter-spacing: 0.38em;
+    writing-mode: vertical-rl;
+  }
+
+  .journey__poem {
+    top: 20%;
+    left: 50%;
+    width: max-content;
+    margin: 0;
+    font-size: clamp(1.8rem, 4.2vw, 3.8rem);
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    transform: translateX(-50%);
+  }
+
+  .journey__ending {
+    right: 7%;
+    bottom: 11%;
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+  }
+
+  .journey__seal {
+    display: inline-flex;
+    width: 3rem;
+    height: 3rem;
+    align-items: center;
+    justify-content: center;
+    background: var(--cinnabar);
+    color: var(--paper);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: 1rem;
+    letter-spacing: 0;
+    writing-mode: vertical-rl;
+  }
+
+  .journey__progress {
+    margin-top: 1.25rem;
+  }
+
+  .journey__progress > span {
+    display: block;
+    width: 100%;
+    height: 1px;
+    background: var(--cinnabar);
+    transform-origin: left center;
+  }
+
+  .journey__progress > div {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.55rem;
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.6rem;
+    letter-spacing: 0.16em;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js) .journey__inscription,
+    :global(html.js) .journey__poem,
+    :global(html.js) .journey__ending {
+      opacity: 0;
+    }
+
+    :global(html.js) .journey__progress > span {
+      transform: scaleX(0);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .journey {
+      height: auto;
+    }
+
+    .journey__sticky {
+      position: relative;
+      min-height: 0;
+      padding-block: 5rem;
+    }
+
+    .journey__header > p {
+      margin-bottom: 2.5rem;
+    }
+
+    .journey__frame {
+      height: auto;
+      aspect-ratio: 4 / 5;
+    }
+
+    .journey__art {
+      width: 190%;
+      transform: translateX(-24%);
+    }
+
+    .journey__poem {
+      top: 14%;
+      font-size: 1.65rem;
+      letter-spacing: 0.08em;
+    }
+
+    .journey__inscription {
+      top: 28%;
+      left: 8%;
+    }
+
+    .journey__ending {
+      right: 8%;
+      bottom: 8%;
+    }
+
+    .journey__progress {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .journey {
+      height: auto;
+    }
+
+    .journey__sticky {
+      position: relative;
+      min-height: 0;
+      padding-block: 6rem;
+    }
+
+    .journey__art {
+      width: 100%;
+    }
+  }
+
+  :global(html:not(.js)) .journey {
+    height: auto;
+  }
+
+  :global(html:not(.js)) .journey__sticky {
+    position: relative;
+    min-height: 0;
+    padding-block: 6rem;
+  }
+
+  :global(html:not(.js)) .journey__art {
+    width: 100%;
+  }
+</style>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../scripts/scroll';
+
+  const section = document.querySelector<HTMLElement>('[data-journey]');
+  if (section && !prefersReducedMotion && window.matchMedia('(min-width: 768px)').matches) {
+    const art = section.querySelector<HTMLElement>('[data-journey-art]');
+    const farLayer = section.querySelector<HTMLElement>('[data-journey-layer="far"]');
+    const midLayer = section.querySelector<HTMLElement>('[data-journey-layer="mid"]');
+    const nearLayer = section.querySelector<HTMLElement>('[data-journey-layer="near"]');
+    const header = section.querySelector<HTMLElement>('[data-journey-header]');
+    const inscription = section.querySelector<HTMLElement>('[data-journey-inscription]');
+    const poem = section.querySelector<HTMLElement>('[data-journey-poem]');
+    const ending = section.querySelector<HTMLElement>('[data-journey-ending]');
+    const progress = section.querySelector<HTMLElement>('[data-journey-progress]');
+
+    if (
+      art &&
+      farLayer &&
+      midLayer &&
+      nearLayer &&
+      header &&
+      inscription &&
+      poem &&
+      ending &&
+      progress
+    ) {
+      gsap.set([inscription, poem, ending], { opacity: 0 });
+      gsap.set(progress, { scaleX: 0 });
+
+      const timeline = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: { trigger: section, start: 'top top', end: 'bottom bottom', scrub: true },
+      });
+
+      timeline
+        .to(farLayer, { xPercent: -12, scale: 1, duration: 10 }, 0)
+        .to(midLayer, { xPercent: -20, scale: 1.02, duration: 10 }, 0)
+        .to(nearLayer, { xPercent: -28, scale: 1.04, duration: 10 }, 0)
+        .to(progress, { scaleX: 1, duration: 10 }, 0)
+        .to(header, { y: -20, opacity: 0, duration: 1.2 }, 0.5)
+        .to(inscription, { y: 0, opacity: 1, duration: 1.2 }, 1.2)
+        .to(inscription, { y: -14, opacity: 0, duration: 1 }, 3.3)
+        .fromTo(poem, { y: 18 }, { y: 0, opacity: 1, duration: 1.4, ease: 'power2.out' }, 3.8)
+        .to(poem, { y: -16, opacity: 0, duration: 1.1 }, 6.2)
+        .fromTo(
+          ending,
+          { y: 18, rotate: -2 },
+          { y: 0, rotate: 0, opacity: 1, duration: 1.2, ease: 'back.out(1.5)' },
+          7.6,
+        );
+    }
+  }
+</script>

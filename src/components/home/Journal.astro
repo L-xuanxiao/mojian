@@ -1,0 +1,89 @@
+---
+import { getCollection } from 'astro:content';
+import SectionHeading from '../SectionHeading.astro';
+import EntryList from '../journal/EntryList.astro';
+import { withBase } from '../../site.config';
+
+const posts = (await getCollection('journal', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+  .slice(0, 3);
+
+// 刊物期次：取最近一篇的出版年月
+const latest = posts[0]?.data.pubDate;
+const latestLabel = latest ? `${latest.getFullYear()} 年 ${latest.getMonth() + 1} 月` : '';
+---
+
+<section class="home-journal" aria-labelledby="journal">
+  <div class="mx-auto max-w-stage px-5 py-20 md:px-8 md:py-32 lg:px-10">
+    <SectionHeading id="journal" title="近来所记" index="肆" note="JOURNAL" />
+
+    <div class="home-journal__grid">
+      <div class="home-journal__lead">
+        <p class="folio-label">本期主稿</p>
+        <EntryList posts={posts.slice(0, 1)} variant="feature" />
+      </div>
+
+      <aside class="home-journal__catalog" aria-label="更多近作">
+        <div class="home-journal__catalog-head">
+          <p class="folio-label">同卷篇目</p>
+          <span>
+            {String(posts.length - 1).padStart(2, '0')} 篇
+            {latestLabel && ` · 近更新 ${latestLabel}`}
+          </span>
+        </div>
+        <EntryList posts={posts.slice(1)} variant="compact" startIndex={1} />
+        <a class="home-journal__more ink-link" href={withBase('/journal/')}>展开全部笺录</a>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<style>
+  .home-journal__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(18rem, 4fr);
+    gap: clamp(4rem, 9vw, 9rem);
+    align-items: start;
+  }
+
+  .home-journal__lead > .folio-label {
+    margin: 0 0 1rem;
+  }
+
+  .home-journal__catalog {
+    margin-top: clamp(2rem, 8vw, 7rem);
+  }
+
+  .home-journal__catalog-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.68rem;
+  }
+
+  .home-journal__catalog-head p {
+    margin: 0;
+  }
+
+  .home-journal__more {
+    display: inline-block;
+    margin-top: 2rem;
+    color: var(--ink);
+    font-family: var(--font-noto-sans);
+    font-size: 0.78rem;
+    text-decoration: none;
+  }
+
+  @media (max-width: 767px) {
+    .home-journal__grid {
+      display: block;
+    }
+
+    .home-journal__catalog {
+      margin-top: 4.5rem;
+    }
+  }
+</style>
