@@ -1,0 +1,17 @@
+{
+  "name": "墨笺",
+  "short_name": "墨笺",
+  "description": "融合东方美学、个人内容与现代网页体验的数字空间。",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4efe3",
+  "theme_color": "#f4efe3",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
