@@ -1,0 +1,84 @@
+---
+import { Font } from 'astro:assets';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import AmbientInkCanvas from '../components/AmbientInkCanvas.astro';
+import Seo from '../components/Seo.astro';
+import { withBase } from '../site.config';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  pubDate?: Date;
+  tags?: string[];
+  noindex?: boolean;
+}
+
+const {
+  title = '墨笺',
+  description = '融合东方美学、个人内容与现代网页体验的数字空间。',
+  image,
+  type = 'website',
+  pubDate,
+  tags,
+  noindex,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <script is:inline>
+      // 防 FOUC：渲染前恢复手动选择的主题；无存储时不设属性，交给媒体查询
+      const theme = localStorage.getItem('theme');
+      if (theme === 'light' || theme === 'dark') {
+        document.documentElement.dataset.theme = theme;
+      }
+      // 防揭示闪烁：有 JS 时尽早标记，CSS 据此在首绘前藏好待揭示元素（见 global.css 门控规则）；
+      // 无 JS 时无此类，内容直达最终态
+      document.documentElement.classList.add('js');
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
+    <link rel="icon" href={withBase('/favicon.ico')} />
+    <link rel="manifest" href={withBase('/site.webmanifest')} />
+    <Seo
+      title={title}
+      description={description}
+      image={image}
+      type={type}
+      pubDate={pubDate}
+      tags={tags}
+      noindex={noindex}
+    />
+    <Font cssVariable="--font-noto-serif" preload />
+    <Font cssVariable="--font-noto-sans" preload />
+    <Font cssVariable="--font-ma-shan-zheng" preload />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <Header />
+    <AmbientInkCanvas />
+    <div id="main-content" tabindex="-1">
+      <slot />
+    </div>
+    <Footer />
+    <script>
+      // 全站平滑滚动底座（prefers-reduced-motion 时内部自动跳过 Lenis）
+      import '../scripts/scroll';
+      // 显式题名、墨线、列表与图像揭示；无 JS 时内容直达最终态
+      import '../scripts/reveal';
+      // 毛笔尖光标（仅桌面细指针且允许动效时启用）
+      import '../scripts/cursor';
+      // 单例水墨环境层：按可见章节切换密度，低动态时只绘制静态一帧
+      import '../scripts/ambient-ink';
+    </script>
+  </body>
+</html>

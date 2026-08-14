@@ -1,0 +1,418 @@
+---
+/*
+ * 导航图标取自 Lucide（项目既有图标库，React 岛屿同款视觉源）。
+ * Header 为纯静态展示，按 AGENTS.md 不引入 React，故将图标路径内联为构建期 SVG。
+ */
+import { withBase } from '../site.config';
+
+const navItems = [
+  {
+    href: withBase('/journal/'),
+    label: '笺录',
+    icon: '<path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/>',
+  },
+  {
+    href: withBase('/projects/'),
+    label: '器作',
+    icon: '<path d="m12.99 6.74l1.93 3.44M19.136 12a10 10 0 0 1-14.271 0M21 21l-2.16-3.84M3 21l8.02-14.26"/><circle cx="12" cy="5" r="2"/>',
+  },
+  {
+    href: withBase('/gallery/'),
+    label: '光影',
+    icon: '<circle cx="12" cy="12" r="10"/><path d="m14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83m13.79-4l-5.74 9.94"/>',
+  },
+  {
+    href: withBase('/about/'),
+    label: '此间',
+    icon: '<path d="m8 3l4 8l5-5l5 15H2z"/>',
+  },
+  {
+    href: withBase('/guestbook/'),
+    label: '留墨',
+    icon: '<path d="M14.086 18.412A2 2 0 0 1 12.67 19H5v-7.672a2 2 0 0 1 .586-1.414L11.75 3.75a6 6 0 1 1 8.49 8.49zM16 8L2 22m15.488-7H9"/>',
+  },
+];
+
+const pathname = Astro.url.pathname;
+const isActive = (href: string) => pathname === href || pathname.startsWith(href);
+---
+
+<header class="site-header sticky top-0 z-40" data-site-header>
+  <div class="mx-auto flex max-w-stage items-center gap-4 px-5 py-4 md:px-8 lg:px-10">
+    <a
+      href={withBase('/')}
+      class="brand group shrink-0 text-ink no-underline"
+      aria-label="墨笺首页"
+    >
+      <span class="brand__seal" aria-hidden="true">墨</span>
+      <span class="brand__name font-display">墨笺</span>
+      <span class="brand__latin" aria-hidden="true">MOJIAN</span>
+    </a>
+
+    <div class="nav-rail ml-auto min-w-0">
+      <nav aria-label="主导航">
+        <ul class="m-0 flex list-none items-center gap-5 overflow-x-auto p-0 md:gap-8">
+          {
+            navItems.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <li class="shrink-0">
+                  <a
+                    href={item.href}
+                    aria-current={active ? 'page' : undefined}
+                    class:list={['nav-link', active && 'nav-link--active']}
+                  >
+                    <svg
+                      class="nav-link__icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      set:html={item.icon}
+                    />
+                    <span>{item.label}</span>
+                  </a>
+                </li>
+              );
+            })
+          }
+        </ul>
+      </nav>
+    </div>
+
+    <button
+      id="theme-toggle"
+      type="button"
+      aria-label="切换昼夜主题"
+      aria-pressed="false"
+      class="theme-toggle inline-flex shrink-0 items-center justify-center p-2 text-ink-soft"
+    >
+      <span class="theme-toggle__box relative block">
+        <span class="theme-glyph theme-glyph--day" aria-hidden="true">昼</span>
+        <span class="theme-glyph theme-glyph--night" aria-hidden="true">夜</span>
+      </span>
+    </button>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    background: color-mix(in oklab, var(--paper-glass) 20%, transparent);
+    backdrop-filter: blur(10px);
+  }
+
+  /* 卷头细线：滚动后自左写出，与全站「墨线写出」语汇一致 */
+  .site-header::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    background: var(--line);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 350ms var(--ease-ink);
+  }
+
+  .site-header.is-scrolled {
+    background: var(--paper-glass);
+    backdrop-filter: blur(18px) saturate(0.9);
+  }
+
+  .site-header.is-scrolled::after {
+    transform: scaleX(1);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    view-transition-name: site-brand;
+  }
+
+  .brand__seal {
+    display: inline-flex;
+    width: 1.5rem;
+    height: 1.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--cinnabar);
+    color: var(--cinnabar);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: 0.78rem;
+    line-height: 1;
+    transform: rotate(-3deg);
+    transition: transform 300ms var(--ease-seal);
+  }
+
+  /* 触屏无真正悬停，位移类 hover 仅桌面细指针启用 */
+  @media (hover: hover) and (pointer: fine) {
+    .brand:hover .brand__seal {
+      transform: rotate(0deg) scale(0.96);
+    }
+
+    .nav-link:hover {
+      transform: translateY(-1px);
+    }
+
+    .theme-toggle:hover {
+      transform: rotate(4deg);
+    }
+  }
+
+  .brand__name {
+    font-size: 1.15rem;
+    line-height: 1;
+    letter-spacing: 0.08em;
+  }
+
+  /* 刊名拉丁小字：细线隔开，呼应 Hero 与卷尾的 folio 行 */
+  .brand__latin {
+    margin-left: 0.1rem;
+    padding-left: 0.7rem;
+    border-left: 1px solid var(--line);
+    color: var(--bronze);
+    font-family: var(--font-noto-sans);
+    font-size: 0.6rem;
+    letter-spacing: 0.32em;
+    line-height: 1;
+  }
+
+  .nav-rail {
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      black 1rem,
+      black calc(100% - 1rem),
+      transparent
+    );
+    padding-inline: 1rem;
+  }
+
+  .nav-rail ul {
+    scrollbar-width: none;
+  }
+
+  .nav-rail ul::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding-block: 0.25rem;
+    color: var(--ink-soft);
+    font-size: 0.86rem;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    transition:
+      transform 200ms var(--ease-ink),
+      color 200ms var(--ease-ink);
+  }
+
+  .nav-link__icon {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    transition: color 200ms var(--ease-ink);
+  }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -0.15rem;
+    left: 0;
+    height: 1px;
+    background: var(--cinnabar);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 300ms var(--ease-ink);
+  }
+
+  .nav-link:hover,
+  .nav-link--active {
+    color: var(--ink);
+  }
+
+  .nav-link:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* 当前页：图标落朱砂，即「当前位置」标记，不再常驻下划线 */
+  .nav-link--active .nav-link__icon {
+    color: var(--cinnabar);
+  }
+
+  .theme-toggle {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: transform 200ms var(--ease-ink);
+  }
+
+  /* 昼夜印钮：一方小印，内嵌「昼 / 夜」单字交叉淡入 */
+  .theme-toggle__box {
+    width: 1.9rem;
+    height: 1.9rem;
+    border: 1px solid var(--line);
+    transition: border-color 200ms var(--ease-ink);
+  }
+
+  .theme-toggle:hover .theme-toggle__box {
+    border-color: var(--ink-soft);
+  }
+
+  .theme-toggle:active {
+    transform: scale(0.94);
+  }
+
+  .theme-glyph {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cinnabar);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: 0.95rem;
+    line-height: 1;
+    transition:
+      transform 0.4s var(--ease-seal),
+      opacity 0.4s var(--ease-seal);
+  }
+
+  .theme-glyph--night {
+    opacity: 0;
+    transform: rotate(180deg) scale(0.5);
+  }
+
+  :global(html[data-theme='dark']) .theme-glyph--day {
+    opacity: 0;
+    transform: rotate(180deg) scale(0.5);
+  }
+
+  :global(html[data-theme='dark']) .theme-glyph--night {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(html:not([data-theme='light'])) .theme-glyph--day {
+      opacity: 0;
+      transform: rotate(180deg) scale(0.5);
+    }
+
+    :global(html:not([data-theme='light'])) .theme-glyph--night {
+      opacity: 1;
+      transform: rotate(0deg) scale(1);
+    }
+  }
+
+  @media (max-width: 639px) {
+    .brand__seal,
+    .brand__latin {
+      display: none;
+    }
+
+    .brand__name {
+      font-size: 1rem;
+    }
+
+    .nav-rail {
+      margin-inline-start: 0.25rem;
+      padding-inline: 0.5rem;
+      /* 窄屏 mask 渐隐收窄，让末项半隐可见，作为可横滑提示 */
+      mask-image: linear-gradient(
+        90deg,
+        transparent,
+        black 0.5rem,
+        black calc(100% - 0.5rem),
+        transparent
+      );
+    }
+
+    /* 窄屏压缩间距：五项尽量完整入视口（390 下末项半隐），余量由横滑兜底 */
+    .nav-rail ul {
+      gap: 0.55rem;
+    }
+
+    .nav-link {
+      gap: 0.3rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+    }
+
+    .nav-link__icon {
+      width: 14px;
+      height: 14px;
+    }
+
+    .theme-toggle {
+      padding: 0.35rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .brand__seal,
+    .nav-link,
+    .nav-link::after,
+    .nav-link__icon,
+    .site-header::after,
+    .theme-toggle,
+    .theme-toggle__box,
+    .theme-glyph {
+      transition: none;
+    }
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    const root = document.documentElement;
+    const button = document.getElementById('theme-toggle');
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    if (!button) return;
+
+    const current = () => {
+      const theme = root.dataset.theme;
+      return theme === 'dark' || theme === 'light' ? theme : media.matches ? 'dark' : 'light';
+    };
+
+    const sync = () => button.setAttribute('aria-pressed', String(current() === 'dark'));
+
+    button.addEventListener('click', () => {
+      const next = current() === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      localStorage.setItem('theme', next);
+      sync();
+    });
+
+    media.addEventListener('change', () => {
+      if (!localStorage.getItem('theme')) sync();
+    });
+
+    sync();
+  })();
+</script>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../scripts/scroll';
+
+  const header = document.querySelector<HTMLElement>('[data-site-header]');
+  if (header) {
+    const syncScrolled = () => header.classList.toggle('is-scrolled', window.scrollY > 24);
+    window.addEventListener('scroll', syncScrolled, { passive: true });
+    syncScrolled();
+
+    if (!prefersReducedMotion) {
+      gsap.from(header, { y: -12, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  }
+</script>

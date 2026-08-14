@@ -1,0 +1,19 @@
+<canvas class="ambient-ink" data-ambient-ink aria-hidden="true"></canvas>
+
+<style>
+  .ambient-ink {
+    position: fixed;
+    inset: 0;
+    z-index: 7;
+    width: 100%;
+    height: 100%;
+    opacity: 0.92;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ambient-ink {
+      opacity: 0.72;
+    }
+  }
+</style>

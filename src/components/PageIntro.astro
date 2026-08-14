@@ -1,0 +1,248 @@
+---
+import { Image } from 'astro:assets';
+import InscriptionTip from './InscriptionTip';
+
+interface Props {
+  id: string;
+  title: string;
+  note: string;
+  description: string;
+  variant?: 'default' | 'compact' | 'folio';
+  scene?: 'reading' | 'exhibition' | 'darkroom' | 'personal';
+  artwork?: ImageMetadata;
+  artworkAlt?: string;
+}
+
+const {
+  id,
+  title,
+  note,
+  description,
+  variant = 'default',
+  scene = 'reading',
+  artwork,
+  artworkAlt = '',
+} = Astro.props;
+const hasMeta = Astro.slots.has('meta');
+const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkroom' : 'paper';
+---
+
+<header
+  class:list={[
+    'page-intro',
+    `page-intro--${variant}`,
+    `page-intro--scene-${scene}`,
+    artwork && 'page-intro--with-art',
+  ]}
+  data-page-intro
+  data-page-intro-scene={scene}
+  data-ink-scene={inkScene}
+>
+  <div class="page-intro__folio" data-page-intro-folio>
+    <InscriptionTip text="藏本标记 · 此卷出自墨笺" client:idle>
+      <span>墨笺藏本</span>
+    </InscriptionTip>
+    <span aria-hidden="true">{note}</span>
+  </div>
+
+  <div class="page-intro__grid">
+    <div class="page-intro__copy" data-ink-avoid>
+      <p class="folio-label">{note}</p>
+      <div class="page-intro__title-mask">
+        <h1 id={id} data-page-intro-title>{title}</h1>
+      </div>
+      <p class="page-intro__description" data-page-intro-detail>{description}</p>
+      {
+        hasMeta && (
+          <div class="page-intro__meta" data-page-intro-detail>
+            <slot name="meta" />
+          </div>
+        )
+      }
+    </div>
+
+    {
+      artwork && (
+        <figure class="page-intro__art media-reveal" data-page-intro-art data-ink-avoid>
+          <Image
+            src={artwork}
+            alt={artworkAlt}
+            widths={[480, 720, 1024]}
+            sizes="(min-width: 768px) 34vw, 100vw"
+            quality={84}
+            loading="eager"
+          />
+          <figcaption aria-hidden="true">纸墨残片 · 卷首</figcaption>
+        </figure>
+      )
+    }
+  </div>
+
+  <span class="page-intro__rule" aria-hidden="true" data-reveal-line></span>
+</header>
+
+<style>
+  .page-intro {
+    position: relative;
+    padding-block: clamp(4.5rem, 9vw, 8rem) clamp(3rem, 7vw, 6rem);
+  }
+
+  .page-intro__folio {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: clamp(2.5rem, 5vw, 4.5rem);
+    font-family: var(--font-noto-sans);
+    font-size: 0.62rem;
+    letter-spacing: 0.26em;
+    color: var(--bronze);
+  }
+
+  .page-intro__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(16rem, 4fr);
+    gap: clamp(3rem, 8vw, 8rem);
+    align-items: center;
+  }
+
+  .page-intro:not(.page-intro--with-art) .page-intro__copy {
+    max-width: 52rem;
+  }
+
+  .page-intro__copy > .folio-label {
+    margin: 0 0 1rem;
+  }
+
+  .page-intro h1 {
+    max-width: 9em;
+    margin: 0;
+    font-family: var(--font-ma-shan-zheng);
+    font-size: clamp(3.4rem, 8vw, 6.8rem);
+    font-weight: 400;
+    line-height: 0.98;
+    letter-spacing: 0.035em;
+  }
+
+  .page-intro__title-mask {
+    overflow: clip;
+    padding-block: 0.08em;
+  }
+
+  .page-intro__description {
+    max-width: 34rem;
+    margin: clamp(1.5rem, 3vw, 2.4rem) 0 0;
+    color: var(--ink-soft);
+    font-size: clamp(1rem, 1.5vw, 1.12rem);
+  }
+
+  .page-intro__meta {
+    margin-top: 1.75rem;
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.78rem;
+  }
+
+  .page-intro__art {
+    margin: 0;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .page-intro__art :global(img) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+  }
+
+  .page-intro__art figcaption {
+    position: absolute;
+    right: 0.8rem;
+    bottom: 0.7rem;
+    z-index: 3;
+    padding: 0.2rem 0.45rem;
+    background: color-mix(in oklab, var(--paper) 82%, transparent);
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+  }
+
+  .page-intro__rule {
+    display: block;
+    width: min(100%, 58rem);
+    height: 1px;
+    margin-top: clamp(3rem, 7vw, 6rem);
+    background: linear-gradient(90deg, var(--ink), var(--line) 72%, transparent);
+  }
+
+  .page-intro--compact {
+    padding-bottom: 2.5rem;
+  }
+
+  .page-intro--compact .page-intro__folio {
+    margin-bottom: 2.5rem;
+  }
+
+  .page-intro--compact h1 {
+    font-size: clamp(2.8rem, 6vw, 5rem);
+  }
+
+  .page-intro--folio .page-intro__art {
+    transform: rotate(1.2deg);
+  }
+
+  .page-intro--scene-exhibition .page-intro__grid {
+    grid-template-columns: minmax(0, 6fr) minmax(18rem, 5fr);
+  }
+
+  .page-intro--scene-exhibition .page-intro__art {
+    transform: rotate(-0.7deg);
+  }
+
+  .page-intro--scene-personal .page-intro__art {
+    opacity: 0.9;
+  }
+
+  .page-intro--scene-personal .page-intro__rule {
+    background: linear-gradient(90deg, var(--cinnabar), var(--line) 18%, transparent 78%);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js) [data-page-intro-title] {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+
+    :global(html.js) [data-page-intro-folio],
+    :global(html.js) [data-page-intro-detail] {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .page-intro {
+      padding-block: 3.5rem 2.75rem;
+    }
+
+    .page-intro__folio {
+      margin-bottom: 2.5rem;
+    }
+
+    .page-intro__grid {
+      display: block;
+    }
+
+    .page-intro--scene-exhibition .page-intro__grid {
+      display: block;
+    }
+
+    .page-intro h1 {
+      font-size: clamp(3rem, 18vw, 5rem);
+    }
+
+    .page-intro__art {
+      width: min(78%, 22rem);
+      margin: 3rem 0 0 auto;
+    }
+  }
+</style>

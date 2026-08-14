@@ -1,0 +1,82 @@
+---
+import { getImage } from 'astro:assets';
+import defaultOgArt from '../assets/art/hero-paper-mountains.webp';
+import { withBase } from '../site.config';
+
+// 集中输出 canonical / Open Graph / Twitter Card / JSON-LD。
+// 各页面经 BaseLayout 透传元数据；未提供的字段回落到站点默认值。
+interface Props {
+  title: string;
+  description: string;
+  /** 自定义 OG 图（已优化后的 src）；缺省用首页山水纸墨 */
+  image?: string;
+  type?: 'website' | 'article';
+  pubDate?: Date;
+  tags?: string[];
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  image,
+  type = 'website',
+  pubDate,
+  tags = [],
+  noindex = false,
+} = Astro.props;
+
+const site = Astro.site ?? new URL('https://l-xuanxiao.github.io');
+const canonical = new URL(Astro.url.pathname, site);
+
+const defaultOgImage = await getImage({
+  src: defaultOgArt,
+  width: 1200,
+  format: 'jpeg',
+  quality: 80,
+});
+const ogImage = new URL(image ?? defaultOgImage.src, site);
+
+const websiteLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: '墨笺',
+  url: new URL(withBase('/'), site).href,
+  description: '融合东方美学、个人内容与现代网页体验的数字空间。',
+  inLanguage: 'zh-CN',
+};
+
+const articleLd =
+  type === 'article'
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: title,
+        description,
+        image: ogImage.href,
+        datePublished: pubDate?.toISOString(),
+        keywords: tags.join(', '),
+        inLanguage: 'zh-CN',
+        mainEntityOfPage: canonical.href,
+      }
+    : undefined;
+---
+
+<link rel="canonical" href={canonical} />
+{noindex && <meta name="robots" content="noindex" />}
+
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:locale" content="zh_CN" />
+<meta property="og:site_name" content="墨笺" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(websiteLd)} />
+{articleLd && <script is:inline type="application/ld+json" set:html={JSON.stringify(articleLd)} />}

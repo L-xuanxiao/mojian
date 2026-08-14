@@ -1,0 +1,290 @@
+---
+import { site, withBase } from '../site.config';
+import InscriptionTip from './InscriptionTip';
+---
+
+<footer class="site-footer" data-site-footer>
+  {/* 卷尾云气与竹影：「竹影扫阶尘不动」，纯装饰 */}
+  <span class="mist mist--a footer__mist" aria-hidden="true"></span>
+  <span class="footer__bamboo" aria-hidden="true"></span>
+
+  <div class="mx-auto max-w-stage px-5 pt-20 pb-10 md:px-8 md:pt-28 md:pb-12 lg:px-10">
+    <div class="footer-folio" aria-hidden="true">
+      <span>MOJIAN · DIGITAL FOLIO</span>
+      <span>卷尾</span>
+    </div>
+
+    {/* 收束短句：全页最后一个视觉停顿 */}
+    <div class="footer-statement">
+      <p class="footer-mark font-display" data-reveal-title>山高水长</p>
+      <p class="footer-copy">让文字、器作与光影，各得一处安静的位置。</p>
+    </div>
+
+    {/* 往来：卷尾求静，纯文字一行，与页眉疏密相对 */}
+    <div class="footer-links">
+      <p class="folio-label">往来</p>
+      <nav aria-label="页脚往来" class="footer-links__row">
+        <a class="ink-link" href={site.github}>GitHub</a>
+        <a class="ink-link" href={withBase('/rss.xml')}>RSS</a>
+        {
+          site.email && (
+            <a class="ink-link" href={`mailto:${site.email}`}>
+              邮箱
+            </a>
+          )
+        }
+        <a class="ink-link" href="#main-content">回卷首<span aria-hidden="true"> &#8599;</span></a>
+      </nav>
+    </div>
+
+    <div class="footer-ending">
+      <span class="footer-ending__rule" aria-hidden="true" data-reveal-line></span>
+      <div class="footer-ending__row">
+        <p>© 2026 墨笺 · 纸上留白，墨分五色</p>
+        <div class="footer-signature">
+          <span class="footer-inscription" aria-hidden="true">墨笺藏本</span>
+          <InscriptionTip text="卷尾钤印 · 墨笺" client:idle>
+            <span class="footer-seal" data-footer-seal>
+              <span data-footer-ring></span>
+              墨笺
+            </span>
+          </InscriptionTip>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    position: relative;
+    overflow: hidden;
+    border-top: 1px solid var(--line);
+    background: color-mix(in oklab, var(--paper-deep) 52%, var(--paper));
+  }
+
+  .site-footer::before {
+    content: '';
+    position: absolute;
+    inset: auto -8% -55% 42%;
+    height: 85%;
+    background: radial-gradient(
+      ellipse,
+      color-mix(in oklab, var(--ink) 7%, transparent),
+      transparent 68%
+    );
+    pointer-events: none;
+  }
+
+  /* 云气与竹影沉于内容之下 */
+  .site-footer > div {
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer__mist {
+    top: -16%;
+    left: -6%;
+    width: 32rem;
+    height: 22rem;
+  }
+
+  /* 竹影：SVG 剪影经 mask 随主题取墨色，极淡极缓地摇曳 */
+  .footer__bamboo {
+    position: absolute;
+    right: clamp(1rem, 6vw, 6rem);
+    bottom: -2rem;
+    width: 13rem;
+    height: 26rem;
+    background: var(--ink);
+    opacity: 0.06;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='400' viewBox='0 0 200 400'%3E%3Cg fill='black'%3E%3Crect x='94' y='0' width='9' height='118' rx='4'/%3E%3Crect x='94' y='128' width='9' height='118' rx='4'/%3E%3Crect x='94' y='256' width='9' height='132' rx='4'/%3E%3Cpath d='M100 70C70 55 45 55 22 38c28 34 50 38 78 38Z'/%3E%3Cpath d='M102 108c30-15 57-15 80-32-28 34-50 38-80 38Z'/%3E%3Cpath d='M100 198c-28-13-52-11-74-26 26 32 48 36 74 34Z'/%3E%3Cpath d='M102 238c28-13 52-11 74-26-26 32-48 36-74 34Z'/%3E%3Cpath d='M100 30C84 12 70 8 54 0c20 22 32 30 46 36Z'/%3E%3Cpath d='M102 300c24-10 44-8 62-20-22 28-40 32-62 28Z'/%3E%3C/g%3E%3C/svg%3E")
+      center / contain no-repeat;
+    transform-origin: bottom center;
+    animation: bamboo-sway 26s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+
+  @keyframes bamboo-sway {
+    from {
+      transform: rotate(-1.4deg) translateX(-0.3rem);
+    }
+    to {
+      transform: rotate(1.6deg) translateX(0.3rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .footer__bamboo {
+      animation: none;
+    }
+  }
+
+  .footer-folio {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-noto-sans);
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    color: var(--bronze);
+  }
+
+  /* 收束短句：大字停驻，说明句降为淡墨小字 */
+  .footer-statement {
+    padding-block: clamp(4rem, 8vw, 7rem) 0;
+  }
+
+  .footer-mark {
+    margin: 0;
+    color: var(--ink);
+    font-size: clamp(2.8rem, 6vw, 4.6rem);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: 0.06em;
+  }
+
+  .footer-copy {
+    max-width: 28rem;
+    margin: 1.5rem 0 0;
+    color: var(--ink-soft);
+    font-size: clamp(1rem, 2vw, 1.15rem);
+  }
+
+  .footer-links {
+    margin-top: clamp(3rem, 6vw, 4.5rem);
+  }
+
+  .footer-links .folio-label {
+    margin: 0 0 1.25rem;
+  }
+
+  .footer-links__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem 2rem;
+    font-family: var(--font-noto-sans);
+    font-size: 0.82rem;
+  }
+
+  .footer-links__row a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .footer-ending {
+    margin-top: clamp(3.5rem, 7vw, 5.5rem);
+  }
+
+  /* 卷尾墨线：入视口自左写出（data-reveal-line 复用全站揭示机制） */
+  .footer-ending__rule {
+    display: block;
+    height: 1px;
+    margin-bottom: 1.25rem;
+    background: linear-gradient(90deg, var(--ink), var(--line) 72%, transparent);
+  }
+
+  .footer-ending__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    min-height: 4.5rem;
+    font-family: var(--font-noto-sans);
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    color: var(--bronze);
+  }
+
+  .footer-ending__row > p {
+    margin: 0;
+  }
+
+  .footer-signature {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .footer-inscription {
+    writing-mode: vertical-rl;
+    letter-spacing: 0.25em;
+  }
+
+  .footer-seal {
+    position: relative;
+    display: inline-flex;
+    width: 2.8rem;
+    height: 2.8rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--cinnabar);
+    color: var(--cinnabar);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: 0.85rem;
+    line-height: 1;
+  }
+
+  .footer-seal > span {
+    position: absolute;
+    inset: -0.35rem;
+    border: 1px solid var(--ink-soft);
+    opacity: 0;
+  }
+
+  @media (max-width: 767px) {
+    .footer__bamboo {
+      display: none;
+    }
+
+    .footer__mist {
+      width: 20rem;
+      height: 14rem;
+    }
+
+    .footer-ending__row {
+      align-items: flex-end;
+    }
+
+    .footer-ending__row > p {
+      max-width: 15rem;
+    }
+
+    .footer-inscription {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../scripts/scroll';
+
+  if (!prefersReducedMotion) {
+    const seal = document.querySelector<HTMLElement>('[data-footer-seal]');
+    const ring = document.querySelector<HTMLElement>('[data-footer-ring]');
+    if (seal && ring) {
+      gsap.from(seal, {
+        rotate: -7,
+        scale: 1.25,
+        opacity: 0,
+        duration: 0.5,
+        ease: 'back.out(2)',
+        scrollTrigger: { trigger: seal, start: 'top 92%', once: true },
+      });
+      gsap.fromTo(
+        ring,
+        { scale: 0.7, opacity: 0.35 },
+        {
+          scale: 1.65,
+          opacity: 0,
+          duration: 0.7,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: seal, start: 'top 92%', once: true },
+        },
+      );
+    }
+  }
+</script>
