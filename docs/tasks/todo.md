@@ -1,3 +1,30 @@
+# 当前任务：GitHub Pages 首次部署
+
+目标：将已推送到 `L-xuanxiao/mojian` 的 Astro 静态站接入 GitHub Actions，在 `main` 更新时自动构建并发布到 `/mojian/`。
+
+- [x] 核对 `origin/main`、GitHub CLI 认证、公开仓库与 Pages Actions 来源
+- [x] 添加与 Node 22、pnpm 11 和现有 `pnpm build` 对齐的 Pages 工作流
+- [x] 校验工作流格式与本地生产构建
+- [x] 提交部署配置并推送到 `origin/main`
+- [x] 监看首次 Actions 部署并验证线上地址
+- [x] 记录部署结果与后续更新方式
+
+## 计划确认
+
+- 仓库与路径：仓库固定为 `L-xuanxiao/mojian`，沿用 `site: https://l-xuanxiao.github.io` 与 `base: /mojian`，不改 URL。
+- 发布方式：使用 Astro 官方 Pages Action 构建现有 `pnpm build`，由 GitHub Pages 官方 Action 发布构建产物；不提交 `dist/`。
+- 分支策略：首次部署需由 `main` 触发，按用户明确授权直接提交并推送 `main`，本轮不创建 PR。
+- 验证方式：本地检查工作流与生产构建，推送后等待 Actions 完成，再访问线上首页确认 HTTP 与页面标题。
+
+## 结果审查
+
+- GitHub：公开仓库 `L-xuanxiao/mojian` 以 `main` 为默认分支，Pages 发布源为 GitHub Actions，HTTPS 强制开启；本地 `origin/main` 已对齐。
+- 工作流：新增 `.github/workflows/deploy.yml`，使用 `actions/checkout@v7`、`withastro/action@v6` 与 `actions/deploy-pages@v5`；固定 Node 22、pnpm 11.21.0，并复用 `pnpm build` 产出 Astro 静态页与 Pagefind 索引。
+- 本地验证：工作流通过定向 Prettier 检查与 `git diff --check`；`pnpm build` 成功生成 24 页，Pagefind 索引 3 页、431 词。
+- 首次部署：提交 `aabd848` 已推送到 `origin/main`；GitHub Actions 运行 `31936097255` 成功，build 用时 1分23秒，deploy 用时 8秒。
+- 线上验证：`https://l-xuanxiao.github.io/mojian/` 返回 HTTP 200，标题为「墨笺」，canonical 与静态资源均携带 `/mojian/`；`/mojian/pagefind/pagefind.js` 返回 HTTP 200。
+- 后续更新：以后在 `main` 完成提交并执行 `git push` 即会自动重新构建和发布；也可从 Actions 页手动运行 `workflow_dispatch`。
+
 # 当前任务：全站动效体系「平衡工艺版」
 
 目标：以“高频反馈迅捷、低频叙事精致”为原则重整全站动效；适度删除重复与迟滞动画，同时保留 Hero、桌面长卷、暗室显影、云气粒子和页面墨晕等招牌体验。
