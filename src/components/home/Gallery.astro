@@ -11,10 +11,14 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
 
 <section class="darkroom home-gallery" aria-labelledby="gallery" data-ink-scene="darkroom">
   <span class="mist mist--a home-gallery__mist" aria-hidden="true"></span>
-  <div class="home-gallery__inner mx-auto max-w-stage px-5 py-20 md:px-8 md:py-32 lg:px-10">
+  <div class="home-gallery__inner mx-auto max-w-stage px-5 py-20 md:px-8 md:py-36 lg:px-10">
     <SectionHeading id="gallery" title="光影集" index="伍" note="GALLERY" />
     <p class="mt-4 max-w-[32rem] text-ink-soft">以光为墨，收存纸张、山水与四时一瞬。</p>
-    <ol class="gallery-preview mt-10 list-none p-0 md:mt-14" data-reveal-group>
+    <ol
+      class="gallery-preview mt-10 list-none p-0 md:mt-14"
+      data-reveal-group
+      data-reveal-variant="contact-sheet"
+    >
       {
         works.map((work, index) => (
           <li class:list={['gallery-preview__item', `gallery-preview__item--${index + 1}`]}>
@@ -55,6 +59,19 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
     z-index: 1;
   }
 
+  .home-gallery__inner::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: 24%;
+    right: 9%;
+    width: 38%;
+    height: 28%;
+    border: 1px solid var(--line);
+    transform: rotate(2.5deg);
+    pointer-events: none;
+  }
+
   /* 云气在暗室里呈淡白微光，如暗室浮尘 */
   .home-gallery__mist {
     top: 8%;
@@ -72,24 +89,25 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
 
   .gallery-preview__item--1 {
     position: relative;
-    grid-column: 1 / span 7;
+    grid-column: 1 / span 8;
   }
 
   .gallery-preview__item--2 {
     position: relative;
-    grid-column: 9 / span 4;
-    margin-top: 5rem;
+    grid-column: 10 / span 3;
+    margin-top: 10rem;
   }
 
   .gallery-preview__item--3 {
     position: relative;
     grid-column: 2 / span 4;
+    margin-top: 2rem;
   }
 
   .gallery-preview__item--4 {
     position: relative;
     grid-column: 7 / span 6;
-    margin-top: 3rem;
+    margin-top: 6rem;
   }
 
   .gallery-preview__image {
@@ -118,6 +136,10 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
       filter 500ms var(--ease-ink);
   }
 
+  .gallery-preview__item--1 .gallery-preview__image :global(img) {
+    aspect-ratio: 16 / 10;
+  }
+
   .gallery-preview__item--2 .gallery-preview__image :global(img) {
     aspect-ratio: 4 / 5;
   }
@@ -141,12 +163,25 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
     font-size: 0.875rem;
   }
 
+  .gallery-preview__item--1 > p span:first-child {
+    color: var(--ink);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+  }
+
   .gallery-preview__item > p span:last-child {
     font-family: var(--font-noto-sans);
     font-size: 0.75rem;
   }
 
   @media (max-width: 767px) {
+    .home-gallery__inner::before {
+      top: 34%;
+      right: -10%;
+      width: 70%;
+      height: 18%;
+    }
+
     .gallery-preview {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 2.5rem 1rem;
@@ -158,6 +193,10 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
     .gallery-preview__item--4 {
       grid-column: auto;
       margin-top: 0;
+    }
+
+    .gallery-preview__item--1 {
+      grid-column: 1 / -1;
     }
 
     .gallery-preview__item--2 .gallery-preview__image :global(img) {

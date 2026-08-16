@@ -14,10 +14,10 @@ const latestLabel = latest ? `${latest.getFullYear()} 年 ${latest.getMonth() + 
 ---
 
 <section class="home-journal" aria-labelledby="journal">
-  <div class="mx-auto max-w-stage px-5 py-20 md:px-8 md:py-32 lg:px-10">
+  <div class="mx-auto max-w-stage px-5 py-16 md:px-8 md:py-24 lg:px-10">
     <SectionHeading id="journal" title="近来所记" index="肆" note="JOURNAL" />
 
-    <div class="home-journal__grid">
+    <div class="home-journal__grid" data-reveal-group data-reveal-variant="spread">
       <div class="home-journal__lead">
         <p class="folio-label">本期主稿</p>
         <EntryList posts={posts.slice(0, 1)} variant="feature" />
@@ -41,8 +41,8 @@ const latestLabel = latest ? `${latest.getFullYear()} 年 ${latest.getMonth() + 
 <style>
   .home-journal__grid {
     display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(18rem, 4fr);
-    gap: clamp(4rem, 9vw, 9rem);
+    grid-template-columns: minmax(0, 8fr) minmax(18rem, 4fr);
+    gap: clamp(3rem, 8vw, 8rem);
     align-items: start;
   }
 
@@ -51,7 +51,9 @@ const latestLabel = latest ? `${latest.getFullYear()} 年 ${latest.getMonth() + 
   }
 
   .home-journal__catalog {
-    margin-top: clamp(2rem, 8vw, 7rem);
+    margin-top: clamp(4rem, 10vw, 9rem);
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--ink);
   }
 
   .home-journal__catalog-head {

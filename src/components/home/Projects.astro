@@ -10,14 +10,21 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
 ---
 
 <section
-  class="mx-auto max-w-stage px-5 py-20 md:px-8 md:py-32 lg:px-10"
+  class="home-projects mx-auto max-w-stage px-5 py-16 md:px-8 md:py-24 lg:px-10"
   aria-labelledby="projects"
 >
   <SectionHeading id="projects" title="器作" index="贰" note="WORKS" />
-  <ol class="project-preview mt-10 list-none p-0 md:mt-14" data-reveal-group>
+  <ol
+    class="project-preview mt-10 list-none p-0 md:mt-14"
+    data-reveal-group
+    data-reveal-variant="exhibit"
+  >
     {
       projects.map((project, index) => (
-        <li class:list={['project-preview__item', `project-preview__item--${index + 1}`]}>
+        <li
+          class:list={['project-preview__item', `project-preview__item--${index + 1}`]}
+          data-number={String(index + 1).padStart(2, '0')}
+        >
           <span class="project-preview__folio" aria-hidden="true">
             展品 {String(index + 1).padStart(2, '0')}
           </span>
@@ -57,16 +64,35 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
 </section>
 
 <style>
+  .home-projects {
+    position: relative;
+    overflow: clip;
+  }
+
   .project-preview {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: clamp(3rem, 7vw, 6rem) clamp(1rem, 3vw, 2rem);
+    gap: clamp(4rem, 8vw, 7rem) clamp(1rem, 3vw, 2rem);
     align-items: start;
   }
 
   .project-preview__item {
     position: relative;
+    isolation: isolate;
     margin: 0;
+  }
+
+  .project-preview__item::before {
+    content: attr(data-number);
+    position: absolute;
+    z-index: -1;
+    top: -0.62em;
+    right: -0.05em;
+    color: color-mix(in oklab, var(--ink) 9%, transparent);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: clamp(6rem, 15vw, 13rem);
+    line-height: 1;
+    pointer-events: none;
   }
 
   .project-preview__folio {
@@ -82,16 +108,16 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
   }
 
   .project-preview__item--1 {
-    grid-column: 1 / span 7;
+    grid-column: 1 / span 8;
   }
 
   .project-preview__item--2 {
-    grid-column: 8 / -1;
-    margin-top: 7rem;
+    grid-column: 9 / -1;
+    margin-top: 10rem;
   }
 
   .project-preview__item--3 {
-    grid-column: 3 / span 8;
+    grid-column: 2 / -1;
   }
 
   .project-preview__image {
@@ -136,8 +162,18 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
   }
 
   .project-preview__copy {
-    max-width: 34rem;
-    margin-top: 1.25rem;
+    position: relative;
+    max-width: 36rem;
+    margin-top: 1.5rem;
+    padding-left: clamp(0rem, 3vw, 2.5rem);
+  }
+
+  .project-preview__item--2 .project-preview__copy {
+    padding-left: 0;
+  }
+
+  .project-preview__item--3 .project-preview__copy {
+    max-width: 44rem;
   }
 
   .project-preview__meta {
@@ -161,7 +197,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
 
   .project-preview h3 {
     margin: 0.65rem 0 0;
-    font-size: clamp(1.6rem, 3.5vw, 2.7rem);
+    font-size: clamp(2rem, 4.6vw, 4rem);
     font-weight: 400;
   }
 
@@ -176,7 +212,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
     }
 
     .project-preview__item + .project-preview__item {
-      margin-top: 3.5rem;
+      margin-top: 5rem;
     }
 
     .project-preview__item--2 {
@@ -188,6 +224,16 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
       display: block;
       margin-bottom: 0.7rem;
       writing-mode: horizontal-tb;
+    }
+
+    .project-preview__item::before {
+      top: -0.72em;
+      font-size: 6rem;
+    }
+
+    .project-preview__copy,
+    .project-preview__item--3 .project-preview__copy {
+      padding-left: 0;
     }
 
     .project-preview__item--2 .project-preview__image :global(img),

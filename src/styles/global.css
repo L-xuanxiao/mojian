@@ -270,6 +270,11 @@
       transform: translateY(0.75rem);
     }
 
+    html.js [data-reveal-detail] {
+      opacity: 0;
+      transform: translateY(0.55rem);
+    }
+
     html.js [data-reveal-line] {
       transform: scaleX(0);
     }
@@ -287,6 +292,28 @@
   :focus-visible {
     outline: 2px solid var(--cinnabar);
     outline-offset: 2px;
+  }
+
+  html {
+    scrollbar-color: var(--ink-soft) var(--paper-deep);
+    scrollbar-width: thin;
+  }
+
+  body {
+    caret-color: var(--cinnabar);
+  }
+
+  ::-webkit-scrollbar {
+    width: 0.7rem;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--paper-deep);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid var(--paper-deep);
+    background: var(--ink-soft);
   }
 
   /* 全局减少动态：压缩所有动画与过渡时长，退回原生滚动 */

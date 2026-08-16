@@ -80,6 +80,9 @@ import InscriptionTip from './InscriptionTip';
   .site-footer > div {
     position: relative;
     z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(16rem, 4fr);
+    column-gap: clamp(3rem, 9vw, 9rem);
   }
 
   .footer__mist {
@@ -121,6 +124,7 @@ import InscriptionTip from './InscriptionTip';
   }
 
   .footer-folio {
+    grid-column: 1 / -1;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -135,13 +139,13 @@ import InscriptionTip from './InscriptionTip';
 
   /* 收束短句：大字停驻，说明句降为淡墨小字 */
   .footer-statement {
-    padding-block: clamp(4rem, 8vw, 7rem) 0;
+    padding-block: clamp(4rem, 7vw, 6rem) 0;
   }
 
   .footer-mark {
     margin: 0;
     color: var(--ink);
-    font-size: clamp(2.8rem, 6vw, 4.6rem);
+    font-size: clamp(2.8rem, 5vw, 4rem);
     font-weight: 400;
     line-height: 1.1;
     letter-spacing: 0.06em;
@@ -155,7 +159,8 @@ import InscriptionTip from './InscriptionTip';
   }
 
   .footer-links {
-    margin-top: clamp(3rem, 6vw, 4.5rem);
+    align-self: end;
+    margin-top: clamp(4rem, 7vw, 6rem);
   }
 
   .footer-links .folio-label {
@@ -176,6 +181,7 @@ import InscriptionTip from './InscriptionTip';
   }
 
   .footer-ending {
+    grid-column: 1 / -1;
     margin-top: clamp(3.5rem, 7vw, 5.5rem);
   }
 
@@ -236,6 +242,10 @@ import InscriptionTip from './InscriptionTip';
   }
 
   @media (max-width: 767px) {
+    .site-footer > div {
+      display: block;
+    }
+
     .footer__bamboo {
       display: none;
     }

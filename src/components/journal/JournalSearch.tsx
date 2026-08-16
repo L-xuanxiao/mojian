@@ -101,11 +101,11 @@ export default function JournalSearch() {
           onChange={(event) => setQuery(event.target.value)}
           placeholder="检索笺录…"
           aria-label="检索笺录文章"
-          className="border-line text-ink placeholder:text-ink-soft/60 w-full border-0 border-b bg-transparent py-2.5 pr-8 pl-7 font-sans text-base focus:outline-none"
+          className="border-line text-ink placeholder:text-ink-soft/60 w-full border-0 border-b bg-transparent py-3 pr-11 pl-7 font-sans text-lg focus:outline-none"
         />
         {/* 聚焦墨线：自左向右写出 */}
         <span
-          className="bg-ink pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 transition-transform duration-400 ease-ink group-focus-within:scale-x-100"
+          className="bg-ink pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 transition-transform duration-250 ease-ink group-focus-within:scale-x-100"
           aria-hidden
         />
         {query && (
@@ -113,7 +113,7 @@ export default function JournalSearch() {
             type="button"
             onClick={clear}
             aria-label="清空检索"
-            className="text-ink-soft hover:text-ink absolute top-1/2 right-0 -translate-y-1/2 p-1 transition-colors duration-150"
+            className="text-ink-soft hover:text-ink absolute top-1/2 right-0 flex size-11 -translate-y-1/2 items-center justify-center transition-colors duration-150"
           >
             <X className="size-4" aria-hidden />
           </button>

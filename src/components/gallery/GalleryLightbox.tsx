@@ -67,7 +67,13 @@ export default function GalleryLightbox({ items }: Props) {
 
   return (
     <>
-      <section className="gallery-grid" aria-label="光影作品" ref={gridRef}>
+      <section
+        className="gallery-grid"
+        aria-label="光影作品"
+        ref={gridRef}
+        data-reveal-group
+        data-reveal-variant="contact-sheet"
+      >
         {items.map((item, itemIndex) => (
           <figure
             className={`gallery-entry gallery-entry--${item.orientation}`}

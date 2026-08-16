@@ -82,7 +82,17 @@ const displayName = site.profile.displayName;
 
   .self-intro__column {
     position: relative;
-    padding-bottom: clamp(4rem, 8vw, 7rem);
+    padding: clamp(1rem, 3vw, 2rem) clamp(0rem, 5vw, 4rem) clamp(5rem, 8vw, 7rem) 0;
+  }
+
+  .self-intro__column::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: clamp(4rem, 7vw, 6rem);
+    left: clamp(0rem, 7vw, 6rem);
+    width: 1px;
+    background: linear-gradient(180deg, var(--cinnabar), var(--line) 28%, transparent);
   }
 
   .self-intro__lead {
@@ -104,6 +114,17 @@ const displayName = site.profile.displayName;
     margin-top: clamp(2.5rem, 5vw, 4rem);
     margin-left: clamp(0rem, 10vw, 9rem);
     color: var(--ink-soft);
+  }
+
+  .self-intro__empty {
+    position: relative;
+    max-width: 42rem;
+    margin-left: clamp(2.5rem, 12vw, 11rem);
+    padding: clamp(2rem, 4vw, 3.5rem);
+    border-block: 1px solid var(--line);
+    background: color-mix(in oklab, var(--paper-deep) 34%, transparent);
+    font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+    line-height: 2.1;
   }
 
   .self-intro__body p {
@@ -133,6 +154,14 @@ const displayName = site.profile.displayName;
     .self-intro__body,
     .self-intro__empty {
       margin-left: 0;
+    }
+
+    .self-intro__column::before {
+      display: none;
+    }
+
+    .self-intro__empty {
+      padding: 1.75rem 1.25rem;
     }
 
     .self-intro__signature {

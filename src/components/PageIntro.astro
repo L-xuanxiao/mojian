@@ -36,6 +36,7 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
   ]}
   data-page-intro
   data-page-intro-scene={scene}
+  data-reveal-variant={`intro-${scene}`}
   data-ink-scene={inkScene}
 >
   <div class="page-intro__folio" data-page-intro-folio>
@@ -84,13 +85,28 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
 <style>
   .page-intro {
     position: relative;
-    padding-block: clamp(4.5rem, 9vw, 8rem) clamp(3rem, 7vw, 6rem);
+    isolation: isolate;
+    min-height: 0;
+    padding-block: clamp(4.5rem, 8vw, 7rem) clamp(3.5rem, 7vw, 6rem);
+  }
+
+  .page-intro::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: 16%;
+    left: clamp(-2rem, -4vw, -0.5rem);
+    width: clamp(8rem, 22vw, 20rem);
+    height: clamp(8rem, 22vw, 20rem);
+    border: 1px solid var(--line);
+    opacity: 0.48;
+    transform: rotate(9deg);
   }
 
   .page-intro__folio {
     display: flex;
     justify-content: space-between;
-    margin-bottom: clamp(2.5rem, 5vw, 4.5rem);
+    margin-bottom: clamp(3rem, 7vw, 6rem);
     font-family: var(--font-noto-sans);
     font-size: 0.62rem;
     letter-spacing: 0.26em;
@@ -99,13 +115,16 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
 
   .page-intro__grid {
     display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(16rem, 4fr);
-    gap: clamp(3rem, 8vw, 8rem);
-    align-items: center;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    align-items: end;
   }
 
-  .page-intro:not(.page-intro--with-art) .page-intro__copy {
-    max-width: 52rem;
+  .page-intro__copy {
+    position: relative;
+    z-index: 2;
+    grid-column: 1 / span 7;
+    padding-bottom: clamp(1rem, 4vw, 3.5rem);
   }
 
   .page-intro__copy > .folio-label {
@@ -113,13 +132,13 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
   }
 
   .page-intro h1 {
-    max-width: 9em;
+    max-width: 7em;
     margin: 0;
     font-family: var(--font-ma-shan-zheng);
-    font-size: clamp(3.4rem, 8vw, 6.8rem);
+    font-size: clamp(4.5rem, 10vw, 8.5rem);
     font-weight: 400;
-    line-height: 0.98;
-    letter-spacing: 0.035em;
+    line-height: 0.88;
+    letter-spacing: 0.025em;
   }
 
   .page-intro__title-mask {
@@ -129,9 +148,10 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
 
   .page-intro__description {
     max-width: 34rem;
-    margin: clamp(1.5rem, 3vw, 2.4rem) 0 0;
+    margin: clamp(2rem, 4vw, 3rem) 0 0;
     color: var(--ink-soft);
-    font-size: clamp(1rem, 1.5vw, 1.12rem);
+    font-size: clamp(1rem, 1.45vw, 1.18rem);
+    line-height: 2;
   }
 
   .page-intro__meta {
@@ -142,6 +162,9 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
   }
 
   .page-intro__art {
+    position: relative;
+    z-index: 1;
+    grid-column: 8 / -1;
     margin: 0;
     box-shadow: var(--shadow-lg);
   }
@@ -149,7 +172,7 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
   .page-intro__art :global(img) {
     display: block;
     width: 100%;
-    aspect-ratio: 2 / 3;
+    aspect-ratio: 4 / 5;
     object-fit: cover;
   }
 
@@ -168,13 +191,14 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
 
   .page-intro__rule {
     display: block;
-    width: min(100%, 58rem);
+    width: min(100%, 64rem);
     height: 1px;
-    margin-top: clamp(3rem, 7vw, 6rem);
+    margin-top: clamp(3rem, 6vw, 5rem);
     background: linear-gradient(90deg, var(--ink), var(--line) 72%, transparent);
   }
 
   .page-intro--compact {
+    min-height: 0;
     padding-bottom: 2.5rem;
   }
 
@@ -183,23 +207,85 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
   }
 
   .page-intro--compact h1 {
-    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-size: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  /* 笺录：左侧题名如刊物扉页，右侧纸本残片轻压入版心。 */
+  .page-intro--scene-reading .page-intro__copy {
+    grid-column: 1 / span 7;
   }
 
   .page-intro--folio .page-intro__art {
-    transform: rotate(1.2deg);
+    grid-column: 9 / -1;
+    margin-right: clamp(0rem, 2vw, 2.25rem);
+    transform: rotate(1.5deg) translateY(1.5rem);
   }
 
+  /* 器作：画幅越出展台，题名与展品在中轴交叠。 */
   .page-intro--scene-exhibition .page-intro__grid {
-    grid-template-columns: minmax(0, 6fr) minmax(18rem, 5fr);
+    align-items: center;
+  }
+
+  .page-intro--scene-exhibition .page-intro__copy {
+    grid-column: 1 / span 6;
+    padding-top: clamp(4rem, 10vw, 8rem);
   }
 
   .page-intro--scene-exhibition .page-intro__art {
-    transform: rotate(-0.7deg);
+    grid-column: 7 / -1;
+    width: calc(100% + clamp(1rem, 1.5vw, 1.75rem));
+    transform: rotate(-0.7deg) translateX(clamp(0.35rem, 0.75vw, 0.75rem));
   }
 
+  .page-intro--scene-exhibition .page-intro__art :global(img) {
+    aspect-ratio: 5 / 6;
+  }
+
+  .page-intro--scene-exhibition h1 {
+    font-size: clamp(5.5rem, 12vw, 10rem);
+  }
+
+  /* 暗室：无图卷首以一枚大题字建立入暗时刻。 */
+  .page-intro--scene-darkroom {
+    min-height: clamp(38rem, 82svh, 56rem);
+  }
+
+  .page-intro--scene-darkroom::before {
+    top: 28%;
+    right: 3%;
+    left: auto;
+    width: clamp(12rem, 34vw, 31rem);
+    height: clamp(8rem, 20vw, 18rem);
+    border-color: var(--line);
+    transform: rotate(-4deg);
+  }
+
+  .page-intro--scene-darkroom .page-intro__copy {
+    grid-column: 1 / span 9;
+    padding-block: clamp(4rem, 10vw, 9rem) 0;
+  }
+
+  .page-intro--scene-darkroom h1 {
+    max-width: none;
+    font-size: clamp(6.5rem, 17vw, 14rem);
+    color: var(--paper);
+    text-shadow: 0 0 2.5rem rgb(232 227 212 / 0.12);
+  }
+
+  /* 此间 / 留墨：题名近左，纸本像一页被主人随手压住的手记。 */
   .page-intro--scene-personal .page-intro__art {
-    opacity: 0.9;
+    grid-column: 8 / -1;
+    margin-right: clamp(0rem, 2vw, 2rem);
+    opacity: 0.92;
+    transform: rotate(1.25deg) translateY(2.25rem);
+  }
+
+  .page-intro--scene-personal .page-intro__copy {
+    grid-column: 1 / span 6;
+  }
+
+  .page-intro--scene-personal h1 {
+    font-size: clamp(5rem, 11vw, 9rem);
   }
 
   .page-intro--scene-personal .page-intro__rule {
@@ -221,7 +307,15 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
 
   @media (max-width: 767px) {
     .page-intro {
-      padding-block: 3.5rem 2.75rem;
+      min-height: 0;
+      padding-block: 3.75rem 3rem;
+    }
+
+    .page-intro::before {
+      top: 18%;
+      left: -2.5rem;
+      width: 9rem;
+      height: 9rem;
     }
 
     .page-intro__folio {
@@ -237,12 +331,40 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
     }
 
     .page-intro h1 {
-      font-size: clamp(3rem, 18vw, 5rem);
+      font-size: clamp(4.25rem, 23vw, 6.5rem);
     }
 
     .page-intro__art {
-      width: min(78%, 22rem);
-      margin: 3rem 0 0 auto;
+      width: min(86%, 22rem);
+      margin: 3.5rem 0 0 auto;
+    }
+
+    .page-intro--folio .page-intro__art,
+    .page-intro--scene-exhibition .page-intro__art,
+    .page-intro--scene-personal .page-intro__art {
+      width: min(86%, 22rem);
+      margin-right: 0;
+      transform: rotate(1deg);
+    }
+
+    .page-intro--scene-exhibition .page-intro__copy,
+    .page-intro--scene-darkroom .page-intro__copy {
+      padding-top: 1rem;
+    }
+
+    .page-intro--scene-darkroom {
+      min-height: 34rem;
+    }
+
+    .page-intro--scene-darkroom::before {
+      top: 36%;
+      right: -3rem;
+      width: 14rem;
+      height: 9rem;
+    }
+
+    .page-intro--scene-darkroom h1 {
+      font-size: clamp(5rem, 28vw, 7.5rem);
     }
   }
 </style>

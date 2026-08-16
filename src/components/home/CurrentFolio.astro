@@ -33,7 +33,7 @@ const identityProof = site.profile.focus.length
 ---
 
 <section class="current-folio" aria-labelledby="current-folio">
-  <div class="mx-auto max-w-stage px-5 py-20 md:px-8 md:py-32 lg:px-10">
+  <div class="current-folio__inner mx-auto max-w-stage px-5 py-16 md:px-8 md:py-24 lg:px-10">
     <SectionHeading id="current-folio" title="此间近况" index="壹" note="PORTRAIT / NOW" />
 
     <div class="current-folio__grid">
@@ -41,7 +41,12 @@ const identityProof = site.profile.focus.length
         <p class="current-folio__lead" data-reveal-title>
           写字、写代码、拍照片。<br />在这里安放文章、作品与光影。
         </p>
-        <p class="current-folio__identity" aria-label="作者身份与创作概况" data-reveal-group>
+        <p
+          class="current-folio__identity"
+          aria-label="作者身份与创作概况"
+          data-reveal-group
+          data-reveal-variant="spread"
+        >
           <span class="current-folio__identity-name">{identityName}</span>
           {identityRole && <span>{identityRole}</span>}
           <span>{identityProof}</span>
@@ -58,7 +63,7 @@ const identityProof = site.profile.focus.length
           {/* 季节标记：手动维护，随案头三事一并更新 */}
           <span>2026 · 夏</span>
         </div>
-        <ol class="m-0 list-none p-0" data-reveal-group>
+        <ol class="m-0 list-none p-0" data-reveal-group data-reveal-variant="stagger">
           {
             statusItems.map((item, index) => (
               <li>
@@ -82,31 +87,47 @@ const identityProof = site.profile.focus.length
 <style>
   .current-folio {
     position: relative;
+    overflow: clip;
+  }
+
+  .current-folio::before {
+    content: '';
+    position: absolute;
+    top: clamp(11rem, 24vw, 21rem);
+    right: 0;
+    bottom: clamp(2rem, 8vw, 7rem);
+    left: 58%;
+    background: color-mix(in oklab, var(--paper-deep) 44%, transparent);
+    pointer-events: none;
+  }
+
+  .current-folio__inner {
+    position: relative;
   }
 
   .current-folio__grid {
     display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(18rem, 4fr);
-    gap: clamp(4rem, 10vw, 10rem);
-    align-items: start;
+    grid-template-columns: minmax(0, 8fr) minmax(18rem, 4fr);
+    gap: clamp(3rem, 8vw, 8rem);
+    align-items: center;
   }
 
   .current-folio__portrait {
     position: relative;
-    padding-block: clamp(1rem, 4vw, 3rem) clamp(4rem, 8vw, 7rem);
+    padding-block: clamp(0rem, 2vw, 1.5rem) clamp(3rem, 6vw, 5rem);
   }
 
   .current-folio__lead {
-    max-width: 13em;
+    max-width: 11em;
     margin: 0;
-    font-size: clamp(1.75rem, 4vw, 3.5rem);
-    line-height: 1.55;
+    font-size: clamp(2.1rem, 4.8vw, 4.25rem);
+    line-height: 1.42;
     letter-spacing: 0.02em;
   }
 
   .current-folio__note {
     max-width: 34rem;
-    margin: 2.5rem 0 0 clamp(0rem, 8vw, 7rem);
+    margin: 2.5rem 0 0 clamp(0rem, 10vw, 9rem);
     color: var(--ink-soft);
   }
 
@@ -146,10 +167,23 @@ const identityProof = site.profile.focus.length
   }
 
   .current-folio__status {
+    position: relative;
     padding: 2rem;
     border-top: 2px solid var(--ink);
     background: color-mix(in oklab, var(--paper-deep) 52%, transparent);
     box-shadow: var(--shadow-md);
+    transform: rotate(0.8deg) translateY(-1.5rem);
+  }
+
+  .current-folio__status::after {
+    content: '';
+    position: absolute;
+    right: 1.25rem;
+    bottom: -1.2rem;
+    width: 4.5rem;
+    height: 1px;
+    background: var(--cinnabar);
+    transform: rotate(-5deg);
   }
 
   .current-folio__status-head {
@@ -201,6 +235,12 @@ const identityProof = site.profile.focus.length
   }
 
   @media (max-width: 767px) {
+    .current-folio::before {
+      top: 48%;
+      bottom: 2rem;
+      left: 10%;
+    }
+
     .current-folio__grid {
       display: block;
     }
@@ -225,6 +265,7 @@ const identityProof = site.profile.focus.length
 
     .current-folio__status {
       padding: 1.5rem;
+      transform: none;
     }
   }
 </style>

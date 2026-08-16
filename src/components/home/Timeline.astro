@@ -6,7 +6,7 @@ import { siteMilestones } from './site-timeline.data';
 ---
 
 <section class="timeline-folio" aria-labelledby="timeline-heading">
-  <div class="mx-auto max-w-stage px-5 py-20 md:px-8 md:py-28 lg:px-10">
+  <div class="mx-auto max-w-stage px-5 py-16 md:px-8 md:py-24 lg:px-10">
     <SectionHeading id="timeline-heading" title="卷尾年谱" index="陆" note="COLOPHON" />
 
     <div class="timeline-folio__grid">
@@ -16,7 +16,7 @@ import { siteMilestones } from './site-timeline.data';
         <span aria-hidden="true">未完待续</span>
       </div>
 
-      <ol class="timeline-folio__list" data-reveal-group>
+      <ol class="timeline-folio__list" data-reveal-group data-reveal-variant="stagger">
         {
           siteMilestones.map(({ year, event }, index) => (
             <li>
@@ -36,6 +36,10 @@ import { siteMilestones } from './site-timeline.data';
 <style>
   .timeline-folio {
     background: color-mix(in oklab, var(--paper-deep) 36%, transparent);
+  }
+
+  .timeline-folio :global(.section-heading h2) {
+    font-size: clamp(2.8rem, 5vw, 4.5rem);
   }
 
   .timeline-folio__grid {
@@ -79,6 +83,19 @@ import { siteMilestones } from './site-timeline.data';
     padding: 1.5rem;
     border-right: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
+  }
+
+  .timeline-folio__list li:only-child {
+    grid-column: 1 / -1;
+    min-height: 15rem;
+    border-right: 0;
+  }
+
+  .timeline-folio__list li:only-child .timeline-folio__index {
+    top: -0.16em;
+    right: 0.2em;
+    color: color-mix(in oklab, var(--ink) 8%, transparent);
+    font-size: clamp(7rem, 15vw, 13rem);
   }
 
   .timeline-folio__list li:nth-child(even) {

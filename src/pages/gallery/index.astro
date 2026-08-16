@@ -51,7 +51,7 @@ const items = await Promise.all(
       </div>
 
       <div class="gallery-stage mx-auto max-w-stage px-5 md:px-8 lg:px-10">
-        <GalleryLightbox items={items} client:visible />
+        <GalleryLightbox items={items} client:load />
       </div>
     </div>
   </main>

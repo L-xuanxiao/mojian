@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
@@ -44,10 +45,28 @@ export default function ProjectCarousel({ title, slides }: Props) {
 
   const scrollPrev = () => emblaApi?.scrollPrev(Boolean(reducedMotion));
   const scrollNext = () => emblaApi?.scrollNext(Boolean(reducedMotion));
+  const handleCarouselKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    // 图集画布提供方向键语义；按钮仍保留独立 Tab 停靠点。
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      scrollPrev();
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      scrollNext();
+    }
+  };
 
   return (
     <section className="project-carousel" aria-label={`${title}图集`} data-ink-avoid>
-      <div className="project-carousel__viewport" id={carouselId} ref={emblaRef}>
+      <div
+        className="project-carousel__viewport"
+        id={carouselId}
+        ref={emblaRef}
+        role="group"
+        tabIndex={slides.length > 1 ? 0 : -1}
+        aria-label="图集画布，使用左右方向键切换"
+        onKeyDown={handleCarouselKeyDown}
+      >
         <div className="project-carousel__track">
           {slides.map((slide, index) => (
             <motion.figure

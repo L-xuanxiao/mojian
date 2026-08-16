@@ -15,7 +15,7 @@ const endpoint = site.formspree.endpoint;
       <p class="contact__note">
         有信自远方来，不论是商榷文字、请益代码，或只是道一声看过，皆欢迎。
       </p>
-      <ul class="contact__list" data-reveal-group>
+      <ul class="contact__list" data-reveal-group data-reveal-variant="stagger">
         {
           email && (
             <li>
@@ -88,7 +88,7 @@ const endpoint = site.formspree.endpoint;
 <style>
   .contact__grid {
     display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
     gap: clamp(3rem, 8vw, 8rem);
     align-items: start;
   }
@@ -128,10 +128,24 @@ const endpoint = site.formspree.endpoint;
 
   .contact__form,
   .contact__pending {
-    padding: 2rem;
+    position: relative;
+    padding: clamp(2rem, 5vw, 4rem);
     border-top: 2px solid var(--ink);
     background: color-mix(in oklab, var(--paper-deep) 52%, transparent);
     box-shadow: var(--shadow-md);
+    transform: rotate(0.55deg);
+  }
+
+  .contact__form::after,
+  .contact__pending::after {
+    content: '';
+    position: absolute;
+    right: 1.5rem;
+    bottom: -1rem;
+    width: 5rem;
+    height: 1px;
+    background: var(--cinnabar);
+    transform: rotate(-4deg);
   }
 
   .contact__form > .folio-label,
@@ -163,7 +177,7 @@ const endpoint = site.formspree.endpoint;
     color: var(--ink);
     font-family: var(--font-noto-serif);
     font-size: 0.95rem;
-    transition: border-color 200ms var(--ease-ink);
+    transition: border-color 150ms var(--ease-ink);
   }
 
   .contact__field textarea {
@@ -221,7 +235,7 @@ const endpoint = site.formspree.endpoint;
     margin: 0 0 1.25rem;
     color: color-mix(in oklab, var(--ink) 30%, transparent);
     font-family: var(--font-ma-shan-zheng);
-    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-size: clamp(3rem, 7vw, 6rem);
     letter-spacing: 0.12em;
     transform: rotate(-2deg);
   }
@@ -241,6 +255,7 @@ const endpoint = site.formspree.endpoint;
     .contact__pending {
       margin-top: 3rem;
       padding: 1.5rem;
+      transform: none;
     }
   }
 </style>

@@ -16,7 +16,7 @@ import { aboutMilestones } from './about-timeline.data';
 
     {
       aboutMilestones.length > 0 ? (
-        <ol class="about-timeline__list" data-reveal-group>
+        <ol class="about-timeline__list" data-reveal-group data-reveal-variant="stagger">
           <li class="about-timeline__line" aria-hidden="true" />
           {aboutMilestones.map(({ year, title, event }) => (
             <li class="about-timeline__item">
@@ -156,7 +156,26 @@ import { aboutMilestones } from './about-timeline.data';
   }
 
   .about-timeline__empty {
+    position: relative;
+    display: flex;
+    min-height: clamp(15rem, 30vw, 24rem);
+    align-items: flex-end;
     margin: 0;
+    padding: clamp(2rem, 4vw, 3.5rem);
+    border-top: 2px solid var(--ink);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+  }
+
+  .about-timeline__empty::before {
+    content: '—';
+    position: absolute;
+    top: -0.42em;
+    right: 0;
+    color: color-mix(in oklab, var(--ink) 8%, transparent);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: clamp(10rem, 25vw, 22rem);
+    line-height: 1;
   }
 
   /* 「未完待续」与空态「行年待记」共用闲笔题字样 */
@@ -165,7 +184,7 @@ import { aboutMilestones } from './about-timeline.data';
     display: inline-block;
     color: color-mix(in oklab, var(--ink) 24%, transparent);
     font-family: var(--font-ma-shan-zheng);
-    font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+    font-size: clamp(2.4rem, 5vw, 4.5rem);
     letter-spacing: 0.12em;
     transform: rotate(-2deg);
   }
@@ -177,6 +196,11 @@ import { aboutMilestones } from './about-timeline.data';
 
     .about-timeline__intro {
       margin-bottom: 3rem;
+    }
+
+    .about-timeline__empty {
+      min-height: 12rem;
+      padding: 1.5rem;
     }
 
     .about-timeline__list li:not(.about-timeline__line) {

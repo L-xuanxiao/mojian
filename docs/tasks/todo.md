@@ -1,3 +1,103 @@
+# 当前任务：全站「六章墨场」大胆化重设计
+
+目标：沿用「墨笺书房」既有纸、墨、朱砂与字体资产，把全站升级为“章节戏剧化、阅读区安静”的体验；压缩无叙事作用的长空段，只在 Hero、桌面长卷与暗室保留大尺度停顿。
+
+- [x] 重塑页眉、四类 PageIntro、章节标题与全局版式节奏
+- [x] 完成首页 Hero、近况、器作、长卷、笺录、光影与卷尾的差异化章法
+- [x] 深化笺录、器作、光影、此间、留墨、404 与详情页组件样式
+- [x] 建立 `data-reveal-variant` 内部动效契约并完成低动态 / 无 JS 降级
+- [x] 同步 `DESIGN.md` 与本地 Impeccable 设计侧车
+- [x] 执行格式、类型、构建与三视口浏览器验证
+- [x] 记录结果审查、视觉证据与已知边界
+
+## 计划确认
+
+- 视觉方向：采用用户确认的“章节戏剧化 + 峰值留白”；大胆来自构图、尺度、错位装裱和章节节拍，不新增无出处特效。
+- 内容边界：保留首页章节顺序、现有事实文案、URL、内容集合与配置 schema；不虚构个人身份或社会证明。
+- 材料边界：只使用既有纸、墨、朱砂、字体、圆角、阴影和真实内容资产；不新增颜色、字体、远程素材或依赖。
+- 动效边界：高频反馈固定 150 / 250ms；页面换卷与主题换纸保持 150 / 400ms；GSAP 只承担 Hero、桌面长卷、章节一次性揭示与有限视差。
+- 降级边界：触屏不执行位移类 hover；`prefers-reduced-motion` 与无 JS 直接显示完整终态；移动长卷继续保持静态完整终态。
+- 工作区边界：保护现有 `public/favicon.svg`、`public/favicon.ico` 与本任务前已有的任务记录改动；本轮不提交、不推送。
+
+## 结果审查
+
+### 设计与实现
+
+- 全局章法：Header 强化刊头滚动态与当前章标记；`PageIntro` 落成 reading / exhibition / darkroom / personal 四种构图，普通卷首取消视口级强制高度；`SectionHeading` 统一大题字、方印编号、竖排侧注和墨线的尺度冲突。
+- 首页六段：Hero 题字与山水进一步交叠；近况改为作者手记跨页；器作形成错位展墙；桌面长卷保留唯一长时间线且移动端静态完整；笺录形成主稿 / 目录跨页；暗室以主影像带动接触印样，年谱与 Footer 主动降噪收束。
+- 内容页面：笺录目录、归档、标签、分类与文章卷首共享新骨架；器作列表 / 详情强化跨栏装裱与事实栏；光影网格与灯箱统一暗室层级；此间、留墨和 404 分别采用手记、投书纸面与断卷构图。原文案、章节顺序、URL、集合 schema 与产品事实未变。
+- 动效契约：新增 `intro-*`、`folio`、`spread`、`exhibit`、`contact-sheet`、`stagger` 内部变体；移动端 `spread` 改用纵向揭示，避免未入场横移造成页面溢出。CSS 管高频反馈，GSAP 只管 Hero、桌面长卷、章节一次性揭示和有限视差。
+- 交互补强：JournalSearch 与 GalleryLightbox 改为核心交互随页面加载水合，消除首个输入 / 点击竞态；器作轮播增加画布左右方向键和可见焦点，保留点击、拖拽与按钮入口。
+
+### 验证证据
+
+- 静态：本轮变更文件定向 Prettier 已执行；`git diff --check` 通过；`pnpm check` 为 50 files、0 errors / 0 warnings / 0 hints；`pnpm build` 成功生成 24 页，Pagefind 索引 3 页。
+- 格式基线：全仓 `pnpm format:check` 仍命中 33 个既有、未触及文件，未批量改写无关基线；本轮触及文件均已定向格式化。
+- 路由与视口：生产预览覆盖首页、笺录列表 / 正文 / 归档 / 标签 / 分类、器作列表 / 详情、光影、此间、留墨和 404；1440×1000、768×1024、390×844 均完成巡检。最终定向复核中器作桌面、首页移动、笺录移动与此间平板的 `scrollWidth === clientWidth`。
+- 交互：主题 light → dark → light 双向切换后无过渡类残留；连续检索「留白」→「Astro」即时替换为不同结果；轮播方向键与拖拽状态为 `01 → 02 → 01 → 02`；灯箱打开、下一幅、Escape 与焦点归还均通过。
+- 降级：390×844 触屏媒体查询不命中细指针 hover，器作 transform 为 `none`；reduced-motion 与无 JS 下 reveal 隐藏数为 0，移动长卷题跋 / 诗句 / 卷尾 opacity 均为 1；正常路由控制台 warning / error 为 0，404 文档按语义返回 404。
+- 视觉证据：截图保存在本次 Codex visualizations 目录，包含 `six-ink-home-desktop.png`、`six-ink-confirm-projects-desktop.png`、`six-ink-confirm-home-mobile.png`、`six-ink-journey-mobile.png`、`six-ink-darkroom-desktop.png`、`six-ink-confirm-about-tablet.png` 与 `six-ink-404-mobile.png`。
+- Detector：按要求在全部 UI 完成后对变更目标仅运行一次。可见 warning 为设计契约中的 `--ease-seal` 印章回弹与 prose h2 3px 墨线题签；字号 / 色值 advisory 多为已文档化档位、流体端点或既有全局值，未据此破坏设计系统。
+
+### 已知边界
+
+- 浏览器覆盖为 Chromium 桌面 / 平板 / 移动仿真，未覆盖真实 iOS / Android 硬件；自定义 404 的网络状态码为预期的 404。
+- `.impeccable/design.json` 已同步四类卷首、章节密度与 reveal 变体，但继续由 `.gitignore` 作为本地侧车忽略。
+- 既有 favicon SVG / ICO 改动完整保留；本轮未新增依赖，未提交、未推送。
+
+# 当前任务：刷新 Impeccable 设计侧车
+
+目标：执行 `$impeccable document` 的侧车刷新路径，使 `.impeccable/design.json` 与当前 `DESIGN.md` 及已实现组件保持一致，同时不覆盖已定稿的根设计文档。
+
+- [x] 确认命令意图与现有未提交改动边界
+- [x] 提取当前设计扩展、组件样张与叙事映射
+- [x] 重写 `.impeccable/design.json` 并校验 schema
+- [x] 核对 `DESIGN.md` 保持不变且 favicon 改动未受影响
+- [x] 记录结果审查
+
+## 计划确认
+
+- 文档边界：依据上一轮明确的 sidecar stale 提示，本次只刷新 `.impeccable/design.json`，不覆盖或改写 `DESIGN.md`。
+- 提取边界：frontmatter 已承担颜色、字体、圆角、间距和基础组件令牌；sidecar 只承载 tonal ramp、阴影、动效、断点、代表性组件样张与设计叙事，不重复原始令牌。
+- 事实边界：全部值来自当前 `DESIGN.md`、全局令牌与已实现组件；不新增视觉规则，不虚构组件。
+- Git 边界：`.impeccable/design.json` 继续作为本地忽略文件；保留上一任务未提交的 favicon 与任务文档改动，本轮不提交、不推送。
+
+## 结果审查
+
+- 刷新范围：按 stale-hint 的专用路径只重写 `.impeccable/design.json`；`DESIGN.md` 无 diff，既有产品事实、根设计令牌与视觉规则均未被覆盖。
+- 扩展内容：sidecar 保持 schemaVersion 2，现含 10 个颜色 metadata、5 个字体角色、2 个阴影、5 个动效、3 个断点和 10 个代表组件；新增页面换卷 `150ms out / 400ms in` 与主题换纸 `400ms clip-path: circle()`，高频反馈明确收敛到 150 / 250ms。
+- 组件同步：按钮、墨线链接、描边印章、导航与墨线条目的样张已对齐当前实现；补入细指针 hover 门控，导航更新为 1.5 stroke 图标与 150 / 250ms 节拍，条目移除旧 550 / 400ms 迟滞并改为 250ms。
+- 叙事同步：North Star、两段 Overview、5 条 Key Characteristics、5 条 Named Rules、6 条 Do 与 6 条 Don't 均以脚本和 `DESIGN.md` 逐字比对通过，保留代码标记与精确时长，不再使用旧版转述。
+- 验证结果：JSON 解析、generatedAt ISO 时间、组件数量与 kind 枚举、5–10 个组件边界均通过；sidecar 的定向 Prettier 检查通过，文件写入时间晚于 `DESIGN.md`，且继续由 `.gitignore` 本地忽略。
+- 工作区边界：上一任务的 `public/favicon.svg`、`public/favicon.ico` 与本任务单改动均保留；本轮没有修改运行时代码、依赖或 URL，按纯设计文档任务未重复执行项目构建，未提交、未推送。
+
+# 当前任务：重绘「笺」字印章网站图标
+
+目标：将 Astro 默认图标替换为与「墨笺书房」一致的朱砂白文「笺」字 SVG 方印，并确保浏览器小尺寸与旧格式回退保持一致。
+
+- [x] 核对现有 favicon、manifest 与 `/mojian` 子路径接线
+- [x] 绘制不依赖外部字体的「笺」字朱砂白文 SVG
+- [x] 同步 `.ico` 回退并检查多尺寸辨识度
+- [x] 执行格式、构建、产物与浏览器验证
+- [x] 记录结果审查与已知边界
+
+## 计划确认
+
+- 视觉方向：采用朱砂底、宣纸字的白文方印，保留手工钤印的不齐边与少量缺口；细节以 16–32px 仍能辨认「笺」为上限，不做噪点堆叠。
+- 技术方向：印文全部转为 SVG 几何路径，不使用 `<text>` 或外部字体，避免 favicon 独立加载时字形漂移；保留透明外缘以适配浏览器标签页与桌面快捷方式。
+- 接线方向：沿用现有 `withBase('/favicon.svg')` 与 manifest，不改 URL；由同一 SVG 生成 `.ico` 兼容回退，不新增依赖。
+- 验证方向：检查 SVG/XML 与构建产物，分别以 16、32、64、128px 目检，并验证首页实际 favicon 请求、控制台和 `/mojian` 路径。
+- Git 边界：本轮不提交、不推送。
+
+## 结果审查
+
+- 视觉结果：`public/favicon.svg` 已由 Astro 默认标记改为朱砂 `#a44736`、宣纸 `#f4efe3` 的白文「笺」字方印；印面、边款与印文均为手写 SVG 路径，未使用 `<text>`、滤镜、外部字体或脚本。
+- 小尺寸结果：浏览器按 16 / 32 / 64 / 128px 在浅灰纸面与深墨背景分别渲染检查；16px 保留完整方印轮廓，32px 起「笺」字与边款清晰，未继续叠加只在大尺寸可见的纹理。
+- 回退一致：`public/favicon.ico` 由同一 SVG 渲染源生成，`ffprobe` 确认内含 RGBA PNG 的 16 / 32 / 48 / 64px 四档，不再回退到旧 Astro 图标。
+- 接线验证：首页继续使用 `withBase('/favicon.svg')` 与 `/favicon.ico`，manifest 继续指向 `./favicon.svg`；本地浏览器实测三者在 `/mojian` 子路径下均返回 200，首页控制台 0 error / 0 warning。
+- 静态验证：SVG 以 Prettier HTML parser、任务文档以 Markdown parser 定向检查通过；`git diff --check` 通过；`pnpm check` 为 50 files、0 errors / 0 warnings / 0 hints；`pnpm build` 成功生成 24 页，Pagefind 索引 3 页；Impeccable detector 返回空数组。
+- 已知边界：全仓 `pnpm format:check` 仍只命中既有 55 文件格式基线，未批量改写无关文件；浏览器可能缓存 favicon，部署后如未立即更新需强制刷新或重新打开标签页。本轮未新增依赖、未改 URL，未提交、未推送。
+
 # 当前任务：GitHub Pages 首次部署
 
 目标：将已推送到 `L-xuanxiao/mojian` 的 Astro 静态站接入 GitHub Actions，在 `main` 更新时自动构建并发布到 `/mojian/`。

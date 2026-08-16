@@ -26,7 +26,7 @@ const tags = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeComp
       </p>
     </PageIntro>
 
-    <ol class="tag-index" data-reveal-group>
+    <ol class="tag-index" data-reveal-group data-reveal-variant="stagger">
       {
         tags.map(([tag, count], index) => (
           <li>
@@ -46,11 +46,9 @@ const tags = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeComp
 
 <style>
   .tag-index {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0 3rem;
+    display: block;
     margin: 0 0 clamp(6rem, 12vw, 10rem);
-    padding: 2rem 0 0;
+    padding: 0;
     border-top: 2px solid var(--ink);
     list-style: none;
   }
@@ -61,13 +59,15 @@ const tags = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeComp
 
   .tag-index a {
     display: grid;
-    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
-    gap: 1rem;
+    grid-template-columns: minmax(4.5rem, 1fr) minmax(0, 7fr) minmax(4rem, 1fr);
+    gap: clamp(1rem, 4vw, 4rem);
     align-items: baseline;
-    padding-block: 1.7rem;
+    padding-block: clamp(1.4rem, 3vw, 2.4rem);
     color: var(--ink);
     text-decoration: none;
-    transition: transform 250ms var(--ease-ink);
+    transition:
+      color 150ms var(--ease-ink),
+      transform 250ms var(--ease-ink);
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -77,13 +77,16 @@ const tags = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeComp
   }
 
   .tag-index__number {
-    color: var(--bronze);
+    color: color-mix(in oklab, var(--cinnabar) 48%, transparent);
     font-family: var(--font-ma-shan-zheng);
-    font-size: 1.2rem;
+    font-size: clamp(2.4rem, 6vw, 5.5rem);
+    line-height: 0.75;
   }
 
   .tag-index__name {
-    font-size: clamp(1.2rem, 2.8vw, 1.8rem);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    line-height: 1;
   }
 
   .tag-index__count {
@@ -98,7 +101,17 @@ const tags = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeComp
     }
 
     .tag-index a {
-      grid-template-columns: 2rem minmax(0, 1fr) auto;
+      grid-template-columns: 3rem minmax(0, 1fr) auto;
+      gap: 0.75rem;
+      padding-block: 1.5rem;
+    }
+
+    .tag-index__number {
+      font-size: 2.6rem;
+    }
+
+    .tag-index__name {
+      font-size: clamp(1.9rem, 10vw, 3.2rem);
     }
   }
 </style>

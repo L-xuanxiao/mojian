@@ -87,7 +87,8 @@ const slides = await Promise.all(
   .project-hero__copy {
     position: relative;
     z-index: 2;
-    grid-column: 1 / span 5;
+    grid-column: 1 / span 6;
+    padding-block: clamp(2rem, 5vw, 4rem);
   }
 
   .project-hero__kicker {
@@ -96,7 +97,7 @@ const slides = await Promise.all(
 
   .project-hero h1 {
     margin: 0;
-    font-size: clamp(4rem, 9vw, 8rem);
+    font-size: clamp(5rem, 11vw, 10rem);
     font-weight: 400;
     line-height: 0.95;
     letter-spacing: 0.04em;
@@ -106,7 +107,8 @@ const slides = await Promise.all(
     max-width: 30rem;
     margin: 2rem 0 0;
     color: var(--ink-soft);
-    font-size: 1.02rem;
+    font-size: clamp(1rem, 1.4vw, 1.16rem);
+    line-height: 2;
   }
 
   .project-hero__facts {
@@ -133,8 +135,14 @@ const slides = await Promise.all(
   }
 
   .project-hero__media {
-    grid-column: 6 / -1;
+    position: relative;
+    z-index: 1;
+    grid-row: 1;
+    grid-column: 5 / -1;
+    width: calc(100% + clamp(2rem, 6vw, 6rem));
+    margin-right: clamp(-6rem, -6vw, -2rem);
     min-width: 0;
+    box-shadow: var(--shadow-lg);
   }
 
   .project-hero__folio {
@@ -216,7 +224,10 @@ const slides = await Promise.all(
 
     .project-hero__media {
       order: 2;
+      width: 100%;
+      margin-right: 0;
       margin-top: 2rem;
+      box-shadow: none;
     }
 
     .project-story-layout {

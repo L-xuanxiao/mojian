@@ -34,10 +34,15 @@ import GiscusWall from '../components/guestbook/GiscusWall.astro';
 <style>
   .guestbook-stage {
     display: grid;
-    grid-template-columns: minmax(13rem, 3fr) minmax(0, 8fr);
+    grid-template-columns: minmax(13rem, 3fr) minmax(0, 9fr);
     gap: clamp(3rem, 8vw, 8rem);
     align-items: start;
-    padding-block: 2rem clamp(7rem, 14vw, 12rem);
+    padding-block: 3rem clamp(7rem, 12vw, 10rem);
+  }
+
+  .guestbook-stage__aside {
+    position: sticky;
+    top: 7.5rem;
   }
 
   .guestbook-stage__aside > .folio-label {
@@ -61,6 +66,7 @@ import GiscusWall from '../components/guestbook/GiscusWall.astro';
     }
 
     .guestbook-stage__aside {
+      position: static;
       margin-bottom: 3rem;
     }
   }

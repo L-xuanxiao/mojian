@@ -33,7 +33,12 @@ const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
       </p>
     </PageIntro>
 
-    <section class="journal-issue" aria-labelledby="journal-issue-title">
+    <section
+      class="journal-issue"
+      aria-labelledby="journal-issue-title"
+      data-reveal-group
+      data-reveal-variant="spread"
+    >
       <div class="journal-issue__lead">
         <p class="folio-label" id="journal-issue-title">本期主稿</p>
         <EntryList posts={posts.slice(0, 1)} variant="feature" />
@@ -46,7 +51,7 @@ const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
         </div>
         <p>输入题名、正文或标签，在这册笺录里寻一处旧墨。</p>
         <div data-pagefind-ignore>
-          <JournalSearch client:visible />
+          <JournalSearch client:load />
         </div>
       </aside>
     </section>
@@ -64,10 +69,10 @@ const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
 <style>
   .journal-issue {
     display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(18rem, 4fr);
-    gap: clamp(4rem, 9vw, 9rem);
+    grid-template-columns: minmax(0, 8fr) minmax(18rem, 4fr);
+    gap: clamp(3rem, 8vw, 8rem);
     align-items: start;
-    padding-block: clamp(4rem, 8vw, 7rem);
+    padding-block: clamp(3rem, 7vw, 6rem);
   }
 
   .journal-issue__lead > .folio-label {
@@ -75,10 +80,12 @@ const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
   }
 
   .journal-issue__search {
-    margin-top: clamp(2rem, 8vw, 7rem);
-    padding: 1.75rem;
+    position: sticky;
+    top: 7.5rem;
+    margin-top: clamp(4rem, 10vw, 9rem);
+    padding: 1.5rem 0 0;
     border-top: 2px solid var(--ink);
-    background: color-mix(in oklab, var(--paper-deep) 48%, transparent);
+    border-bottom: 1px solid var(--line);
   }
 
   .journal-issue__search-head,
@@ -103,9 +110,9 @@ const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
   }
 
   .journal-catalog {
-    max-width: 58rem;
+    max-width: 64rem;
     margin-left: auto;
-    padding-block: 2rem clamp(6rem, 12vw, 11rem);
+    padding-block: 2rem clamp(6rem, 11vw, 9rem);
   }
 
   .journal-catalog > header {
@@ -118,6 +125,7 @@ const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
     }
 
     .journal-issue__search {
+      position: static;
       margin-top: 4rem;
     }
 

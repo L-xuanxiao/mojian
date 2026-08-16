@@ -12,6 +12,10 @@
   transition: transform 250ms var(--ease-ink);
 }
 
+.gallery-entry:first-child {
+  grid-column: 1 / span 8;
+}
+
 .gallery-entry--portrait {
   grid-column: span 5;
 }
@@ -21,8 +25,8 @@
 }
 
 .gallery-entry:nth-child(2) {
-  grid-column: 9 / -1;
-  margin-top: 8rem;
+  grid-column: 10 / -1;
+  margin-top: 11rem;
 }
 
 .gallery-entry:nth-child(3) {
@@ -31,7 +35,7 @@
 
 .gallery-entry:nth-child(4) {
   grid-column: 7 / -1;
-  margin-top: 3rem;
+  margin-top: 6rem;
 }
 
 .gallery-entry:last-child:not(.gallery-entry--wide) {
@@ -40,11 +44,18 @@
 
 .gallery-entry__number {
   position: absolute;
-  top: -1.7rem;
+  top: -2.4rem;
   left: 0;
   color: var(--bronze);
   font-family: var(--font-ma-shan-zheng);
-  font-size: 1.1rem;
+  font-size: 1.65rem;
+}
+
+.gallery-entry:first-child .gallery-entry__number {
+  top: -0.75em;
+  left: -0.08em;
+  color: color-mix(in oklab, var(--paper) 14%, transparent);
+  font-size: clamp(5rem, 10vw, 9rem);
 }
 
 .gallery-entry__image {
@@ -155,6 +166,12 @@
   font-size: clamp(1.125rem, 2vw, 1.4rem);
 }
 
+.gallery-entry:first-child h2 {
+  font-family: var(--font-ma-shan-zheng);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 400;
+}
+
 .gallery-entry figcaption p {
   margin: 0.35rem 0 0;
   color: var(--ink-soft);
@@ -207,6 +224,28 @@
   border-radius: 2px;
 }
 
+.ink-lightbox .yarl__button {
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid rgb(238 233 222 / 0.28);
+  background: rgb(17 18 16 / 0.62);
+  transition:
+    border-color 150ms var(--ease-ink),
+    background-color 150ms var(--ease-ink),
+    transform 160ms var(--ease-ink);
+}
+
+.ink-lightbox .yarl__button:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ink-lightbox .yarl__button:hover {
+    border-color: rgb(238 233 222 / 0.72);
+    background: rgb(17 18 16 / 0.86);
+  }
+}
+
 .ink-lightbox__caption {
   position: absolute;
   right: 1rem;
@@ -214,11 +253,11 @@
   left: 1rem;
   display: flex;
   align-items: baseline;
-  justify-content: center;
+  justify-content: space-between;
   gap: 0.75rem 1rem;
   color: #eee9de;
   font-family: var(--font-noto-serif);
-  text-align: center;
+  text-align: left;
   pointer-events: none;
 }
 
@@ -241,6 +280,16 @@
   .gallery-entry:nth-child(4),
   .gallery-entry:last-child:not(.gallery-entry--wide) {
     margin-top: 3.5rem;
+  }
+
+  .gallery-entry:first-child {
+    grid-column: auto;
+  }
+
+  .gallery-entry:first-child .gallery-entry__number {
+    top: -2rem;
+    left: 0;
+    font-size: 1.65rem;
   }
 
   .gallery-entry figcaption {

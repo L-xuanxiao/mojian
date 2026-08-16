@@ -7,6 +7,11 @@
   cursor: grab;
 }
 
+.project-carousel__viewport:focus-visible {
+  outline: 2px solid var(--cinnabar);
+  outline-offset: 0.3rem;
+}
+
 .project-carousel__viewport:active {
   cursor: grabbing;
 }
@@ -18,7 +23,7 @@
 }
 
 .project-carousel__slide {
-  flex: 0 0 min(90%, 68rem);
+  flex: 0 0 min(92%, 72rem);
   min-width: 0;
   margin: 0;
 }
@@ -37,6 +42,7 @@
   margin-top: 0.75rem;
   color: var(--ink-soft);
   font-size: 0.875rem;
+  letter-spacing: 0.04em;
 }
 
 .project-carousel__controls {
@@ -58,8 +64,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border: 1px solid var(--line);
   background: color-mix(in oklab, var(--paper) 72%, transparent);
   color: var(--ink);
@@ -67,11 +73,15 @@
   transition:
     border-color 150ms var(--ease-ink),
     opacity 150ms var(--ease-ink),
-    transform 150ms var(--ease-ink);
+    transform 160ms var(--ease-ink),
+    background-color 150ms var(--ease-ink),
+    color 150ms var(--ease-ink);
 }
 
 .project-carousel__buttons button:hover:not(:disabled) {
   border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
 }
 
 @media (hover: hover) and (pointer: fine) {

@@ -124,15 +124,16 @@ import { withBase } from '../../site.config';
     min-height: calc(100svh - 4rem);
     grid-template-columns: repeat(12, minmax(0, 1fr));
     align-items: center;
-    padding-block: 7rem 5.5rem;
+    padding-block: 6.25rem 5rem;
   }
 
   .hero__art {
     position: relative;
     isolation: isolate;
     grid-row: 1;
-    grid-column: 5 / -1;
-    margin: 0;
+    grid-column: 4 / -1;
+    width: calc(100% + clamp(2rem, 5vw, 5rem));
+    margin: 0 clamp(-5rem, -5vw, -2rem) 0 0;
     box-shadow: var(--shadow-lg);
     background:
       radial-gradient(
@@ -146,7 +147,7 @@ import { withBase } from '../../site.config';
   .hero__art :global(img) {
     display: block;
     width: 100%;
-    min-height: min(68vh, 47rem);
+    min-height: min(74vh, 52rem);
     object-fit: cover;
   }
 
@@ -237,9 +238,9 @@ import { withBase } from '../../site.config';
     position: relative;
     z-index: 4;
     grid-row: 1;
-    grid-column: 1 / span 7;
+    grid-column: 1 / span 8;
     align-self: center;
-    padding-block: 3rem;
+    padding-block: 2rem 4rem;
   }
 
   .hero__eyebrow {
@@ -250,10 +251,10 @@ import { withBase } from '../../site.config';
     display: flex;
     margin: 0;
     color: var(--ink);
-    font-size: clamp(6.5rem, 17vw, 14rem);
+    font-size: clamp(7.5rem, 19vw, 16rem);
     font-weight: 400;
     line-height: 0.68;
-    letter-spacing: -0.08em;
+    letter-spacing: -0.04em;
     text-shadow: 0 0.04em 0.16em color-mix(in oklab, var(--paper) 75%, transparent);
   }
 
@@ -276,12 +277,13 @@ import { withBase } from '../../site.config';
   }
 
   .hero-title-mask--offset {
-    margin-top: 0.22em;
+    margin-top: 0.18em;
+    margin-left: -0.08em;
   }
 
   .hero__tagline {
     max-width: 29rem;
-    margin: clamp(2.5rem, 5vw, 4rem) 0 0;
+    margin: clamp(2.5rem, 5vw, 4rem) 0 0 clamp(0rem, 4vw, 3.5rem);
     color: var(--ink-soft);
     font-size: clamp(1rem, 1.8vw, 1.22rem);
     line-height: 1.9;
@@ -290,7 +292,7 @@ import { withBase } from '../../site.config';
   .hero__links {
     display: flex;
     gap: 2rem;
-    margin-top: 2rem;
+    margin: 2rem 0 0 clamp(0rem, 4vw, 3.5rem);
     font-family: var(--font-noto-sans);
     font-size: 0.82rem;
   }
@@ -454,12 +456,17 @@ import { withBase } from '../../site.config';
     }
 
     .hero__title {
-      font-size: clamp(6rem, 34vw, 9rem);
+      font-size: clamp(6.5rem, 36vw, 9.5rem);
     }
 
     .hero__tagline {
       max-width: 21rem;
       margin-top: 2.75rem;
+      margin-left: 0;
+    }
+
+    .hero__links {
+      margin-left: 0;
     }
 
     /* 文字尺寸不变，只扩展可点击纸面，保证拇指触控热区不小于 44px */
@@ -473,8 +480,8 @@ import { withBase } from '../../site.config';
 
     .hero__art {
       order: 2;
-      width: 92%;
-      margin: 3.5rem 0 0 auto;
+      width: calc(100% + 1.25rem);
+      margin: 3.5rem -1.25rem 0 auto;
     }
 
     .hero__art :global(img) {

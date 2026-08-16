@@ -35,11 +35,26 @@ import { withBase } from '../site.config';
 
 <style>
   .lost {
+    position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-    gap: clamp(2.5rem, 7vw, 7rem);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: clamp(1.25rem, 3vw, 2.5rem);
     align-items: center;
-    padding-block: clamp(5rem, 11vw, 10rem) clamp(7rem, 14vw, 12rem);
+    min-height: calc(100svh - 5rem);
+    padding-block: clamp(4rem, 8vw, 7rem);
+  }
+
+  .lost::before {
+    position: absolute;
+    inset: 9% 3% 13% 38%;
+    border: 1px solid var(--line);
+    content: '';
+    pointer-events: none;
+  }
+
+  .lost__copy {
+    z-index: 2;
+    grid-column: 1 / span 7;
   }
 
   .lost__copy > .folio-label {
@@ -48,9 +63,10 @@ import { withBase } from '../site.config';
 
   .lost__copy h1 {
     margin: 0;
-    font-size: clamp(3.2rem, 8vw, 6.5rem);
+    font-size: clamp(5rem, 12vw, 10rem);
     font-weight: 400;
-    letter-spacing: 0.05em;
+    line-height: 0.86;
+    letter-spacing: -0.02em;
   }
 
   .lost__note {
@@ -67,12 +83,16 @@ import { withBase } from '../site.config';
   }
 
   .lost__art {
+    z-index: 1;
+    grid-column: 6 / -1;
+    grid-row: 1;
+    width: calc(100% + clamp(1rem, 4vw, 4rem));
     margin: 0;
     overflow: hidden;
-    border: 1px solid color-mix(in oklab, var(--ink) 22%, transparent);
     padding: clamp(0.55rem, 1.2vw, 0.9rem);
-    background: var(--paper);
+    background: var(--paper-deep);
     box-shadow: var(--shadow-lg);
+    transform: translateY(clamp(2rem, 7vw, 6rem));
   }
 
   .lost__art img {
@@ -92,11 +112,23 @@ import { withBase } from '../site.config';
   @media (max-width: 767px) {
     .lost {
       display: block;
+      min-height: 0;
       padding-block: 4rem 6rem;
     }
 
+    .lost::before {
+      inset: 2rem 0 auto 18%;
+      height: 16rem;
+    }
+
+    .lost__copy {
+      position: relative;
+    }
+
     .lost__art {
+      width: calc(100% + 1.25rem);
       margin-top: 3rem;
+      transform: none;
     }
   }
 </style>
