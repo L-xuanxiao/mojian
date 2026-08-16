@@ -1,8 +1,7 @@
 // 笺录检索：全站首个 React Island。
 // 数据层为 Pagefind 纯 JS API（构建期生成 /pagefind/ 索引，dev 下不存在 → 优雅降级）；
-// React 管状态机，Motion 管结果落墨入场，reduced-motion 时直达最终态。
+// React 只管检索状态；键盘输入属于高频操作，结果返回后立即更新，不附加入退场等待。
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion, type Variants } from 'motion/react';
 import { Search, X } from 'lucide-react';
 import { withBase } from '../../site.config';
 
@@ -31,7 +30,6 @@ export default function JournalSearch() {
   const [status, setStatus] = useState<Status>('idle');
   const [results, setResults] = useState<ResultItem[]>([]);
   const pagefindRef = useRef<PagefindModule | null>(null);
-  const reducedMotion = useReducedMotion();
 
   // 组件进入视口即后台加载索引模块；失败则进入降级态
   useEffect(() => {
@@ -90,17 +88,6 @@ export default function JournalSearch() {
     setStatus('idle');
   };
 
-  // 目录式轻入场：只用短距离位移与透明度，避免重复全站旧式大模糊。
-  const listVariants: Variants = {
-    visible: { transition: { staggerChildren: reducedMotion ? 0 : 0.06 } },
-  };
-  const itemVariants: Variants = {
-    hidden: reducedMotion ? { opacity: 0 } : { opacity: 0, y: 10 },
-    visible: reducedMotion
-      ? { opacity: 1, transition: { duration: 0 } }
-      : { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } },
-  };
-
   return (
     <section aria-label="检索笺录" className="search-island">
       <div className="group relative">
@@ -141,37 +128,25 @@ export default function JournalSearch() {
         )}
       </div>
 
-      <AnimatePresence mode="wait">
-        {results.length > 0 && (
-          <motion.ol
-            key={query.trim()}
-            className="m-0 mt-2 list-none p-0"
-            variants={listVariants}
-            initial="hidden"
-            animate="visible"
-            exit={{ opacity: 0, transition: { duration: reducedMotion ? 0 : 0.15 } }}
-          >
-            {results.map((item) => (
-              <motion.li
-                key={item.url}
-                variants={itemVariants}
-                whileHover={reducedMotion ? undefined : { x: 4 }}
-                transition={{ duration: 0.22, ease: 'easeOut' }}
-                className="border-line border-b last:border-b-0"
-              >
-                <a href={item.url} className="block py-4 no-underline">
-                  <span className="text-ink block text-base leading-snug">{item.title}</span>
-                  {/* Pagefind excerpt 自带 <mark> 高亮，样式见 global.css */}
-                  <span
-                    className="text-ink-soft search-excerpt mt-1 block text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: item.excerpt }}
-                  />
-                </a>
-              </motion.li>
-            ))}
-          </motion.ol>
-        )}
-      </AnimatePresence>
+      {results.length > 0 && (
+        <ol className="m-0 mt-2 list-none p-0">
+          {results.map((item) => (
+            <li
+              key={item.url}
+              className="border-line hover:bg-paper-deep/30 focus-within:bg-paper-deep/30 border-b transition-colors duration-150 last:border-b-0"
+            >
+              <a href={item.url} className="block py-4 no-underline">
+                <span className="text-ink block text-base leading-snug">{item.title}</span>
+                {/* Pagefind excerpt 自带 <mark> 高亮，样式见 global.css */}
+                <span
+                  className="text-ink-soft search-excerpt mt-1 block text-sm leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: item.excerpt }}
+                />
+              </a>
+            </li>
+          ))}
+        </ol>
+      )}
     </section>
   );
 }

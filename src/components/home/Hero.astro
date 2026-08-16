@@ -68,7 +68,9 @@ import { withBase } from '../../site.config';
     <div class="hero__copy" data-ink-avoid>
       <p class="folio-label hero__eyebrow">个人数字书卷</p>
       <h1 class="hero__title font-display" aria-label="墨笺">
-        <span class="hero-title-mask"><span class="hero-title-line hero-title-line--cinnabar">墨</span></span>
+        <span class="hero-title-mask"
+          ><span class="hero-title-line hero-title-line--cinnabar">墨</span></span
+        >
         <span class="hero-title-mask hero-title-mask--offset"
           ><span class="hero-title-line">笺</span></span
         >
@@ -395,7 +397,7 @@ import { withBase } from '../../site.config';
     height: 3.5rem;
     background: var(--line);
     transform-origin: top center;
-    animation: scroll-breath 2.4s var(--ease-ink) infinite;
+    animation: scroll-breath 2.4s ease-in-out infinite;
   }
 
   @keyframes scroll-breath {
@@ -458,6 +460,15 @@ import { withBase } from '../../site.config';
     .hero__tagline {
       max-width: 21rem;
       margin-top: 2.75rem;
+    }
+
+    /* 文字尺寸不变，只扩展可点击纸面，保证拇指触控热区不小于 44px */
+    .hero__links a {
+      display: inline-flex;
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+      align-items: center;
+      padding-inline: 0.25rem;
     }
 
     .hero__art {

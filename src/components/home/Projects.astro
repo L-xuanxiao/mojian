@@ -78,7 +78,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
     font-size: 0.62rem;
     letter-spacing: 0.16em;
     writing-mode: vertical-rl;
-    transition: color 400ms var(--ease-ink);
+    transition: color 250ms var(--ease-ink);
   }
 
   .project-preview__item--1 {
@@ -99,7 +99,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
     overflow: hidden;
     background: var(--paper-deep);
     box-shadow: var(--shadow-md);
-    transition: box-shadow 500ms var(--ease-ink);
+    transition: box-shadow 250ms var(--ease-ink);
   }
 
   .project-preview__image :global(img) {
@@ -107,9 +107,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
     width: 100%;
     aspect-ratio: 3 / 2;
     object-fit: cover;
-    transition:
-      transform 700ms var(--ease-ink),
-      filter 500ms var(--ease-ink);
+    transition: transform 250ms var(--ease-ink);
   }
 
   .project-preview__item--2 .project-preview__image :global(img) {
@@ -123,7 +121,6 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
   @media (hover: hover) and (pointer: fine) {
     .project-preview__image:hover :global(img) {
       transform: scale(1.026);
-      filter: contrast(1.04);
     }
 
     /* 景深：展品浮起，竖签落朱砂 */

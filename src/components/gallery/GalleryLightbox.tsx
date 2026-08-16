@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { motion, useReducedMotion } from 'motion/react';
+import { useReducedMotion } from 'motion/react';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import './gallery-lightbox.css';
@@ -69,13 +69,10 @@ export default function GalleryLightbox({ items }: Props) {
     <>
       <section className="gallery-grid" aria-label="光影作品" ref={gridRef}>
         {items.map((item, itemIndex) => (
-          <motion.figure
+          <figure
             className={`gallery-entry gallery-entry--${item.orientation}`}
             key={item.id}
             data-ink-avoid
-            initial={false}
-            whileHover={reducedMotion ? undefined : { y: -7 }}
-            transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
           >
             <span className="gallery-entry__number" aria-hidden="true">
               {String(itemIndex + 1).padStart(2, '0')}
@@ -110,7 +107,7 @@ export default function GalleryLightbox({ items }: Props) {
                 {item.projectHref && <a href={item.projectHref}>相关器作</a>}
               </p>
             </figcaption>
-          </motion.figure>
+          </figure>
         ))}
       </section>
 
@@ -127,7 +124,7 @@ export default function GalleryLightbox({ items }: Props) {
         animation={
           reducedMotion
             ? { fade: 0, swipe: 0, navigation: 0 }
-            : { fade: 220, swipe: 420, navigation: 320 }
+            : { fade: 250, swipe: 400, navigation: 250 }
         }
         render={{
           iconPrev: () => <ChevronLeft aria-hidden="true" strokeWidth={1.5} />,

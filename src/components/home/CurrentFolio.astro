@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import SectionHeading from '../SectionHeading.astro';
+import { site } from '../../site.config';
 
 // 演示数据：案头三事待主人按近况更新，条目即改即生效
 const statusItems = [
@@ -9,13 +10,26 @@ const statusItems = [
   { text: '整理去年的胶片照片', meta: '缓慢推进' },
 ];
 
+const [journalEntries, projectEntries, galleryEntries] = await Promise.all([
+  getCollection('journal', ({ data }) => !data.draft),
+  getCollection('projects', ({ data }) => !data.draft),
+  getCollection('gallery', ({ data }) => !data.draft),
+]);
+
 // 最近更新：自动取笺录最新文章的月份；无文章时不渲染该行
-const latestPost = (await getCollection('journal', ({ data }) => !data.draft)).sort(
+const latestPost = journalEntries.sort(
   (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
 )[0];
 const latestUpdate = latestPost
   ? `${latestPost.data.pubDate.getFullYear()} 年 ${latestPost.data.pubDate.getMonth() + 1} 月`
   : '';
+
+// 身份资料未填写时不臆造姓名或职业，改用构建期真实内容数量证明作者正在做什么
+const identityName = site.profile.displayName || '墨笺作者';
+const identityRole = site.profile.role;
+const identityProof = site.profile.focus.length
+  ? site.profile.focus.join(' · ')
+  : `${journalEntries.length} 篇笺录 · ${projectEntries.length} 件器作 · ${galleryEntries.length} 帧光影`;
 ---
 
 <section class="current-folio" aria-labelledby="current-folio">
@@ -26,6 +40,11 @@ const latestUpdate = latestPost
       <div class="current-folio__portrait">
         <p class="current-folio__lead" data-reveal-title>
           写字、写代码、拍照片。<br />在这里安放文章、作品与光影。
+        </p>
+        <p class="current-folio__identity" aria-label="作者身份与创作概况" data-reveal-group>
+          <span class="current-folio__identity-name">{identityName}</span>
+          {identityRole && <span>{identityRole}</span>}
+          <span>{identityProof}</span>
         </p>
         <p class="current-folio__note">
           相信克制不是减少，而是让每一处存在都有缘由。如今正在把旧站重新装订成一册可以慢慢翻阅的数字书卷。
@@ -89,6 +108,31 @@ const latestUpdate = latestPost
     max-width: 34rem;
     margin: 2.5rem 0 0 clamp(0rem, 8vw, 7rem);
     color: var(--ink-soft);
+  }
+
+  .current-folio__identity {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    margin: 1.5rem 0 0;
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+  }
+
+  .current-folio__identity > span + span {
+    padding-left: 1rem;
+    border-left: 1px solid var(--line);
+  }
+
+  .current-folio__identity-name {
+    color: var(--ink);
+    font-family: var(--font-noto-serif);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
   }
 
   .current-folio__inscription {
@@ -167,6 +211,10 @@ const latestUpdate = latestPost
 
     .current-folio__note {
       margin-left: 0;
+    }
+
+    .current-folio__identity {
+      align-items: flex-start;
     }
 
     /* 移动端收窄题字并禁折行，避免与上方 note 正文交叠 */

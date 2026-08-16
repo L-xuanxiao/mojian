@@ -105,11 +105,25 @@
 
   /* 墨迹过渡：旧页如墨淡去（轻 blur 退晕），新页自卷心晕染展开（不规则墨边） */
   ::view-transition-old(root) {
-    animation: page-out 220ms ease-in both;
+    animation: page-out 150ms var(--ease-ink) both;
   }
 
   ::view-transition-new(root) {
-    animation: page-in 460ms var(--ease-ink) both;
+    animation: page-in 400ms var(--ease-ink) both;
+  }
+
+  /* 昼夜换纸：新主题从印钮中心扩开；普通跨页仍使用上方卷心墨晕。 */
+  :root.is-theme-transitioning::view-transition-old(root) {
+    animation: none;
+  }
+
+  :root.is-theme-transitioning::view-transition-new(root) {
+    animation: theme-paper-reveal 400ms var(--ease-ink) both;
+  }
+
+  /* 同主题换纸统一收进 root 快照，避免品牌与项目共享元素绕过圆形揭示。 */
+  :root.is-theme-transitioning * {
+    view-transition-name: none !important;
   }
 
   @keyframes page-out {
@@ -130,6 +144,15 @@
       opacity: 1;
       filter: blur(0);
       clip-path: circle(120% at 50% 42%);
+    }
+  }
+
+  @keyframes theme-paper-reveal {
+    from {
+      clip-path: circle(0 at var(--theme-x, 50%) var(--theme-y, 50%));
+    }
+    to {
+      clip-path: circle(var(--theme-radius, 150vmax) at var(--theme-x, 50%) var(--theme-y, 50%));
     }
   }
 

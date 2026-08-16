@@ -9,6 +9,7 @@
   position: relative;
   grid-column: span 7;
   margin: 0;
+  transition: transform 250ms var(--ease-ink);
 }
 
 .gallery-entry--portrait {
@@ -77,7 +78,7 @@
   aspect-ratio: 3 / 2;
   object-fit: cover;
   transition:
-    transform 700ms var(--ease-ink),
+    transform 250ms var(--ease-ink),
     filter 500ms var(--ease-ink);
 }
 
@@ -98,10 +99,19 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
+  .gallery-entry:hover,
+  .gallery-entry:focus-within {
+    transform: translateY(-4px);
+  }
+
   /* 揭帘：画面微亮微显，如掀开覆画薄纱 */
   .gallery-entry__image:hover img {
     transform: scale(1.035);
-    filter: contrast(1.05) brightness(1.04);
+  }
+
+  .gallery-entry__image:hover .gallery-entry__zoom {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -127,7 +137,6 @@
   pointer-events: none;
 }
 
-.gallery-entry__image:hover .gallery-entry__zoom,
 .gallery-entry__image:focus-visible .gallery-entry__zoom {
   opacity: 1;
   transform: translateY(0);
@@ -158,8 +167,8 @@
     opacity: 0;
     transform: translateY(0.3rem);
     transition:
-      opacity 350ms var(--ease-ink),
-      transform 350ms var(--ease-ink);
+      opacity 250ms var(--ease-ink),
+      transform 250ms var(--ease-ink);
   }
 
   .darkroom .gallery-entry:hover figcaption > div > p,
@@ -255,6 +264,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .gallery-entry {
+    transition: none;
+  }
+
   .gallery-entry__image img {
     transition: none;
   }

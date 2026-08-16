@@ -105,7 +105,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
     font-size: clamp(2.5rem, 6vw, 5rem);
     line-height: 1;
     transform: translateY(-50%);
-    transition: color 500ms var(--ease-ink);
+    transition: color 250ms var(--ease-ink);
   }
 
   .project-index__media {
@@ -115,8 +115,8 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
     background: var(--paper-deep);
     box-shadow: var(--shadow-lg);
     transition:
-      transform 500ms var(--ease-ink),
-      box-shadow 500ms var(--ease-ink);
+      transform 250ms var(--ease-ink),
+      box-shadow 250ms var(--ease-ink);
   }
 
   .project-index__media :global(img) {
@@ -124,15 +124,12 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
     width: 100%;
     aspect-ratio: 3 / 2;
     object-fit: cover;
-    transition:
-      transform 700ms var(--ease-ink),
-      filter 500ms var(--ease-ink);
+    transition: transform 250ms var(--ease-ink);
   }
 
   @media (hover: hover) and (pointer: fine) {
     .project-index__media:hover :global(img) {
       transform: scale(1.028);
-      filter: contrast(1.045);
     }
 
     /* 景深：整件展品浮起，编号落朱砂，展签朱砂复笔自左写出 */
@@ -215,7 +212,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
     background: var(--cinnabar);
     transform: scaleX(0);
     transform-origin: left center;
-    transition: transform 550ms var(--ease-ink);
+    transition: transform 250ms var(--ease-ink);
   }
 
   .project-index__meta,

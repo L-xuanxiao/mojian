@@ -277,7 +277,8 @@ import SectionHeading from '../SectionHeading.astro';
     letter-spacing: 0.16em;
   }
 
-  @media (prefers-reduced-motion: no-preference) {
+  /* 仅桌面长卷由 GSAP 接管入场；移动端不初始化时间线，必须保持完整静态终态 */
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
     :global(html.js) .journey__inscription,
     :global(html.js) .journey__poem,
     :global(html.js) .journey__ending {

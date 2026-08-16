@@ -13,6 +13,10 @@ export const site = {
   profile: {
     /** 署名 / 显示名（待主人填写）；为空时自述落款保持「待主人自题」 */
     displayName: '',
+    /** 首页身份短题（如「独立开发者」）；只填写主人确认过的真实身份 */
+    role: '',
+    /** 首页关注方向；为空时改用站内真实内容数量作为能力锚点 */
+    focus: [] as readonly string[],
   },
   /** Formspree 表单 endpoint，形如 https://formspree.io/f/xxxx；为空时表单降级 */
   formspree: {

@@ -55,10 +55,10 @@ export default function ProjectCarousel({ title, slides }: Props) {
               key={slide.src}
               animate={
                 reducedMotion || selectedIndex === index
-                  ? { opacity: 1, scale: 1 }
-                  : { opacity: 0.64, scale: 0.985 }
+                  ? { opacity: 1, transform: 'scale(1)' }
+                  : { opacity: 0.64, transform: 'scale(0.985)' }
               }
-              transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
               <img
                 src={slide.src}
@@ -76,26 +76,24 @@ export default function ProjectCarousel({ title, slides }: Props) {
 
       <div className="project-carousel__controls">
         <div className="project-carousel__buttons">
-          <motion.button
+          <button
             type="button"
             aria-label="上一幅"
             aria-controls={carouselId}
             disabled={!canScrollPrev}
             onClick={scrollPrev}
-            whileTap={reducedMotion ? undefined : { scale: 0.94 }}
           >
             <ArrowLeft aria-hidden="true" strokeWidth={1.5} />
-          </motion.button>
-          <motion.button
+          </button>
+          <button
             type="button"
             aria-label="下一幅"
             aria-controls={carouselId}
             disabled={!canScrollNext}
             onClick={scrollNext}
-            whileTap={reducedMotion ? undefined : { scale: 0.94 }}
           >
             <ArrowRight aria-hidden="true" strokeWidth={1.5} />
-          </motion.button>
+          </button>
         </div>
         <div className="project-carousel__progress" aria-hidden="true">
           <span style={{ transform: `scaleX(${(selectedIndex + 1) / slides.length})` }} />

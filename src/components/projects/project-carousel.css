@@ -65,8 +65,9 @@
   color: var(--ink);
   cursor: pointer;
   transition:
-    opacity 200ms var(--ease-ink),
-    transform 200ms var(--ease-ink);
+    border-color 150ms var(--ease-ink),
+    opacity 150ms var(--ease-ink),
+    transform 150ms var(--ease-ink);
 }
 
 .project-carousel__buttons button:hover:not(:disabled) {
@@ -77,6 +78,10 @@
   .project-carousel__buttons button:hover:not(:disabled) {
     transform: translateY(-2px);
   }
+}
+
+.project-carousel__buttons button:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .project-carousel__buttons button:disabled {
@@ -110,7 +115,7 @@
   height: 100%;
   background: var(--cinnabar);
   transform-origin: left center;
-  transition: transform 420ms var(--ease-ink);
+  transition: transform 250ms var(--ease-ink);
 }
 
 @media (max-width: 767px) {

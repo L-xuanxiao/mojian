@@ -114,7 +114,7 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
     aspect-ratio: 3 / 2;
     object-fit: cover;
     transition:
-      transform 700ms var(--ease-ink),
+      transform 250ms var(--ease-ink),
       filter 500ms var(--ease-ink);
   }
 
@@ -129,7 +129,6 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
   @media (hover: hover) and (pointer: fine) {
     .gallery-preview__image:hover :global(img) {
       transform: scale(1.028);
-      filter: contrast(1.045);
     }
   }
 
