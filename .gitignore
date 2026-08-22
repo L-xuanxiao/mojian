@@ -31,3 +31,6 @@ pnpm-debug.log*
 
 # impeccable 设计工具产物（含 live 会话状态）
 .impeccable/
+
+# ZCode 计划与会话产物
+.zcode/

@@ -536,6 +536,11 @@
     transition-duration: 110ms;
   }
 
+  /* 首个题跋弹出后的后续题跋：免动画即时出现，高频浏览不觉迟滞 */
+  .inscription-tip__popup--instant {
+    transition-duration: 0ms;
+  }
+
   .skip-link {
     position: fixed;
     top: 0.75rem;

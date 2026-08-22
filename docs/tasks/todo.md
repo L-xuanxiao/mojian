@@ -1,4 +1,22 @@
-# 当前任务：critique 五项修复（P1 resize + P2 对比度/章高 + P3 契约收敛/长卷跳过）
+# 当前任务：评审后三项精致化打磨
+
+目标：按 Impeccable + Emil 双视角评审结论修复三项局部瑕疵：Hero CTA 视觉重量、题跋弹层免延迟、长卷无字空窗。
+
+- [x] ① Hero CTA「读笺录/看器作」常驻淡墨下划线，hover 加深至全墨（150ms）
+- [x] ② InscriptionTip 首次弹出后进入即时态（模块标记 + 实例幂等置位 + pointerenter 同步）
+- [x] ③ 长卷卷尾印入场 7.6→7.1，与诗句退场交叉半拍消空窗
+- [x] 验证：check/build/format 全绿 + 浏览器复测三项
+- [x] 结果审查
+
+## 结果审查
+
+- ① 实测：双视口 `text-decoration-line: underline`、offset 精确 0.4em、常驻色为墨 38%、hover 后 rgb(37,38,34) 全墨；字号与触控热区未动。
+- ② 实测：首枚 362ms（仪式保留）、同枚复开 ≤0ms 即时；跨实例首次仍约 314ms——Base UI 在 pointerenter 时按当时 delay 同步排程 timer，React 重渲染无法撤销已排程计时。边界判定：彻底免延迟需受控 open 自控时序（键盘/触屏/Escape 全套），而全站每页仅两枚钤印且跨页后新实例经模块初值直接即时，收益不配复杂度，按 stop-polishing 收口。
+- ③ 实测：73% 行程 ending opacity 0.59、76% 为 1，诗句退场与卷尾印交叉，无全空拍；框高留白（视觉判断项）按计划留档不动。
+- 回归：console 0/0、双视口无横向溢出；`.gitignore` 补 `.zcode/`（ZCode 计划存档，工具产物）。
+- 静态：定向 Prettier 通过、全仓 format:check 全绿、check 0/0/0、build 0 error。
+
+# 上一任务：critique 五项修复（P1 resize + P2 对比度/章高 + P3 契约收敛/长卷跳过）
 
 目标：按 2026-08-22 critique 快照修复全部 5 个优先问题；章高按用户决定继续压密度至 55–75svh 契约，不修改 DESIGN.md 数字。
 

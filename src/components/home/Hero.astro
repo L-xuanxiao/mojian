@@ -384,7 +384,15 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
   }
   .hero__links a {
     color: var(--ink);
-    text-decoration: none;
+    /* 常驻淡墨下划线：首屏入口不依赖 hover 即可被识别为链接 */
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, var(--ink) 38%, transparent);
+    text-underline-offset: 0.4em;
+    transition: text-decoration-color 150ms var(--ease-ink);
+  }
+
+  .hero__links a:hover {
+    text-decoration-color: var(--ink);
   }
 
   .hero__colophon {
