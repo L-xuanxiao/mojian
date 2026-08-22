@@ -237,7 +237,7 @@ components:
 
 ### Reveal 契约
 
-`data-reveal-variant` 只是一份内部 DOM / CSS 动效契约，不是公开组件 API。可用值为 `intro-reading`、`intro-exhibition`、`intro-darkroom`、`intro-personal`、`folio`、`spread`、`exhibit`、`contact-sheet` 与 `stagger`：分别表达主字入画、纸层揭开、章节墨线、跨页错峰、展签错峰、暗室显影与普通列表揭示。`data-home-chapter` 只供页眉读取首页章号与进度；`PageIntro` 的 `glyph` / `artTreatment` 和 `SectionHeading` 的 `mode` 也只属于内部展示契约。CSS 负责普通揭示、静止终态、hover、按压、遮罩与细线；GSAP 只承担 Hero、桌面长卷、暗室和有限视差。所有普通前置隐藏仅在 `:where(html.js.reveal-ready)`、非低动态条件下成立；`:where()` 刻意把门控权重归零，使后置 `.is-revealed` 终态始终可以覆盖初态。无 JS、低动态、不支持观察器或初始化异常时直接显示完整内容。
+`data-reveal-variant` 只是一份内部 DOM / CSS 动效契约，不是公开组件 API。可用值为 `intro-reading`、`intro-exhibition`、`intro-darkroom`、`intro-personal`、`folio`、`folio-turn`、`spread`、`exhibit`、`contact-sheet` 与 `stagger`：分别表达主字入画、纸层揭开、章节墨线、册页自上缘翻起（接缝处首个纸层，需在组件内声明初态以压过 scoped transform）、跨页错峰、展签错峰、暗室显影与普通列表揭示。`data-home-chapter` 只供页眉读取首页章号与进度；`PageIntro` 的 `glyph` / `artTreatment` 和 `SectionHeading` 的 `mode` 也只属于内部展示契约。CSS 负责普通揭示、静止终态、hover、按压、遮罩与细线；GSAP 只承担 Hero、桌面长卷、暗室和有限视差。所有普通前置隐藏仅在 `:where(html.js.reveal-ready)`、非低动态条件下成立；`:where()` 刻意把门控权重归零，使后置 `.is-revealed` 终态始终可以覆盖初态。无 JS、低动态、不支持观察器或初始化异常时直接显示完整内容。
 
 ## Do's and Don'ts
 
