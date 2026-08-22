@@ -1,0 +1,6 @@
+# 仓库统一文本行尾为 LF，Windows checkout 不再转 CRLF（Prettier 默认 endOfLine: lf 依赖此约定）
+* text=auto eol=lf
+
+# 二进制资产显式声明，避免行尾规范化误伤
+*.ico binary
+*.webp binary
