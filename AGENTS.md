@@ -9,6 +9,7 @@ mojian —— 基于 Astro 7 + React Islands 的个人静态网站（现代东�
 - 部署 base 为 `/mojian`：站内手写的根路径链接必须经 `src/site.config.ts` 的 `withBase()` 拼接；Astro 资产管线（Image/getImage/字体）已自动携带 base，勿重复拼接
 - 沟通：回复以"喵内が"开头，使用中文，简洁说明结果、验证和必要风险
 - 优先级：用户当前要求 > 项目实际代码、配置与约定 > 本文件 > 规划文档（`docs/mojian_plan.md` 是路线图，不代表能力已实现）
+- 文档同步：阶段完成或设计契约、动效体系、工作流约定发生变化时，及时更新本文件、`docs/agents/` 附件、`DESIGN.md` 与 `docs/progress.md`，不积压到下次会话
 
 ## 详细规则（按需查阅）
 
