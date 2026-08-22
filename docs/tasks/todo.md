@@ -1,4 +1,22 @@
-# 当前任务：全站「紧卷成册」布局重构
+# 当前任务：分支提交与格式基线清零
+
+目标：将「紧卷成册」布局重构的 36 文件工作区改动在独立分支提交；随后以 `.gitattributes` 统一仓库 LF 行尾，清零 `format:check` 的 32 文件历史基线。
+
+- [x] 建立 `tight-volumes` 分支并提交「紧卷成册」全部改动（`6cd93a9`）
+- [x] 新增 `.gitattributes`（`* text=auto eol=lf` + ico/webp binary）并 renormalize
+- [x] 全仓 `pnpm format` 重写工作区行尾，`format:check` 首次全绿
+- [x] 格式基线提交直接落在 `main`（`9e60c2d`，经用户纠正重排）并验证 check / build 全绿
+- [x] 记录结果审查
+
+## 结果审查
+
+- 行尾根因：`core.autocrlf=true` 使 Windows checkout 转 CRLF，而 Prettier 3 默认 `endOfLine: lf`；32 个从未被 prettier 触碰的文件持续报红。`git diff --ignore-cr-at-eol` 证实差异仅为行尾，无任何内容差异。
+- renormalize 结果：除新增 `.gitattributes` 外零变化，证明仓库入库历史已是 LF；工作区由 `pnpm format` 重写为 LF 后，幻影 M 在 `git add` 后全部归位，格式基线提交实际仅含 `.gitattributes` 6 行。
+- 验证：`pnpm format:check` 在 `main` 与分支均全绿（All matched files use Prettier code style）；`pnpm check` 50 files、0 errors / 0 warnings / 0 hints；`pnpm build` 成功含 Pagefind 索引；两侧工作区均干净。
+- 归宿重排：按用户纠正，基线类提交不留在特性分支——`chore` 经 cherry-pick 落于 `main`（`9e60c2d`），再以 `rebase --onto` 将任务记录重放回仅含 `feat` 的分支；分支上已无 `.gitattributes` 变更，后续合并不冲突。
+- 边界：「紧卷成册」与任务记录在 `tight-volumes` 分支（`6cd93a9`、`05822fd`），格式基线在 `main`（`9e60c2d`）；`main` 本就领先 `origin/main` 两个提交（`fe860d4`、`d6461fc` 未推送），本轮全部未推送。
+
+# 上一任务：全站「紧卷成册」布局重构
 
 目标：修复本应叠放的网格项被自动排入下一行的结构错误，以“首屏见内容、普通章半屏编辑流、仅长卷多屏”为密度原则，重排卷首、首页章节、详情页与全局卷尾。
 
