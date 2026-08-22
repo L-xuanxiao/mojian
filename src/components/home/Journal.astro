@@ -24,13 +24,18 @@ const latestLabel = latest ? `${latest.getFullYear()} 年 ${latest.getMonth() + 
     <span class="home-journal__spine" aria-hidden="true">录</span>
     <SectionHeading id="journal" title="近来所记" index="肆" note="JOURNAL" mode="chapter" />
 
-    <div class="home-journal__grid" data-reveal-group data-reveal-variant="spread">
-      <div class="home-journal__lead">
+    <div class="home-journal__grid">
+      <div class="home-journal__lead" data-reveal-variant="folio-turn">
         <p class="folio-label">本期主稿</p>
         <EntryList posts={posts.slice(0, 1)} variant="feature" />
       </div>
 
-      <aside class="home-journal__catalog" aria-label="更多近作">
+      <aside
+        class="home-journal__catalog"
+        aria-label="更多近作"
+        data-reveal-group
+        data-reveal-variant="spread"
+      >
         <div class="home-journal__catalog-head">
           <p class="folio-label">同卷篇目</p>
           <span>
@@ -98,6 +103,26 @@ const latestLabel = latest ? `${latest.getFullYear()} 年 ${latest.getMonth() + 
     background: color-mix(in oklab, var(--paper) 94%, var(--paper-deep));
     box-shadow: var(--shadow-lg);
     transform: rotate(-0.45deg);
+  }
+
+  /* 翻页接棒终态需保留常态斜置：通用变体终态是 transform:none */
+  .home-journal__lead.is-revealed {
+    transform: rotate(-0.45deg);
+  }
+
+  /*
+   * 翻页初态必须在组件内声明：通用变体的 :where() 预置态权重低于本组件的
+   * 常态 transform，会被 rotate(-0.45deg) 覆盖而丢失翻页角度。
+   */
+  :global(html.js.reveal-ready) .home-journal__lead:not(.is-revealed) {
+    transform: perspective(56rem) rotateX(9deg) translateY(2rem);
+    transform-origin: 50% 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.js.reveal-ready) .home-journal__lead:not(.is-revealed) {
+      transform: rotate(-0.45deg);
+    }
   }
 
   .home-journal__lead > .folio-label {

@@ -13,7 +13,7 @@ const reveal = (element: HTMLElement) => {
 
 const targets = Array.from(
   document.querySelectorAll<HTMLElement>(
-    '[data-page-intro], [data-reveal-variant="folio"], [data-reveal-title], [data-reveal-line], [data-reveal-group], .media-reveal',
+    '[data-page-intro], [data-reveal-variant="folio"], [data-reveal-variant="folio-turn"], [data-reveal-title], [data-reveal-line], [data-reveal-group], .media-reveal',
   ),
 ).filter((element) => {
   if (element.matches('[data-reveal-title], [data-reveal-line]')) {

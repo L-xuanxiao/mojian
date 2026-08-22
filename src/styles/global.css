@@ -361,6 +361,24 @@
       transform: translateY(0.85rem);
     }
 
+    /* 翻页接棒：册页自上缘翻起立正（transform-origin 顶部 + 轻透视），用于章节接缝的首个纸层 */
+    :where(html.js.reveal-ready) [data-reveal-variant='folio-turn'] {
+      opacity: 0;
+      transform: perspective(56rem) rotateX(9deg) translateY(2rem);
+      transform-origin: 50% 0;
+    }
+
+    [data-reveal-variant='folio-turn'] {
+      transition:
+        opacity 450ms var(--ease-ink),
+        transform 550ms var(--ease-ink);
+    }
+
+    [data-reveal-variant='folio-turn'].is-revealed {
+      opacity: 1;
+      transform: none;
+    }
+
     [data-reveal-title].is-revealed,
     [data-reveal-line].is-revealed,
     [data-reveal-group].is-revealed > *,

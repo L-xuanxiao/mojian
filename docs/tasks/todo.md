@@ -1,4 +1,25 @@
-# 当前任务：用户真实视口复现与展墙/Hero 修复
+# 当前任务：三项动效落地（合卷收束 / 翻页接棒 / 印泥磁吸）
+
+目标：按动效提案落地解评审遗留痛点的三项——长卷 peak-end 强化、章界接棒、钤印磁吸与移动端落款仪式。
+
+- [x] 合卷收束：长卷 9.4/10 起 mount 自右缘 clip-path 收拢（scrub 双向），题跋提前至 0.8 加速启动
+- [x] 翻页接棒：新增 `folio-turn` reveal 变体（rotateX 9° 自上缘翻起），章肆主稿卡接入；group 下放 catalog
+- [x] 印泥磁吸：Hero 钤印与卷尾「山水」细指针 quickTo 弹性跟随（±3px 上限）
+- [x] 移动端落款：statement 卡右上角新增小印 `hero__seal--inset`（桌面 display:none）
+- [x] 验证：check/build/format 全绿 + 浏览器六项复测
+- [x] 结果审查
+
+## 结果审查
+
+- 合卷：96% 行程实测 `inset(... 30.08% ...)`、100% 收至 94%、回滚 90% 恢复 none——scrub 双向成立，卷尾印落定后整幅卷框自右缘收拢离场。
+- 翻页：初态 matrix3d 实测 rotateX(9°) 精确吻合（cos/sin 逐位对上）+ 透视与 y 平移分量；终态精确保留常态 rotate(-0.45deg)；reduced-motion 直出常态无翻页。首版初态被组件 scoped transform 权重覆盖（:where() 预置态 0,1,0 < 组件 0,2,0），已在组件内以 `:global(html.js.reveal-ready) :not(.is-revealed)` 补声明。
+- 磁吸：两处印章 pointermove 后 inline translate 非零且封顶 ±3px、pointerleave 后归零；触屏不启用。
+- 移动印章：390×844 下位于 statement 上缘右侧（top -17px / right 13px）；注：getComputedStyle 对 inline-flex 返回计算值 flex 属标准规范化，非缺陷。
+- 启动提前：长卷 10% 行程题跋 opacity 0.17 > 0，展墙到题字的空档缩短。
+- 回归：双视口 console 0/0、无横向溢出、滚到底 reveal 隐藏 0/42。
+- 边界：reveal.ts 观察目标新增 folio-turn 选择器；DESIGN.md 的 Reveal 契约值域未同步（folio-turn 待下次文档刷新一并入册）。
+
+# 上一任务：用户真实视口复现与展墙/Hero 修复
 
 目标：用户截图反馈首页器作板块"文字溢出"、Hero 太占空间；经用户实际 Chrome（CDP 附加，视口 1707×735 @DPR1.5）复现定位并修复。
 

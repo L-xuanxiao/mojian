@@ -93,6 +93,8 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
             <a class="ink-link" href={withBase('/journal/')}>读笺录</a>
             <a class="ink-link" href={withBase('/projects/')}>看器作</a>
           </nav>
+          {/* 移动端卷首钤印：竖排 colophon 被收起后，落款仪式移入 statement 卡角 */}
+          <span class="hero__seal hero__seal--inset" aria-hidden="true">墨</span>
         </div>
       </div>
 
@@ -507,6 +509,10 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
     }
   }
 
+  .hero__seal--inset {
+    display: none;
+  }
+
   @media (max-width: 767px) {
     .hero {
       min-height: calc(100svh - 5rem);
@@ -568,6 +574,18 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
       padding: 0.9rem 0;
       background: color-mix(in oklab, var(--paper) 92%, transparent);
       backdrop-filter: none;
+    }
+
+    /* 落款仪式入卡角：小印浮于 statement 上缘右侧，恢复移动端朱砂钤印 */
+    .hero__seal--inset {
+      position: absolute;
+      top: -1.15rem;
+      right: 0.8rem;
+      display: inline-flex;
+      width: 2.2rem;
+      height: 2.2rem;
+      font-size: 1.15rem;
+      box-shadow: 0 0 0 0.22rem var(--paper);
     }
     .hero__links {
       margin-top: 1rem;
@@ -704,5 +722,25 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
         teardownHandoff?.();
       }
     });
+
+    /*
+     * 印泥磁吸：细指针下卷首钤印被指尖轻带、弹性回位（印泥有黏性）。
+     * 与入场动画同由 GSAP 统一管理 transform；触屏不启用。
+     */
+    const sealEl = hero.querySelector<HTMLElement>('[data-hero-seal]');
+    const colophon = hero.querySelector<HTMLElement>('.hero__colophon');
+    if (sealEl && colophon && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      const sealX = gsap.quickTo(sealEl, 'x', { duration: 0.45, ease: 'power3.out' });
+      const sealY = gsap.quickTo(sealEl, 'y', { duration: 0.45, ease: 'power3.out' });
+      colophon.addEventListener('pointermove', (event) => {
+        const rect = colophon.getBoundingClientRect();
+        sealX(gsap.utils.clamp(-3, 3, (event.clientX - (rect.left + rect.width / 2)) * 0.12));
+        sealY(gsap.utils.clamp(-3, 3, (event.clientY - (rect.top + rect.height / 2)) * 0.12));
+      });
+      colophon.addEventListener('pointerleave', () => {
+        sealX(0);
+        sealY(0);
+      });
+    }
   }
 </script>

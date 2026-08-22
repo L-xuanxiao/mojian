@@ -27,7 +27,7 @@ import SectionHeading from '../SectionHeading.astro';
         <p>一卷不必讲完故事。山势缓移，水路留白，行至卷尾只钤一方小印。</p>
       </header>
 
-      <div class="journey__mount">
+      <div class="journey__mount" data-journey-mount>
         <div class="journey__frame">
           <div class="journey__art media-reveal" data-journey-art>
             <Image
@@ -347,12 +347,6 @@ import SectionHeading from '../SectionHeading.astro';
     outline-offset: 0.3rem;
   }
 
-  @media (hover: hover) and (pointer: fine) {
-    .journey__seal:hover {
-      transform: translateY(-0.2rem);
-    }
-  }
-
   .journey__progress {
     margin-top: 1.25rem;
   }
@@ -479,6 +473,7 @@ import SectionHeading from '../SectionHeading.astro';
 
   const section = document.querySelector<HTMLElement>('[data-journey]');
   if (section && !prefersReducedMotion) {
+    const mount = section.querySelector<HTMLElement>('[data-journey-mount]');
     const art = section.querySelector<HTMLElement>('[data-journey-art]');
     const farLayer = section.querySelector<HTMLElement>('[data-journey-layer="far"]');
     const midLayer = section.querySelector<HTMLElement>('[data-journey-layer="mid"]');
@@ -499,6 +494,7 @@ import SectionHeading from '../SectionHeading.astro';
 
     const setupTimeline = () => {
       if (!(
+        mount &&
         art &&
         farLayer &&
         midLayer &&
@@ -526,7 +522,8 @@ import SectionHeading from '../SectionHeading.astro';
         .to(nearLayer, { xPercent: -28, scale: 1.04, duration: 10 }, 0)
         .to(progress, { scaleX: 1, duration: 10 }, 0)
         .to(header, { y: -20, opacity: 0, duration: 1.2 }, 0.5)
-        .to(inscription, { y: 0, opacity: 1, duration: 1.2 }, 1.2)
+        // 题跋提前入场：缩短展墙到题字之间的叙事空档
+        .to(inscription, { y: 0, opacity: 1, duration: 1.2 }, 0.8)
         .to(inscription, { y: -14, opacity: 0, duration: 1 }, 3.3)
         .fromTo(poem, { y: 18 }, { y: 0, opacity: 1, duration: 1.4, ease: 'power2.out' }, 3.8)
         .to(poem, { y: -16, opacity: 0, duration: 1.1 }, 6.2)
@@ -536,13 +533,19 @@ import SectionHeading from '../SectionHeading.astro';
           { y: 18, rotate: -2 },
           { y: 0, rotate: 0, opacity: 1, duration: 1.2, ease: 'back.out(1.5)' },
           7.1,
+        )
+        // 合卷收束：卷尾印落定后整幅卷框自右缘收拢离场，强化 peak-end
+        .to(
+          mount,
+          { clipPath: 'inset(-2% 94% -2% -2%)', duration: 0.5, ease: 'power1.inOut' },
+          9.4,
         );
 
       teardown = () => {
         timeline.scrollTrigger?.kill();
         timeline.kill();
         // 清除 scrub 残留的内联中间态，让移动布局回到完整静态终态
-        gsap.set([inscription, poem, ending, progress], { clearProps: 'all' });
+        gsap.set([mount, inscription, poem, ending, progress], { clearProps: 'all' });
         teardown = null;
       };
     };
@@ -556,5 +559,25 @@ import SectionHeading from '../SectionHeading.astro';
         teardown?.();
       }
     });
+
+    /*
+     * 印泥磁吸：细指针下卷尾印被指尖轻带、弹性回位（印泥有黏性）。
+     * quickTo 写 x/y 与时间线（动容器 ending）互不干扰；触屏不启用。
+     */
+    const seal = section.querySelector<HTMLElement>('.journey__seal');
+    const magnetAnchor = section.querySelector<HTMLElement>('[data-journey-ending]');
+    if (seal && magnetAnchor && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      const xTo = gsap.quickTo(seal, 'x', { duration: 0.45, ease: 'power3.out' });
+      const yTo = gsap.quickTo(seal, 'y', { duration: 0.45, ease: 'power3.out' });
+      magnetAnchor.addEventListener('pointermove', (event) => {
+        const rect = magnetAnchor.getBoundingClientRect();
+        xTo(gsap.utils.clamp(-3, 3, (event.clientX - (rect.left + rect.width / 2)) * 0.12));
+        yTo(gsap.utils.clamp(-3, 3, (event.clientY - (rect.top + rect.height / 2)) * 0.12));
+      });
+      magnetAnchor.addEventListener('pointerleave', () => {
+        xTo(0);
+        yTo(0);
+      });
+    }
   }
 </script>
