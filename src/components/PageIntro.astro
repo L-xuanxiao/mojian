@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { getImage, Image } from 'astro:assets';
 import InscriptionTip from './InscriptionTip';
 
 interface Props {
@@ -7,8 +7,10 @@ interface Props {
   title: string;
   note: string;
   description: string;
+  glyph: string;
   variant?: 'default' | 'compact' | 'folio';
   scene?: 'reading' | 'exhibition' | 'darkroom' | 'personal';
+  artTreatment?: 'ink-glyph' | 'mounted' | 'contact-sheet' | 'handnote';
   artwork?: ImageMetadata;
   artworkAlt?: string;
 }
@@ -18,13 +20,24 @@ const {
   title,
   note,
   description,
+  glyph,
   variant = 'default',
   scene = 'reading',
+  artTreatment = scene === 'exhibition'
+    ? 'mounted'
+    : scene === 'darkroom'
+      ? 'contact-sheet'
+      : scene === 'personal'
+        ? 'handnote'
+        : 'ink-glyph',
   artwork,
   artworkAlt = '',
 } = Astro.props;
 const hasMeta = Astro.slots.has('meta');
 const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkroom' : 'paper';
+const glyphArtwork = artwork
+  ? await getImage({ src: artwork, width: Math.min(720, artwork.width), quality: 78 })
+  : undefined;
 ---
 
 <header
@@ -32,6 +45,7 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
     'page-intro',
     `page-intro--${variant}`,
     `page-intro--scene-${scene}`,
+    `page-intro--art-${artTreatment}`,
     artwork && 'page-intro--with-art',
   ]}
   data-page-intro
@@ -39,6 +53,9 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
   data-reveal-variant={`intro-${scene}`}
   data-ink-scene={inkScene}
 >
+  <span class="page-intro__paper page-intro__paper--back" aria-hidden="true"></span>
+  <span class="page-intro__paper page-intro__paper--front" aria-hidden="true"></span>
+
   <div class="page-intro__folio" data-page-intro-folio>
     <InscriptionTip text="藏本标记 · 此卷出自墨笺" client:idle>
       <span>墨笺藏本</span>
@@ -46,7 +63,16 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
     <span aria-hidden="true">{note}</span>
   </div>
 
-  <div class="page-intro__grid">
+  <div class="page-intro__scene">
+    <span
+      class:list={['page-intro__glyph', glyphArtwork && 'page-intro__glyph--image']}
+      aria-hidden="true"
+      data-page-intro-glyph
+      style={glyphArtwork ? `--intro-art: url('${glyphArtwork.src}')` : undefined}
+    >
+      {glyph}
+    </span>
+
     <div class="page-intro__copy" data-ink-avoid>
       <p class="folio-label">{note}</p>
       <div class="page-intro__title-mask">
@@ -68,8 +94,8 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
           <Image
             src={artwork}
             alt={artworkAlt}
-            widths={[480, 720, 1024]}
-            sizes="(min-width: 768px) 34vw, 100vw"
+            widths={[480, 720, 1024, 1440]}
+            sizes="(min-width: 1024px) 52vw, (min-width: 768px) 46vw, 88vw"
             quality={84}
             loading="eager"
           />
@@ -86,45 +112,84 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
   .page-intro {
     position: relative;
     isolation: isolate;
-    min-height: 0;
-    padding-block: clamp(4.5rem, 8vw, 7rem) clamp(3.5rem, 7vw, 6rem);
+    min-height: clamp(30rem, 52svh, 40rem);
+    overflow: clip;
+    padding-block: clamp(2.25rem, 4vw, 3.5rem) clamp(2rem, 3.5vw, 3rem);
   }
 
-  .page-intro::before {
-    content: '';
+  .page-intro__paper {
     position: absolute;
-    z-index: -1;
-    top: 16%;
-    left: clamp(-2rem, -4vw, -0.5rem);
-    width: clamp(8rem, 22vw, 20rem);
-    height: clamp(8rem, 22vw, 20rem);
+    z-index: -2;
+    pointer-events: none;
+  }
+
+  .page-intro__paper--back {
+    inset: 13% -5% 8% 42%;
     border: 1px solid var(--line);
-    opacity: 0.48;
-    transform: rotate(9deg);
+    background: color-mix(in oklab, var(--paper-deep) 46%, transparent);
+    box-shadow: var(--shadow-lg);
+    transform: rotate(-1.8deg);
+  }
+
+  .page-intro__paper--front {
+    top: 22%;
+    right: 1.5%;
+    width: clamp(7rem, 17vw, 15rem);
+    height: clamp(13rem, 32vw, 29rem);
+    border-block: 1px solid var(--line);
+    opacity: 0.64;
+    transform: rotate(2.5deg);
   }
 
   .page-intro__folio {
+    position: relative;
+    z-index: 5;
     display: flex;
     justify-content: space-between;
-    margin-bottom: clamp(3rem, 7vw, 6rem);
+    margin-bottom: clamp(1.25rem, 2.5vw, 2rem);
     font-family: var(--font-noto-sans);
     font-size: 0.62rem;
     letter-spacing: 0.26em;
     color: var(--bronze);
   }
 
-  .page-intro__grid {
+  .page-intro__scene {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: clamp(1.25rem, 3vw, 2.5rem);
-    align-items: end;
+    align-items: center;
+    min-height: clamp(18rem, 32vw, 24rem);
+  }
+
+  .page-intro__glyph {
+    position: absolute;
+    z-index: -1;
+    margin: 0;
+    color: color-mix(in oklab, var(--ink) 12%, transparent);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: var(--type-glyph-page);
+    font-weight: 400;
+    line-height: 0.72;
+    user-select: none;
+  }
+
+  .page-intro__glyph--image {
+    background-image:
+      linear-gradient(color-mix(in oklab, var(--ink) 14%, transparent), transparent),
+      var(--intro-art);
+    background-position: center;
+    background-size: cover;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: contrast(0.92) saturate(0.72);
   }
 
   .page-intro__copy {
     position: relative;
-    z-index: 2;
-    grid-column: 1 / span 7;
-    padding-bottom: clamp(1rem, 4vw, 3.5rem);
+    z-index: 3;
   }
 
   .page-intro__copy > .folio-label {
@@ -135,10 +200,10 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
     max-width: 7em;
     margin: 0;
     font-family: var(--font-ma-shan-zheng);
-    font-size: clamp(4.5rem, 10vw, 8.5rem);
+    font-size: var(--type-title-page);
     font-weight: 400;
-    line-height: 0.88;
-    letter-spacing: 0.025em;
+    line-height: 0.86;
+    letter-spacing: 0.02em;
   }
 
   .page-intro__title-mask {
@@ -148,14 +213,14 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
 
   .page-intro__description {
     max-width: 34rem;
-    margin: clamp(2rem, 4vw, 3rem) 0 0;
+    margin: clamp(1.1rem, 2vw, 1.5rem) 0 0;
     color: var(--ink-soft);
     font-size: clamp(1rem, 1.45vw, 1.18rem);
     line-height: 2;
   }
 
   .page-intro__meta {
-    margin-top: 1.75rem;
+    margin-top: 1rem;
     color: var(--ink-soft);
     font-family: var(--font-noto-sans);
     font-size: 0.78rem;
@@ -163,16 +228,16 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
 
   .page-intro__art {
     position: relative;
-    z-index: 1;
-    grid-column: 8 / -1;
+    z-index: 2;
     margin: 0;
+    background: var(--paper-deep);
     box-shadow: var(--shadow-lg);
   }
 
   .page-intro__art :global(img) {
     display: block;
     width: 100%;
-    aspect-ratio: 4 / 5;
+    height: 100%;
     object-fit: cover;
   }
 
@@ -189,103 +254,241 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
     letter-spacing: 0.18em;
   }
 
+  /* artTreatment 决定图像的物件身份；scene 决定空间构图，两者职责分离。 */
+  .page-intro--art-mounted .page-intro__art {
+    padding: clamp(0.45rem, 0.8vw, 0.75rem);
+    background: var(--paper-deep);
+  }
+
+  .page-intro--art-contact-sheet .page-intro__art {
+    outline: 1px solid color-mix(in oklab, var(--ink) 34%, transparent);
+    outline-offset: clamp(0.35rem, 0.8vw, 0.75rem);
+  }
+
+  .page-intro--art-handnote .page-intro__art {
+    filter: contrast(0.94) saturate(0.68);
+  }
+
   .page-intro__rule {
+    position: relative;
+    z-index: 4;
     display: block;
     width: min(100%, 64rem);
     height: 1px;
-    margin-top: clamp(3rem, 6vw, 5rem);
+    margin-top: clamp(1.5rem, 3vw, 2.5rem);
     background: linear-gradient(90deg, var(--ink), var(--line) 72%, transparent);
   }
 
   .page-intro--compact {
-    min-height: 0;
-    padding-bottom: 2.5rem;
+    min-height: clamp(24rem, 40svh, 30rem);
+    padding-bottom: 2rem;
   }
 
   .page-intro--compact .page-intro__folio {
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .page-intro--compact .page-intro__scene {
+    min-height: clamp(15rem, 24vw, 19rem);
   }
 
   .page-intro--compact h1 {
-    font-size: clamp(3.5rem, 7vw, 6rem);
+    font-size: var(--type-title-page);
   }
 
-  /* 笺录：左侧题名如刊物扉页，右侧纸本残片轻压入版心。 */
+  /* 笺录：巨字作为书脊，纸本图像从字内转交至右侧真图。 */
+  .page-intro--scene-reading .page-intro__glyph {
+    top: 50%;
+    left: -0.08em;
+    transform: translateY(-50%) rotate(-2deg);
+  }
+
   .page-intro--scene-reading .page-intro__copy {
-    grid-column: 1 / span 7;
+    grid-column: 5 / span 6;
+    grid-row: 1;
+    align-self: end;
+    padding-bottom: clamp(0.75rem, 2vw, 1.5rem);
   }
 
-  .page-intro--folio .page-intro__art {
+  .page-intro--scene-reading .page-intro__art {
     grid-column: 9 / -1;
-    margin-right: clamp(0rem, 2vw, 2.25rem);
-    transform: rotate(1.5deg) translateY(1.5rem);
+    grid-row: 1;
+    align-self: start;
+    height: clamp(15rem, 24vw, 22rem);
+    margin-top: clamp(-1rem, -2vw, -0.25rem);
+    transform: rotate(1.7deg);
   }
 
-  /* 器作：画幅越出展台，题名与展品在中轴交叠。 */
-  .page-intro--scene-exhibition .page-intro__grid {
-    align-items: center;
+  .page-intro--scene-reading .page-intro__art :global(img) {
+    aspect-ratio: 4 / 5;
+  }
+
+  .page-intro--scene-reading.page-intro--with-art .page-intro__copy {
+    grid-column: 4 / span 6;
+  }
+
+  .page-intro--scene-reading .page-intro__paper--back {
+    inset: 12% -4% 5% 54%;
+  }
+
+  /* 器作：画幅占据舞台，标题贴在装裱边缘，巨字同时成为图像窗口。 */
+  .page-intro--scene-exhibition {
+    min-height: clamp(30rem, 54svh, 38rem);
+  }
+
+  .page-intro--scene-exhibition .page-intro__scene {
+    min-height: clamp(21rem, 34vw, 28rem);
+  }
+
+  .page-intro--scene-exhibition .page-intro__glyph {
+    top: -0.06em;
+    right: -0.06em;
+    z-index: 1;
+    font-size: var(--type-glyph-page-emphasis);
+    transform: rotate(2deg);
   }
 
   .page-intro--scene-exhibition .page-intro__copy {
-    grid-column: 1 / span 6;
-    padding-top: clamp(4rem, 10vw, 8rem);
+    grid-column: 1 / span 7;
+    grid-row: 1;
+    align-self: end;
+    margin-bottom: clamp(0.75rem, 2vw, 1.5rem);
+    padding: clamp(1.25rem, 2vw, 1.75rem) clamp(1.25rem, 2.5vw, 2rem) 1.25rem 0;
+    background: color-mix(in oklab, var(--paper) 91%, transparent);
+  }
+
+  .page-intro--scene-exhibition h1 {
+    max-width: none;
+    font-size: var(--type-title-page-emphasis);
   }
 
   .page-intro--scene-exhibition .page-intro__art {
-    grid-column: 7 / -1;
-    width: calc(100% + clamp(1rem, 1.5vw, 1.75rem));
-    transform: rotate(-0.7deg) translateX(clamp(0.35rem, 0.75vw, 0.75rem));
+    grid-column: 5 / -1;
+    grid-row: 1;
+    width: calc(100% + clamp(1rem, 3vw, 3rem));
+    height: clamp(20rem, 30vw, 28rem);
+    transform: translateX(clamp(0.25rem, 1vw, 1rem)) rotate(-0.8deg);
   }
 
   .page-intro--scene-exhibition .page-intro__art :global(img) {
     aspect-ratio: 5 / 6;
   }
 
-  .page-intro--scene-exhibition h1 {
-    font-size: clamp(5.5rem, 12vw, 10rem);
+  .page-intro--scene-exhibition .page-intro__paper--back {
+    inset: 8% -6% 3% 29%;
+    transform: rotate(1.4deg);
   }
 
-  /* 暗室：无图卷首以一枚大题字建立入暗时刻。 */
+  /* 暗室：主影像悬在视口中部，巨字由影像显影，题跋压在画面下缘。 */
   .page-intro--scene-darkroom {
-    min-height: clamp(38rem, 82svh, 56rem);
+    min-height: clamp(30rem, 54svh, 38rem);
   }
 
-  .page-intro--scene-darkroom::before {
-    top: 28%;
-    right: 3%;
-    left: auto;
-    width: clamp(12rem, 34vw, 31rem);
-    height: clamp(8rem, 20vw, 18rem);
-    border-color: var(--line);
-    transform: rotate(-4deg);
+  .page-intro--scene-darkroom .page-intro__scene {
+    min-height: clamp(21rem, 34vw, 28rem);
+  }
+
+  .page-intro--scene-darkroom .page-intro__glyph {
+    top: 46%;
+    right: -0.08em;
+    z-index: 2;
+    color: color-mix(in oklab, var(--ink) 14%, transparent);
+    font-size: var(--type-glyph-page-emphasis);
+    transform: translateY(-50%);
+  }
+
+  .page-intro--scene-darkroom .page-intro__glyph--image {
+    filter: brightness(0.74) contrast(1.16) saturate(0.58);
   }
 
   .page-intro--scene-darkroom .page-intro__copy {
-    grid-column: 1 / span 9;
-    padding-block: clamp(4rem, 10vw, 9rem) 0;
+    grid-column: 1 / span 8;
+    grid-row: 1;
+    align-self: end;
+    padding-bottom: clamp(0.75rem, 2vw, 1.5rem);
   }
 
   .page-intro--scene-darkroom h1 {
     max-width: none;
-    font-size: clamp(6.5rem, 17vw, 14rem);
-    color: var(--paper);
+    /* 暗室始终取重映射后的浅墨，避免夜间主题沿用深纸色而失去题名。 */
+    color: var(--ink);
+    font-size: var(--type-title-page-emphasis);
     text-shadow: 0 0 2.5rem rgb(232 227 212 / 0.12);
   }
 
-  /* 此间 / 留墨：题名近左，纸本像一页被主人随手压住的手记。 */
-  .page-intro--scene-personal .page-intro__art {
-    grid-column: 8 / -1;
-    margin-right: clamp(0rem, 2vw, 2rem);
-    opacity: 0.92;
-    transform: rotate(1.25deg) translateY(2.25rem);
+  .page-intro--scene-darkroom .page-intro__art {
+    grid-column: 4 / -1;
+    grid-row: 1;
+    align-self: start;
+    width: calc(100% + clamp(1rem, 3vw, 3rem));
+    height: clamp(18rem, 29vw, 25rem);
+    margin-top: clamp(-1rem, -2vw, -0.25rem);
+    filter: contrast(1.08) saturate(0.7);
+  }
+
+  .page-intro--scene-darkroom .page-intro__art :global(img) {
+    aspect-ratio: 16 / 10;
+  }
+
+  .page-intro--scene-darkroom .page-intro__paper--back {
+    inset: 15% -5% 7% 23%;
+    background: rgb(232 227 212 / 0.035);
+    transform: rotate(-1deg);
+  }
+
+  .page-intro--scene-darkroom .page-intro__paper--front {
+    border-color: var(--line);
+  }
+
+  /* 此间 / 留墨：题文落在一张竖向手记上，图像像案头纸笺斜压其后。 */
+  .page-intro--scene-personal .page-intro__scene {
+    align-items: stretch;
+  }
+
+  .page-intro--scene-personal .page-intro__glyph {
+    right: -0.08em;
+    bottom: -0.04em;
+    font-size: var(--type-glyph-page);
+    transform: rotate(4deg);
   }
 
   .page-intro--scene-personal .page-intro__copy {
-    grid-column: 1 / span 6;
+    grid-column: 2 / span 6;
+    grid-row: 1;
+    align-self: center;
+    padding: clamp(2rem, 3vw, 3rem) clamp(1.5rem, 3vw, 2.5rem);
+    border-block: 1px solid var(--line);
+    background: color-mix(in oklab, var(--paper-deep) 52%, var(--paper));
+    box-shadow: var(--shadow-lg);
+    transform: rotate(-0.8deg);
+  }
+
+  .page-intro--scene-personal .page-intro__copy::before {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.2rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 1px solid var(--cinnabar);
+    content: '';
+    opacity: 0.72;
   }
 
   .page-intro--scene-personal h1 {
-    font-size: clamp(5rem, 11vw, 9rem);
+    font-size: var(--type-title-page);
+  }
+
+  .page-intro--scene-personal .page-intro__art {
+    grid-column: 7 / -1;
+    grid-row: 1;
+    align-self: center;
+    width: calc(100% + clamp(1rem, 3vw, 2.5rem));
+    height: clamp(18rem, 28vw, 24rem);
+    transform: translateX(clamp(0.5rem, 2vw, 2rem)) rotate(2.4deg);
+  }
+
+  .page-intro--scene-personal .page-intro__art :global(img) {
+    aspect-ratio: 4 / 5;
   }
 
   .page-intro--scene-personal .page-intro__rule {
@@ -293,78 +496,153 @@ const inkScene = scene === 'reading' ? 'reading' : scene === 'darkroom' ? 'darkr
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    :global(html.js) [data-page-intro-title] {
+    :global(:where(html.js.reveal-ready)) [data-page-intro-title] {
       opacity: 0;
       transform: translateY(100%);
     }
 
-    :global(html.js) [data-page-intro-folio],
-    :global(html.js) [data-page-intro-detail] {
+    :global(:where(html.js.reveal-ready)) [data-page-intro-folio],
+    :global(:where(html.js.reveal-ready)) [data-page-intro-detail] {
       opacity: 0;
       transform: translateY(0.5rem);
+    }
+
+    [data-page-intro-title],
+    [data-page-intro-folio],
+    [data-page-intro-detail] {
+      transition:
+        opacity 600ms var(--ease-ink),
+        transform 600ms var(--ease-ink);
+    }
+
+    .page-intro.is-revealed [data-page-intro-title],
+    .page-intro.is-revealed [data-page-intro-folio],
+    .page-intro.is-revealed [data-page-intro-detail] {
+      opacity: 1;
+      transform: none;
     }
   }
 
   @media (max-width: 767px) {
-    .page-intro {
+    .page-intro,
+    .page-intro--compact,
+    .page-intro--scene-exhibition,
+    .page-intro--scene-darkroom {
       min-height: 0;
-      padding-block: 3.75rem 3rem;
-    }
-
-    .page-intro::before {
-      top: 18%;
-      left: -2.5rem;
-      width: 9rem;
-      height: 9rem;
+      padding-block: 2.25rem 2rem;
     }
 
     .page-intro__folio {
-      margin-bottom: 2.5rem;
+      margin-bottom: 1.25rem;
     }
 
-    .page-intro__grid {
-      display: block;
+    .page-intro__folio > span:last-child {
+      max-width: 46%;
+      text-align: right;
     }
 
-    .page-intro--scene-exhibition .page-intro__grid {
-      display: block;
+    .page-intro__scene,
+    .page-intro--compact .page-intro__scene,
+    .page-intro--scene-exhibition .page-intro__scene,
+    .page-intro--scene-darkroom .page-intro__scene {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      min-height: 0;
     }
 
-    .page-intro h1 {
-      font-size: clamp(4.25rem, 23vw, 6.5rem);
+    .page-intro__glyph,
+    .page-intro--scene-exhibition .page-intro__glyph,
+    .page-intro--scene-darkroom .page-intro__glyph,
+    .page-intro--scene-personal .page-intro__glyph {
+      top: -0.08em;
+      right: -0.1em;
+      bottom: auto;
+      left: auto;
+      z-index: -1;
+      font-size: var(--type-glyph-page);
+      transform: rotate(2deg);
     }
 
-    .page-intro__art {
-      width: min(86%, 22rem);
-      margin: 3.5rem 0 0 auto;
+    /* 移动端保留巨字结构，但不用第二份位图填字，避免与响应式真图重复下载。 */
+    .page-intro__glyph--image {
+      background-image: none;
+      color: color-mix(in oklab, var(--ink) 12%, transparent);
+      -webkit-text-fill-color: currentColor;
+      filter: none;
     }
 
-    .page-intro--folio .page-intro__art,
-    .page-intro--scene-exhibition .page-intro__art,
-    .page-intro--scene-personal .page-intro__art {
-      width: min(86%, 22rem);
-      margin-right: 0;
-      transform: rotate(1deg);
+    .page-intro h1,
+    .page-intro--compact h1,
+    .page-intro--scene-exhibition h1,
+    .page-intro--scene-darkroom h1,
+    .page-intro--scene-personal h1 {
+      max-width: 4.8em;
+      font-size: var(--type-title-page);
     }
 
+    .page-intro__copy,
+    .page-intro--scene-reading .page-intro__copy,
+    .page-intro--scene-reading.page-intro--with-art .page-intro__copy,
     .page-intro--scene-exhibition .page-intro__copy,
     .page-intro--scene-darkroom .page-intro__copy {
-      padding-top: 1rem;
+      align-self: auto;
+      width: 100%;
+      margin: 0;
+      padding: 0.5rem 0 0;
+      background: transparent;
     }
 
-    .page-intro--scene-darkroom {
-      min-height: 34rem;
+    .page-intro--scene-personal .page-intro__copy {
+      width: calc(100% - 0.5rem);
+      margin-left: 0;
+      padding: 2rem 1.25rem;
+      background: color-mix(in oklab, var(--paper-deep) 52%, var(--paper));
     }
 
-    .page-intro--scene-darkroom::before {
-      top: 36%;
-      right: -3rem;
-      width: 14rem;
-      height: 9rem;
+    .page-intro__description {
+      max-width: 27rem;
+      margin-top: 1rem;
+      line-height: 1.85;
     }
 
-    .page-intro--scene-darkroom h1 {
-      font-size: clamp(5rem, 28vw, 7.5rem);
+    .page-intro__art,
+    .page-intro--scene-reading .page-intro__art,
+    .page-intro--scene-exhibition .page-intro__art,
+    .page-intro--scene-darkroom .page-intro__art,
+    .page-intro--scene-personal .page-intro__art {
+      align-self: flex-end;
+      order: 2;
+      width: min(62%, 18rem);
+      height: clamp(9rem, 35vw, 12rem);
+      margin: 1.5rem 0 0 auto;
+      transform: rotate(1.2deg);
+    }
+
+    .page-intro--scene-darkroom .page-intro__art {
+      width: min(82%, 22rem);
+      height: clamp(9rem, 38vw, 12rem);
+    }
+
+    .page-intro__paper--back {
+      inset: 20% -3rem 5% 22%;
+    }
+
+    .page-intro__paper--front {
+      display: none;
+    }
+
+    .page-intro__rule {
+      margin-top: 1.5rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page-intro__copy,
+    .page-intro__art,
+    .page-intro__glyph,
+    .page-intro__paper {
+      transform: none;
     }
   }
 </style>

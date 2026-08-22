@@ -149,12 +149,14 @@ const stats = readingStats(post.body ?? '');
 
   .article-header {
     position: relative;
+    isolation: isolate;
+    overflow: clip;
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: 1rem clamp(1rem, 3vw, 2rem);
-    min-height: clamp(40rem, 82svh, 58rem);
+    min-height: clamp(28rem, 55svh, 40rem);
     align-content: center;
-    padding-block: clamp(5rem, 9vw, 8rem) clamp(4rem, 8vw, 7rem);
+    padding-block: clamp(2.5rem, 4vw, 3.5rem) clamp(2.25rem, 3.5vw, 3rem);
     border-bottom: 1px solid var(--line);
   }
 
@@ -162,13 +164,28 @@ const stats = readingStats(post.body ?? '');
     content: '';
     position: absolute;
     z-index: -1;
-    top: 19%;
-    right: 4%;
-    width: clamp(11rem, 28vw, 26rem);
-    height: clamp(11rem, 28vw, 26rem);
-    border: 1px solid var(--line);
-    opacity: 0.55;
-    transform: rotate(7deg);
+    top: 12%;
+    right: -4%;
+    bottom: 9%;
+    left: 23%;
+    border-block: 1px solid var(--line);
+    background: color-mix(in oklab, var(--paper-deep) 44%, transparent);
+    box-shadow: -1.2rem 1.4rem 3rem var(--shadow-color);
+    transform: rotate(-0.75deg);
+  }
+
+  .article-header::after {
+    position: absolute;
+    z-index: -1;
+    top: 50%;
+    right: -0.12em;
+    content: '录';
+    color: color-mix(in oklab, var(--ink) 8%, transparent);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: var(--type-glyph-page);
+    line-height: 0.72;
+    transform: translateY(-52%);
+    pointer-events: none;
   }
 
   .article-header__folio {
@@ -202,7 +219,9 @@ const stats = readingStats(post.body ?? '');
   }
 
   .article-header__title {
-    grid-column: 4 / span 8;
+    position: relative;
+    z-index: 1;
+    grid-column: 4 / -1;
   }
 
   .article-header__title > .folio-label {
@@ -210,9 +229,9 @@ const stats = readingStats(post.body ?? '');
   }
 
   .article-header h1 {
-    max-width: 10em;
+    max-width: 8.5em;
     margin: 0;
-    font-size: clamp(4.2rem, 9vw, 8rem);
+    font-size: var(--type-title-page);
     font-weight: 400;
     line-height: 1.12;
     letter-spacing: 0.035em;
@@ -220,7 +239,7 @@ const stats = readingStats(post.body ?? '');
 
   .article-header__title > p:not(.folio-label) {
     max-width: 34rem;
-    margin: 2rem 0 0;
+    margin: 1.25rem 0 0;
     color: var(--ink-soft);
     font-size: 1.02rem;
   }
@@ -229,7 +248,7 @@ const stats = readingStats(post.body ?? '');
     display: block;
     width: min(100%, 28rem);
     height: 1px;
-    margin-top: 2.5rem;
+    margin-top: 1.5rem;
     background: linear-gradient(90deg, var(--ink), transparent);
   }
 
@@ -269,7 +288,7 @@ const stats = readingStats(post.body ?? '');
     display: grid;
     grid-template-columns: minmax(10rem, 2fr) minmax(0, 7fr) minmax(0, 2fr);
     gap: clamp(2.5rem, 7vw, 7rem);
-    padding-block: clamp(4rem, 9vw, 8rem);
+    padding-block: clamp(3rem, 6vw, 5rem);
   }
 
   .article-aside {
@@ -316,7 +335,7 @@ const stats = readingStats(post.body ?? '');
     align-items: center;
     justify-content: center;
     gap: 1.5rem;
-    padding-block: 3rem clamp(6rem, 12vw, 10rem);
+    padding-block: 2.5rem clamp(4rem, 7vw, 6rem);
     border-top: 1px solid var(--line);
   }
 
@@ -345,7 +364,7 @@ const stats = readingStats(post.body ?? '');
 
   /* 续卷：卷签式条目，题名列前、分类日期为款 */
   .article-related {
-    padding-block: 0 clamp(6rem, 12vw, 10rem);
+    padding-block: 0 clamp(4rem, 7vw, 6rem);
   }
 
   .article-related > .folio-label {
@@ -399,7 +418,20 @@ const stats = readingStats(post.body ?? '');
     .article-header {
       display: block;
       min-height: 0;
-      padding-block: 4rem 3.5rem;
+      padding-block: 3rem 2.75rem;
+    }
+
+    .article-header::before {
+      top: 6rem;
+      right: -3rem;
+      bottom: 2rem;
+      left: 18%;
+    }
+
+    .article-header::after {
+      top: 42%;
+      right: -0.2em;
+      font-size: var(--type-glyph-page);
     }
 
     .article-header__folio {
@@ -413,12 +445,12 @@ const stats = readingStats(post.body ?? '');
     }
 
     .article-header h1 {
-      font-size: clamp(3.3rem, 17vw, 5.2rem);
+      font-size: var(--type-title-page);
     }
 
     .article-layout {
       display: block;
-      padding-block: 3.5rem 5rem;
+      padding-block: 3rem 4rem;
     }
 
     .article-aside {

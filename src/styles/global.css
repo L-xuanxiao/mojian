@@ -18,6 +18,31 @@
   --bronze: #8b7355;
   --shadow-color: rgb(37 38 34 / 0.08);
   --paper-glass: rgb(244 239 227 / 0.86);
+
+  /* 展示字号按角色统一约束：装饰字可以裁切，真实标题必须保持可读。 */
+  --type-hero-primary: clamp(8rem, 30vw, 18rem);
+  --type-hero-secondary: clamp(4rem, 13vw, 8rem);
+  --type-glyph-page: clamp(10rem, 22vw, 20rem);
+  --type-glyph-page-emphasis: clamp(10rem, 24vw, 22rem);
+  --type-title-page: clamp(2.75rem, 4.75vw, 5rem);
+  --type-title-page-emphasis: clamp(3rem, 5.5vw, 5rem);
+  --type-glyph-chapter: clamp(6rem, 11vw, 10rem);
+  --type-title-chapter: clamp(2.5rem, 4.25vw, 4rem);
+  --type-title-section: clamp(2.25rem, 3.25vw, 2.75rem);
+  --type-title-card: clamp(1.75rem, 2.75vw, 2.5rem);
+}
+
+@media (max-width: 767px) {
+  :root {
+    --type-glyph-page: clamp(8rem, 34vw, 11rem);
+    --type-glyph-page-emphasis: clamp(8rem, 36vw, 12rem);
+    --type-title-page: clamp(2.5rem, 10vw, 3.25rem);
+    --type-title-page-emphasis: clamp(2.75rem, 11vw, 3.5rem);
+    --type-glyph-chapter: clamp(5rem, 22vw, 7rem);
+    --type-title-chapter: clamp(2rem, 8vw, 2.5rem);
+    --type-title-section: clamp(2rem, 7vw, 2.5rem);
+    --type-title-card: clamp(1.75rem, 6vw, 2.25rem);
+  }
 }
 
 /* 昼：手动指定浅色时固定 color-scheme（变量取上方 :root 默认值） */
@@ -103,13 +128,30 @@
     scroll-behavior: smooth;
   }
 
-  /* 墨迹过渡：旧页如墨淡去（轻 blur 退晕），新页自卷心晕染展开（不规则墨边） */
-  ::view-transition-old(root) {
-    animation: page-out 150ms var(--ease-ink) both;
+  /* 只让正文横向拉卷，刊头与卷尾保持稳定；项目共享图像仍由独立快照接棒。 */
+  [data-page-reel] {
+    view-transition-name: page-reel;
   }
 
+  ::view-transition-old(root),
   ::view-transition-new(root) {
+    animation: none;
+  }
+
+  ::view-transition-old(page-reel) {
+    animation: page-out 150ms var(--ease-ink) both;
+    transform-origin: right center;
+  }
+
+  ::view-transition-new(page-reel) {
     animation: page-in 400ms var(--ease-ink) both;
+    transform-origin: left center;
+  }
+
+  /* 灯箱只接棒所点照片，不重复触发整页拉卷或刊名快照。 */
+  :root.is-gallery-transitioning [data-page-reel],
+  :root.is-gallery-transitioning .site-brand {
+    view-transition-name: none;
   }
 
   /* 昼夜换纸：新主题从印钮中心扩开；普通跨页仍使用上方卷心墨晕。 */
@@ -128,22 +170,22 @@
 
   @keyframes page-out {
     to {
-      opacity: 0;
-      filter: blur(5px);
-      transform: translateY(-0.35rem);
+      opacity: 0.42;
+      clip-path: inset(0 0 0 7%);
+      transform: translateX(-3rem) scale(0.992);
     }
   }
 
   @keyframes page-in {
     from {
-      opacity: 0.25;
-      filter: blur(8px);
-      clip-path: circle(6% at 50% 42%);
+      opacity: 0.78;
+      clip-path: inset(0 100% 0 0);
+      transform: translateX(3rem);
     }
     to {
       opacity: 1;
-      filter: blur(0);
-      clip-path: circle(120% at 50% 42%);
+      clip-path: inset(0 0% 0 0);
+      transform: translateX(0);
     }
   }
 
@@ -260,32 +302,72 @@
   /* 有 JS 且允许动效时才预置初态；无 JS / reduced-motion 直接呈现完整内容。 */
   @media (prefers-reduced-motion: no-preference) {
     /* 普通题名短距落位；卷首大题名另用遮罩揭示，避免全站重复模糊上移。 */
-    html.js [data-reveal-title] {
+    :where(html.js.reveal-ready) [data-reveal-title] {
       opacity: 0;
       transform: translateY(1.1rem);
     }
 
-    html.js [data-reveal-group] > * {
+    :where(html.js.reveal-ready) [data-reveal-group] > * {
       opacity: 0;
       transform: translateY(0.75rem);
     }
 
-    html.js [data-reveal-detail] {
+    :where(html.js.reveal-ready) [data-reveal-detail] {
       opacity: 0;
       transform: translateY(0.55rem);
     }
 
-    html.js [data-reveal-line] {
+    :where(html.js.reveal-ready) [data-reveal-line] {
       transform: scaleX(0);
     }
 
-    html.js .media-reveal::after {
+    :where(html.js.reveal-ready) .media-reveal::after {
       transform: scaleX(1);
     }
 
-    html.js .media-reveal > img,
-    html.js .media-reveal picture > img {
+    :where(html.js.reveal-ready) .media-reveal > img,
+    :where(html.js.reveal-ready) .media-reveal picture > img {
       transform: scale(1.035);
+    }
+
+    [data-reveal-title],
+    [data-reveal-detail] {
+      transition:
+        opacity 550ms var(--ease-ink),
+        transform 550ms var(--ease-ink);
+    }
+
+    [data-reveal-line] {
+      transition: transform 650ms var(--ease-ink);
+    }
+
+    [data-reveal-group] > * {
+      transition:
+        opacity 500ms var(--ease-ink),
+        transform 500ms var(--ease-ink);
+      transition-delay: calc(var(--reveal-order, 0) * 70ms);
+    }
+
+    :where(html.js.reveal-ready) [data-reveal-group][data-reveal-variant='exhibit'] > * {
+      transform: translateY(1.5rem) rotate(0.6deg);
+    }
+
+    :where(html.js.reveal-ready) [data-reveal-group][data-reveal-variant='contact-sheet'] > * {
+      transform: translateY(1.35rem) scale(0.985);
+    }
+
+    :where(html.js.reveal-ready) [data-reveal-group][data-reveal-variant='spread'] > * {
+      transform: translateY(0.85rem);
+    }
+
+    [data-reveal-title].is-revealed,
+    [data-reveal-line].is-revealed,
+    [data-reveal-group].is-revealed > *,
+    [data-reveal-variant='folio'].is-revealed [data-reveal-title],
+    [data-reveal-variant='folio'].is-revealed [data-reveal-detail],
+    [data-reveal-variant='folio'].is-revealed [data-reveal-line] {
+      opacity: 1;
+      transform: none;
     }
   }
 
@@ -549,8 +631,8 @@
    * 用 :not(.is-revealed) 限定前态，揭示后不再设 filter，避免与 hover 提亮发生优先级冲突。
    */
   @media (prefers-reduced-motion: no-preference) {
-    html.js .darkroom .media-reveal:not(.is-revealed) > img,
-    html.js .darkroom .media-reveal:not(.is-revealed) picture > img {
+    :where(html.js.reveal-ready) .darkroom .media-reveal:not(.is-revealed) > img,
+    :where(html.js.reveal-ready) .darkroom .media-reveal:not(.is-revealed) picture > img {
       filter: brightness(0.5) contrast(0.86);
     }
   }

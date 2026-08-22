@@ -1,140 +1,53 @@
-// 显式动效语义：题名、墨线、列表、图像各用不同节奏，避免全站同一种模糊上移。
-// 初态由 global.css 的 html.js 门控；无 JS / reduced-motion 时直接显示终态。
-import { gsap, ScrollTrigger, prefersReducedMotion } from './scroll';
+// 普通题名、墨线、展签与图像只由 CSS 负责过渡；脚本仅判定何时进入视口。
+// 初态由 reveal-ready 门控，模块异常时 BaseLayout 的超时兜底会解除隐藏。
+const root = document.documentElement;
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-if (!prefersReducedMotion) {
-  document.querySelectorAll<HTMLElement>('[data-page-intro]').forEach((intro) => {
-    const scene = intro.dataset.pageIntroScene ?? 'reading';
-    const folio = intro.querySelector<HTMLElement>('[data-page-intro-folio]');
-    const title = intro.querySelector<HTMLElement>('[data-page-intro-title]');
-    const details = intro.querySelectorAll<HTMLElement>('[data-page-intro-detail]');
-    const rule = intro.querySelector<HTMLElement>('[data-reveal-line]');
-    const art = intro.querySelector<HTMLElement>('[data-page-intro-art]');
+const reveal = (element: HTMLElement) => {
+  element.classList.add('is-revealed');
 
-    const timeline = gsap.timeline({
-      defaults: { ease: 'expo.out' },
-      scrollTrigger: { trigger: intro, start: 'top 86%', once: true },
-    });
+  if (element.matches('[data-page-intro]')) {
+    element.querySelector<HTMLElement>('[data-page-intro-art]')?.classList.add('is-revealed');
+  }
+};
 
-    if (scene === 'exhibition' && art) {
-      timeline.call(() => art.classList.add('is-revealed'), [], 0);
-    }
+const targets = Array.from(
+  document.querySelectorAll<HTMLElement>(
+    '[data-page-intro], [data-reveal-variant="folio"], [data-reveal-title], [data-reveal-line], [data-reveal-group], .media-reveal',
+  ),
+).filter((element) => {
+  if (element.matches('[data-reveal-title], [data-reveal-line]')) {
+    return !element.closest('[data-page-intro], [data-reveal-variant="folio"]');
+  }
+  if (element.matches('.media-reveal')) return !element.closest('[data-page-intro]');
+  return true;
+});
 
-    if (folio) timeline.to(folio, { y: 0, opacity: 1, duration: 0.55 }, 0.02);
-    if (title) {
-      const titleFrom =
-        scene === 'exhibition'
-          ? { xPercent: -9, yPercent: 100, rotate: -1.5 }
-          : scene === 'darkroom'
-            ? { xPercent: 0, yPercent: 42, rotate: 0, filter: 'blur(12px)' }
-            : scene === 'personal'
-              ? { xPercent: 3, yPercent: 100, rotate: 1 }
-              : { xPercent: 0, yPercent: 100, rotate: 0 };
-      timeline.fromTo(
-        title,
-        { x: 0, y: 0, ...titleFrom },
-        {
-          xPercent: 0,
-          y: 0,
-          yPercent: 0,
-          rotate: 0,
-          filter: 'blur(0px)',
-          opacity: 1,
-          duration: scene === 'personal' ? 1.05 : 0.95,
-        },
-        scene === 'exhibition' ? 0.15 : 0.08,
-      );
-    }
-    if (rule) timeline.to(rule, { scaleX: 1, duration: 0.75 }, 0.18);
-    if (details.length > 0) {
-      timeline.to(details, { y: 0, opacity: 1, duration: 0.62, stagger: 0.07 }, 0.34);
-    }
-    if (art && scene !== 'exhibition') {
-      timeline.call(() => art.classList.add('is-revealed'), [], scene === 'reading' ? 0.58 : 0.46);
-    }
+document.querySelectorAll<HTMLElement>('[data-reveal-group]').forEach((group) => {
+  Array.from(group.children).forEach((item, index) => {
+    if (item instanceof HTMLElement) item.style.setProperty('--reveal-order', String(index));
   });
+});
 
-  document.querySelectorAll<HTMLElement>('[data-reveal-variant="folio"]').forEach((panel) => {
-    if (panel.matches('[data-page-intro]')) return;
-    const title = panel.querySelector<HTMLElement>('[data-reveal-title]');
-    const details = panel.querySelectorAll<HTMLElement>('[data-reveal-detail]');
-    const line = panel.querySelector<HTMLElement>('[data-reveal-line]');
-    const timeline = gsap.timeline({
-      defaults: { ease: 'expo.out' },
-      scrollTrigger: { trigger: panel, start: 'top 88%', once: true },
-    });
+if (reducedMotion || !('IntersectionObserver' in window)) {
+  targets.forEach(reveal);
+  root.classList.remove('reveal-ready');
+} else {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        reveal(entry.target as HTMLElement);
+        observer.unobserve(entry.target);
+      });
+    },
+    { rootMargin: '0px 0px -10% 0px', threshold: 0.06 },
+  );
 
-    if (title) timeline.to(title, { y: 0, opacity: 1, duration: 0.9 }, 0);
-    if (details.length > 0) {
-      timeline.to(details, { y: 0, opacity: 1, duration: 0.5, stagger: 0.06 }, 0.14);
-    }
-    if (line) timeline.to(line, { scaleX: 1, duration: 0.72 }, 0.18);
-  });
+  targets.forEach((target) => observer.observe(target));
 
-  document.querySelectorAll<HTMLElement>('[data-reveal-title]').forEach((title) => {
-    if (title.closest('[data-page-intro], [data-reveal-variant="folio"]')) return;
-    gsap.to(title, {
-      y: 0,
-      opacity: 1,
-      duration: 0.9,
-      ease: 'expo.out',
-      scrollTrigger: { trigger: title, start: 'top 88%', once: true },
-    });
-  });
-
-  document.querySelectorAll<HTMLElement>('[data-reveal-line]').forEach((line) => {
-    if (line.closest('[data-page-intro], [data-reveal-variant="folio"]')) return;
-    gsap.to(line, {
-      scaleX: 1,
-      duration: 0.75,
-      ease: 'expo.out',
-      scrollTrigger: { trigger: line, start: 'top 90%', once: true },
-    });
-  });
-
-  document.querySelectorAll<HTMLElement>('[data-reveal-group]').forEach((group) => {
-    const items = Array.from(group.children).filter(
-      (item): item is HTMLElement => item instanceof HTMLElement,
-    );
-    if (items.length === 0) return;
-
-    const variant = group.dataset.revealVariant ?? 'stagger';
-    const isCompactViewport = window.matchMedia('(max-width: 767px)').matches;
-    const from =
-      variant === 'exhibit'
-        ? { y: 28, rotate: 0.6 }
-        : variant === 'contact-sheet'
-          ? { y: 22, scale: 0.985 }
-          : variant === 'spread'
-            ? isCompactViewport
-              ? { x: 0, y: 14 }
-              : { x: 18, y: 0 }
-            : { y: 12 };
-
-    gsap.fromTo(
-      items,
-      { ...from, opacity: 0 },
-      {
-        x: 0,
-        y: 0,
-        rotate: 0,
-        scale: 1,
-        opacity: 1,
-        duration: variant === 'exhibit' ? 0.78 : 0.62,
-        stagger: variant === 'contact-sheet' ? 0.09 : 0.07,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: group, start: 'top 88%', once: true },
-      },
-    );
-  });
-
-  document.querySelectorAll<HTMLElement>('.media-reveal').forEach((media) => {
-    if (media.closest('[data-page-intro]')) return;
-    ScrollTrigger.create({
-      trigger: media,
-      start: 'top 88%',
-      once: true,
-      onEnter: () => media.classList.add('is-revealed'),
-    });
-  });
+  // 只有观察器成功建立后才取消失败兜底；reveal-ready 保留，供未入视口元素维持初态。
+  window.clearTimeout(
+    (window as Window & { __mojianRevealFallback?: number }).__mojianRevealFallback,
+  );
 }

@@ -15,9 +15,11 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
     <PageIntro
       id="projects"
       title="器作"
+      glyph="器"
       note="SELECTED WORKS"
       description="从一个问题出发，经由结构、视觉与代码，留下可以继续生长的作品。"
       scene="exhibition"
+      artTreatment="mounted"
       artwork={projects[0]?.data.cover}
       artworkAlt={projects[0]?.data.coverAlt}
     >
@@ -88,8 +90,8 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
 <style>
   .project-index {
     display: grid;
-    gap: clamp(6rem, 12vw, 11rem);
-    padding-block: 3rem clamp(7rem, 13vw, 11rem);
+    gap: clamp(4rem, 7vw, 6rem);
+    padding-block: 2.5rem clamp(4rem, 7vw, 6rem);
   }
 
   .project-index__item {
@@ -108,7 +110,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
     z-index: -1;
     color: color-mix(in oklab, var(--ink) 9%, transparent);
     font-family: var(--font-ma-shan-zheng);
-    font-size: clamp(8rem, 18vw, 16rem);
+    font-size: var(--type-glyph-chapter);
     line-height: 1;
     transition: color 250ms var(--ease-ink);
   }
@@ -190,7 +192,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
   .project-index__copy h2 {
     margin: 0;
     font-family: var(--font-ma-shan-zheng);
-    font-size: clamp(2.6rem, 5.5vw, 4.8rem);
+    font-size: var(--type-title-card);
     font-weight: 400;
   }
 

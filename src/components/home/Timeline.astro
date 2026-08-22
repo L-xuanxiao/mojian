@@ -5,9 +5,15 @@ import { siteMilestones } from './site-timeline.data';
 // 卷尾年谱（站点史）维护于 ./site-timeline.data.ts，与 About 行年（人的经历）各自独立
 ---
 
-<section class="timeline-folio" aria-labelledby="timeline-heading">
-  <div class="mx-auto max-w-stage px-5 py-16 md:px-8 md:py-24 lg:px-10">
-    <SectionHeading id="timeline-heading" title="卷尾年谱" index="陆" note="COLOPHON" />
+<section class="timeline-folio" aria-labelledby="timeline-heading" data-home-chapter="陆">
+  <div class="timeline-folio__inner mx-auto max-w-stage px-5 py-14 md:px-8 md:py-20 lg:px-10">
+    <SectionHeading
+      id="timeline-heading"
+      title="卷尾年谱"
+      index="陆"
+      note="COLOPHON"
+      mode="quiet"
+    />
 
     <div class="timeline-folio__grid">
       <div class="timeline-folio__intro">
@@ -35,17 +41,38 @@ import { siteMilestones } from './site-timeline.data';
 
 <style>
   .timeline-folio {
-    background: color-mix(in oklab, var(--paper-deep) 36%, transparent);
+    position: relative;
+    overflow: clip;
+    border-top: 1px solid var(--line);
+    background: color-mix(in oklab, var(--paper-deep) 24%, transparent);
   }
 
-  .timeline-folio :global(.section-heading h2) {
-    font-size: clamp(2.8rem, 5vw, 4.5rem);
+  .timeline-folio__inner {
+    position: relative;
+  }
+
+  .timeline-folio__inner::after {
+    content: '';
+    position: absolute;
+    right: clamp(1.25rem, 4vw, 3rem);
+    bottom: clamp(2rem, 4vw, 3.5rem);
+    width: clamp(4rem, 9vw, 8rem);
+    height: 1px;
+    background: var(--cinnabar);
+    transform: rotate(-1.5deg);
   }
 
   .timeline-folio__grid {
     display: grid;
-    grid-template-columns: minmax(15rem, 3fr) minmax(0, 8fr);
-    gap: clamp(4rem, 9vw, 9rem);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: end;
+    padding-block: clamp(1.5rem, 3vw, 2.5rem);
+    border-block: 1px solid var(--line);
+  }
+
+  .timeline-folio__intro {
+    grid-column: 1 / span 4;
   }
 
   .timeline-folio__intro > .folio-label {
@@ -53,62 +80,50 @@ import { siteMilestones } from './site-timeline.data';
   }
 
   .timeline-folio__intro > p:not(.folio-label) {
-    max-width: 24rem;
+    max-width: 22rem;
     margin: 0;
     color: var(--ink-soft);
+    font-size: 0.92rem;
   }
 
   .timeline-folio__intro > span {
     display: block;
-    margin-top: 3rem;
+    margin-top: 1.75rem;
     color: color-mix(in oklab, var(--ink) 22%, transparent);
     font-family: var(--font-ma-shan-zheng);
-    font-size: clamp(2.2rem, 5vw, 4rem);
+    font-size: clamp(1.7rem, 3vw, 2.6rem);
     letter-spacing: 0.1em;
-    transform: rotate(-2deg);
+    transform: rotate(-1deg);
   }
 
   .timeline-folio__list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-column: 5 / -1;
     margin: 0;
     padding: 0;
-    border-top: 2px solid var(--ink);
     list-style: none;
   }
 
   .timeline-folio__list li {
     position: relative;
-    min-height: 12rem;
-    padding: 1.5rem;
-    border-right: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 2.5rem minmax(4rem, 6rem) minmax(0, 1fr);
+    gap: clamp(0.75rem, 2vw, 1.5rem);
+    align-items: baseline;
+    min-height: 0;
+    padding-block: 1.5rem;
+    border-top: 2px solid var(--ink);
     border-bottom: 1px solid var(--line);
   }
 
   .timeline-folio__list li:only-child {
-    grid-column: 1 / -1;
-    min-height: 15rem;
-    border-right: 0;
-  }
-
-  .timeline-folio__list li:only-child .timeline-folio__index {
-    top: -0.16em;
-    right: 0.2em;
-    color: color-mix(in oklab, var(--ink) 8%, transparent);
-    font-size: clamp(7rem, 15vw, 13rem);
-  }
-
-  .timeline-folio__list li:nth-child(even) {
-    border-right: 0;
+    min-height: 0;
   }
 
   .timeline-folio__index {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
+    position: static;
     color: color-mix(in oklab, var(--ink) 16%, transparent);
     font-family: var(--font-ma-shan-zheng);
-    font-size: 2.4rem;
+    font-size: 1.45rem;
   }
 
   .timeline-folio__list time {
@@ -119,8 +134,8 @@ import { siteMilestones } from './site-timeline.data';
   }
 
   .timeline-folio__list p {
-    max-width: 19rem;
-    margin: 2.5rem 0 0;
+    max-width: 32rem;
+    margin: 0;
   }
 
   @media (max-width: 767px) {
@@ -129,7 +144,7 @@ import { siteMilestones } from './site-timeline.data';
     }
 
     .timeline-folio__intro {
-      margin-bottom: 4rem;
+      margin-bottom: 3rem;
     }
 
     /* 移动端堆叠时「未完待续」会先于年谱条目出现，叙事倒置，故隐藏（桌面端保留为左列收束闲笔） */
@@ -141,10 +156,24 @@ import { siteMilestones } from './site-timeline.data';
       display: block;
     }
 
-    .timeline-folio__list li,
-    .timeline-folio__list li:nth-child(even) {
-      min-height: 0;
-      border-right: 0;
+    .timeline-folio__list li {
+      grid-template-columns: 2rem 4rem minmax(0, 1fr);
+      gap: 0.75rem;
+      padding-block: 1.25rem;
+    }
+
+    .timeline-folio__inner::after {
+      bottom: 1.5rem;
+    }
+  }
+
+  @media (max-width: 479px) {
+    .timeline-folio__list li {
+      grid-template-columns: 2rem minmax(0, 1fr);
+    }
+
+    .timeline-folio__list p {
+      grid-column: 2;
     }
   }
 </style>

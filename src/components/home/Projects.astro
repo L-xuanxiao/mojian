@@ -10,12 +10,14 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
 ---
 
 <section
-  class="home-projects mx-auto max-w-stage px-5 py-16 md:px-8 md:py-24 lg:px-10"
+  class="home-projects mx-auto max-w-stage px-5 py-12 md:px-8 md:py-16 lg:px-10"
   aria-labelledby="projects"
+  data-home-chapter="贰"
+  data-ink-scene="exhibition"
 >
-  <SectionHeading id="projects" title="器作" index="贰" note="WORKS" />
+  <SectionHeading id="projects" title="器作" index="贰" note="WORKS" mode="chapter" />
   <ol
-    class="project-preview mt-10 list-none p-0 md:mt-14"
+    class="project-preview mt-6 list-none p-0 md:mt-8"
     data-reveal-group
     data-reveal-variant="exhibit"
   >
@@ -58,7 +60,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
       ))
     }
   </ol>
-  <p class="mt-10 mb-0 text-right font-sans text-sm md:mt-14">
+  <p class="mt-6 mb-0 text-right font-sans text-sm md:mt-8">
     <a class="ink-link" href={withBase('/projects/')}>查看全部器作</a>
   </p>
 </section>
@@ -70,10 +72,15 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
   }
 
   .project-preview {
+    position: relative;
+    left: 50%;
     display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: clamp(4rem, 8vw, 7rem) clamp(1rem, 3vw, 2rem);
+    grid-template-columns: repeat(14, minmax(0, 1fr));
+    width: min(calc(100vw - 1rem), 96rem);
+    gap: clamp(1.25rem, 2.5vw, 2.5rem);
     align-items: start;
+    margin-top: 0;
+    transform: translateX(-50%);
   }
 
   .project-preview__item {
@@ -86,38 +93,64 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
     content: attr(data-number);
     position: absolute;
     z-index: -1;
-    top: -0.62em;
-    right: -0.05em;
-    color: color-mix(in oklab, var(--ink) 9%, transparent);
+    top: -0.5em;
+    right: -0.12em;
+    color: color-mix(in oklab, var(--ink) 8%, transparent);
     font-family: var(--font-ma-shan-zheng);
-    font-size: clamp(6rem, 15vw, 13rem);
+    font-size: var(--type-glyph-chapter);
     line-height: 1;
     pointer-events: none;
+    transition: color 250ms var(--ease-ink);
   }
 
   .project-preview__folio {
     position: absolute;
-    top: 0;
-    right: calc(100% + 1rem);
+    z-index: 3;
+    top: 1rem;
+    right: -1.5rem;
+    padding: 0.55rem 0.45rem;
+    border-block: 1px solid var(--line);
+    background: var(--paper);
     color: var(--bronze);
     font-family: var(--font-noto-sans);
     font-size: 0.62rem;
     letter-spacing: 0.16em;
     writing-mode: vertical-rl;
-    transition: color 250ms var(--ease-ink);
+    transition:
+      color 250ms var(--ease-ink),
+      transform 250ms var(--ease-ink);
   }
 
   .project-preview__item--1 {
-    grid-column: 1 / span 8;
+    grid-row: 1;
+    grid-column: 1 / span 7;
   }
 
   .project-preview__item--2 {
-    grid-column: 9 / -1;
-    margin-top: 10rem;
+    grid-row: 1;
+    grid-column: 8 / span 3;
+    margin-top: clamp(2rem, 4vw, 3.5rem);
   }
 
   .project-preview__item--3 {
-    grid-column: 2 / -1;
+    grid-row: 1;
+    grid-column: 11 / -1;
+    margin-top: clamp(0.75rem, 2vw, 1.5rem);
+  }
+
+  .project-preview__item--2::before {
+    top: -0.35em;
+    right: auto;
+    left: -0.22em;
+  }
+
+  .project-preview__item--2 .project-preview__folio {
+    right: auto;
+    left: -1.25rem;
+  }
+
+  .project-preview__item--3 .project-preview__folio {
+    right: -0.75rem;
   }
 
   .project-preview__image {
@@ -125,7 +158,9 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
     overflow: hidden;
     background: var(--paper-deep);
     box-shadow: var(--shadow-md);
-    transition: box-shadow 250ms var(--ease-ink);
+    transition:
+      box-shadow 250ms var(--ease-ink),
+      transform 250ms var(--ease-ink);
   }
 
   .project-preview__image :global(img) {
@@ -136,44 +171,72 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
     transition: transform 250ms var(--ease-ink);
   }
 
+  .project-preview__item--1 .project-preview__image :global(img) {
+    aspect-ratio: 16 / 8;
+  }
+
   .project-preview__item--2 .project-preview__image :global(img) {
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 4 / 3;
   }
 
   .project-preview__item--3 .project-preview__image :global(img) {
-    aspect-ratio: 16 / 7;
+    aspect-ratio: 4 / 3;
   }
 
   @media (hover: hover) and (pointer: fine) {
     .project-preview__image:hover :global(img) {
-      transform: scale(1.026);
+      transform: scale(1.04);
     }
 
-    /* 景深：展品浮起，竖签落朱砂 */
+    /* 展墙接管构图时，作品向前，贴边展签向外退让。 */
     .project-preview__item:hover .project-preview__image,
     .project-preview__item:focus-within .project-preview__image {
       box-shadow: var(--shadow-lg);
+      transform: translateY(-0.35rem);
     }
 
     .project-preview__item:hover .project-preview__folio,
     .project-preview__item:focus-within .project-preview__folio {
       color: var(--cinnabar);
+      transform: translateX(0.8rem);
+    }
+
+    .project-preview__item--2:hover .project-preview__folio,
+    .project-preview__item--2:focus-within .project-preview__folio {
+      transform: translateX(-0.8rem);
+    }
+
+    .project-preview__item:hover::before,
+    .project-preview__item:focus-within::before {
+      color: color-mix(in oklab, var(--cinnabar) 14%, transparent);
     }
   }
 
   .project-preview__copy {
     position: relative;
+    z-index: 2;
+    width: calc(100% - clamp(1rem, 3vw, 2.5rem));
     max-width: 36rem;
-    margin-top: 1.5rem;
-    padding-left: clamp(0rem, 3vw, 2.5rem);
+    margin: clamp(-2rem, -2vw, -1.25rem) 0 0 clamp(1rem, 3vw, 2.5rem);
+    padding: 1.25rem clamp(1rem, 2vw, 1.75rem);
+    border-left: 2px solid var(--ink);
+    background: color-mix(in oklab, var(--paper) 94%, transparent);
+    box-shadow: var(--shadow-sm);
   }
 
   .project-preview__item--2 .project-preview__copy {
-    padding-left: 0;
+    width: calc(100% + 0.75rem);
+    margin-top: -0.75rem;
+    margin-left: -0.75rem;
+    padding-inline: 1rem;
   }
 
   .project-preview__item--3 .project-preview__copy {
-    max-width: 44rem;
+    width: calc(100% + 0.75rem);
+    max-width: none;
+    margin-top: -0.75rem;
+    margin-left: 0;
+    padding-inline: 1rem;
   }
 
   .project-preview__meta {
@@ -197,7 +260,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
 
   .project-preview h3 {
     margin: 0.65rem 0 0;
-    font-size: clamp(2rem, 4.6vw, 4rem);
+    font-size: var(--type-title-card);
     font-weight: 400;
   }
 
@@ -208,41 +271,81 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
 
   @media (max-width: 767px) {
     .project-preview {
-      display: block;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      width: 100%;
+      gap: 2.5rem 1rem;
+      margin-top: 0;
     }
 
-    .project-preview__item + .project-preview__item {
-      margin-top: 5rem;
+    .project-preview__item--1 {
+      grid-row: auto;
+      grid-column: 1 / -1;
     }
 
-    .project-preview__item--2 {
-      margin-top: 3.5rem;
+    .project-preview__item--2,
+    .project-preview__item--3 {
+      grid-row: auto;
+      grid-column: auto;
+      margin-top: 0;
     }
 
     .project-preview__folio {
-      position: static;
-      display: block;
-      margin-bottom: 0.7rem;
-      writing-mode: horizontal-tb;
+      top: 0.75rem;
+      right: -0.25rem;
+      left: auto;
+      bottom: auto;
+      writing-mode: vertical-rl;
     }
 
     .project-preview__item::before {
-      top: -0.72em;
-      font-size: 6rem;
+      top: -0.55em;
+      right: -0.05em;
+      left: auto;
+      font-size: var(--type-glyph-chapter);
     }
 
     .project-preview__copy,
+    .project-preview__item--1 .project-preview__copy {
+      width: calc(100% - 1.25rem);
+      margin: -1.2rem 0 0 1.25rem;
+      padding: 1.25rem;
+    }
+
+    .project-preview__item--2 .project-preview__copy,
     .project-preview__item--3 .project-preview__copy {
-      padding-left: 0;
+      width: 100%;
+      margin: 0.75rem 0 0;
+      padding: 0;
+      border-left: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .project-preview__item--2 .project-preview__copy > p:last-child,
+    .project-preview__item--3 .project-preview__copy > p:last-child {
+      display: none;
     }
 
     .project-preview__item--2 .project-preview__image :global(img),
     .project-preview__item--3 .project-preview__image :global(img) {
+      aspect-ratio: 4 / 3;
+    }
+
+    .project-preview__item--1 .project-preview__image :global(img) {
       aspect-ratio: 3 / 2;
+    }
+
+    .project-preview__item--2 .project-preview__folio,
+    .project-preview__item--3 .project-preview__folio {
+      right: -0.25rem;
+      left: auto;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .project-preview__image,
+    .project-preview__folio,
     .project-preview__image :global(img) {
       transition: none;
     }

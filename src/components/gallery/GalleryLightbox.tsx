@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
+import { flushSync } from 'react-dom';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import './gallery-lightbox.css';
@@ -26,10 +27,14 @@ interface Props {
 
 export default function GalleryLightbox({ items }: Props) {
   const reducedMotion = useReducedMotion();
+  const supportsViewTransition =
+    typeof document !== 'undefined' && typeof document.startViewTransition === 'function';
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const gridRef = useRef<HTMLElement | null>(null);
+  const transitionTargetRef = useRef<HTMLImageElement | null>(null);
+  const transitionActiveRef = useRef(false);
   const slides = useMemo(
     () => items.map(({ src, alt, width, height }) => ({ src, alt, width, height })),
     [items],
@@ -59,10 +64,83 @@ export default function GalleryLightbox({ items }: Props) {
     return () => observer.disconnect();
   }, [reducedMotion]);
 
+  const gridImageAt = (nextIndex: number) =>
+    gridRef.current?.querySelector<HTMLImageElement>(`[data-gallery-index="${nextIndex}"] img`) ??
+    null;
+
+  const transitionBetween = (
+    from: HTMLImageElement | null,
+    update: () => void,
+    getTarget: () => HTMLImageElement | null,
+  ) => {
+    const startViewTransition = document.startViewTransition?.bind(document);
+    if (reducedMotion || !startViewTransition || !from || transitionActiveRef.current) {
+      update();
+      return;
+    }
+
+    let updated = false;
+    let cleanupTimer: number | undefined;
+    const clearNames = () => {
+      if (cleanupTimer) window.clearTimeout(cleanupTimer);
+      from.style.removeProperty('view-transition-name');
+      transitionTargetRef.current?.style.removeProperty('view-transition-name');
+      gridRef.current
+        ?.querySelectorAll<HTMLElement>('[style*="view-transition-name"]')
+        .forEach((element) => element.style.removeProperty('view-transition-name'));
+      transitionTargetRef.current = null;
+      transitionActiveRef.current = false;
+      document.documentElement.classList.remove('is-gallery-transitioning');
+    };
+
+    transitionActiveRef.current = true;
+    document.documentElement.classList.add('is-gallery-transitioning');
+    from.style.setProperty('view-transition-name', 'gallery-photo');
+
+    try {
+      const transition = startViewTransition(async () => {
+        flushSync(() => {
+          update();
+          updated = true;
+        });
+        from.style.setProperty('view-transition-name', 'none');
+
+        // YARL 在 React 提交后挂载图像；等一帧再把新旧快照接到同一个名字。
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        const target = getTarget();
+        if (target) {
+          target.style.setProperty('view-transition-name', 'gallery-photo');
+          transitionTargetRef.current = target;
+        }
+      });
+      // 快照建立后即可清理源 DOM 契约；伪元素动画会独立继续，快速关闭也不会残留类名。
+      transition.ready.then(clearNames, clearNames);
+      transition.finished.then(clearNames, clearNames);
+      cleanupTimer = window.setTimeout(clearNames, 280);
+    } catch {
+      if (!updated) update();
+      clearNames();
+    }
+  };
+
   const openAt = (nextIndex: number, trigger: HTMLButtonElement) => {
     triggerRef.current = trigger;
-    setIndex(nextIndex);
-    setOpen(true);
+    transitionBetween(
+      gridImageAt(nextIndex),
+      () => {
+        setIndex(nextIndex);
+        setOpen(true);
+      },
+      () => document.querySelector<HTMLImageElement>('.ink-lightbox .yarl__slide_image'),
+    );
+  };
+
+  const closeLightbox = () => {
+    transitionBetween(
+      document.querySelector<HTMLImageElement>('.ink-lightbox .yarl__slide_image'),
+      () => setOpen(false),
+      () => gridImageAt(index),
+    );
   };
 
   return (
@@ -88,6 +166,7 @@ export default function GalleryLightbox({ items }: Props) {
               className="gallery-entry__image"
               aria-label={`放大查看：${item.title}`}
               aria-haspopup="dialog"
+              data-gallery-index={itemIndex}
               onClick={(event) => openAt(itemIndex, event.currentTarget)}
             >
               <img
@@ -120,7 +199,7 @@ export default function GalleryLightbox({ items }: Props) {
       <Lightbox
         className="ink-lightbox"
         open={open}
-        close={() => setOpen(false)}
+        close={closeLightbox}
         index={index}
         slides={slides}
         on={{ view: ({ index: nextIndex }) => setIndex(nextIndex) }}
@@ -130,7 +209,11 @@ export default function GalleryLightbox({ items }: Props) {
         animation={
           reducedMotion
             ? { fade: 0, swipe: 0, navigation: 0 }
-            : { fade: 250, swipe: 400, navigation: 250 }
+            : {
+                fade: supportsViewTransition ? 0 : 250,
+                swipe: 400,
+                navigation: 250,
+              }
         }
         render={{
           iconPrev: () => <ChevronLeft aria-hidden="true" strokeWidth={1.5} />,

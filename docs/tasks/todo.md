@@ -1,3 +1,183 @@
+# 当前任务：全站「紧卷成册」布局重构
+
+目标：修复本应叠放的网格项被自动排入下一行的结构错误，以“首屏见内容、普通章半屏编辑流、仅长卷多屏”为密度原则，重排卷首、首页章节、详情页与全局卷尾。
+
+- [x] 修复 PageIntro、首页近况与器作详情的网格自动换行根因
+- [x] 将四类内页卷首收至桌面 45–55svh，并保持移动端内容完整
+- [x] 将 Hero 收至一屏，重排首页近况、器作、笺录与光影为紧凑编辑流
+- [x] 收紧详情页、列表页、404、内容段落间距与全局 Footer
+- [x] 同步 `DESIGN.md` 的卷首高度、章节密度和巨字不撑高规则
+- [x] 完成静态验证、联合浏览器巡检、单次 layout detector 与结果审查
+
+## 计划确认
+
+- 结构根因：PageIntro reading / personal、首页近况和器作详情存在列区重叠却未显式指定同一 `grid-row`，浏览器将文案自动排入下一行；先修网格关系，再收紧间距。
+- 桌面目标：Hero 不超过一屏；内页卷首约 45–55svh，compact 约 35–42svh；首页普通章约 55–75svh；Footer 约 360–420px；桌面长卷仍为唯一 260svh pinned 章节。
+- 移动目标：器作与光影采用“主图 + 缩略组”，所有内容仍可进入；装饰巨字只裁切在纸层内，不参与父容器高度计算。
+- 内容边界：正文保持 16px 与约 42rem 阅读宽度；不改文案、URL、内容模型、公开组件接口、字体、颜色或依赖。
+- 动效边界：Motion、GSAP 与 CSS 的既有职责保持不变；低动态、无 JS 与异常时内容完整可见。
+- Git 边界：保护当前工作区全部已有改动，不提交、不推送；不刷新 `.impeccable/design.json`。
+
+## 结果审查
+
+### 结构与密度
+
+- 为 PageIntro reading / personal、首页近况和器作详情的同屏元素显式指定同一网格行，修复列区重叠后被 Grid 自动排入下一行的根因；普通 reveal 初态改为纵向位移，避免横向动画扩大页面滚动宽度。
+- 四类 PageIntro 重构为横向刊头、横向装裱、接触印样和短手札。2560×1200 下笺录卷首由 1172px 收至 624px，此间由 1336px 收至 624px；移动端代表卷首为 413–571px，后续内容均能在首屏露出。
+- 首页 Hero 由 1536px 收至 1120px；近况由 1935px 收至 834px、器作由 2397px 收至 883px、笺录由 1227px 收至 835px、光影由 2443px 收至 942px。长卷继续保持唯一 260svh pinned 章节。
+- 移动端器作由 1689px 收至 927px、光影由 1338px 收至 995px，均采用主图加缩略组并保留全部内容；首页总高度在 2560×1200 为 8803px、390×844 为 6618px。
+- 器作详情 Hero 由 1614px 收至 734px，并将轮播控制区让出左侧叠放展签，修复按钮可见但被纸页截获的问题；Footer 由约 600px 收至 394px（移动端 418px）。
+
+### 验证证据
+
+- 静态：全部变更目标 Prettier 检查通过，`git diff --check` 通过；`pnpm check` 为 50 files、0 errors / 0 warnings / 0 hints；`pnpm build` 成功生成 24 页、99 个优化图像与 3 页 Pagefind 索引。
+- 格式基线：全仓 `pnpm format:check` 仍只命中 32 个既有、未触及文件，本轮变更目标全部通过，未批量改写无关文件。
+- 联合巡检覆盖 2560×1200、1440×1000、768×1024、390×844，以及首页、笺录列表 / 正文 / 归档 / 标签 / 分类、器作列表 / 详情、光影 / 灯箱、此间、留墨与 404；全部代表路由隐藏内容数为 0、页面级横向溢出为 false、正文为 16px、控制台错误为 0。
+- 交互：主题往返后没有过渡类残留；器作轮播可由 01 / 02 切换至 02 / 02；灯箱可打开、Escape 关闭并归还焦点；连续输入“墨”与“墨痕”后检索框即时保留最终值。
+- 视觉证据：`layout-tight-hero-wide.png`、`layout-tight-current-wide.png`、`layout-tight-projects-wide.png`、`layout-tight-gallery-wide.png`、`layout-tight-journal-wide.png` 及对应移动截图保存在本次 Codex visualizations 目录。
+- Detector：全部 UI 完成后仅运行一次 `layout` scope，JSON 结果为 `[]`，没有发现布局反模式。
+
+### 已知边界
+
+- 浏览器证据来自 Chromium 视口仿真，不替代真实 iOS / Android 硬件测试；光影桌面章因完整保留四幅作品，在 2560×1200 下为约 78.5svh，但已从两屏以上收至单屏编辑场面。
+- `.impeccable/design.json` 继续按任务边界保持 stale；本轮未启动 live、未新增依赖、未提交、未推送，验证浏览器与生产预览在收尾后停止。
+
+# 上一任务：按真实宽屏观感二次收敛字号
+
+目标：以用户提供的 2560×1440 浏览器截图为视觉基准，修正上一轮“计算值达标但实际仍过大”的判断偏差；进一步压低 Hero、章节题名和首页事实文案，同时保留正文、书卷结构与现有动效。
+
+- [x] 下调 Hero 主 / 副字、页面题名、章节题名、内容题名与装饰字角色
+- [x] 调整首页近况文案行宽，避免字号缩小后产生碎裂换行
+- [x] 同步 `DESIGN.md` 的真实字号上限与宽屏验收规则
+- [x] 执行目标格式、类型、构建与 `git diff --check`
+- [x] 覆盖 2560×1200、1440×1000、390×844 的生产预览联合巡检
+- [x] 完成本轮单次类型 detector，并记录结果审查与已知边界
+
+## 计划确认
+
+- 视觉判断：截图中的 Hero“墨”、chapter“此间近况”和正文事实句仍共同争抢视觉主位；本轮不再以“低于旧值”作为完成标准，而以同屏层级和用户实际窗口观感为准。
+- 字号目标：Hero 主字最高 288px、副字最高 128px；页面真实题名最高 80px；chapter 最高 64px；首页 section / 事实题名最高 44px；移动端真实题名控制在约 32–43px。
+- 角色边界：保留马善政题字、Noto 正文、三档小字、16px 正文与 42rem 阅读宽度；只调展示字号角色和必要行宽，不改内容、组件接口或动效职责。
+- 验证边界：将用户截图对应的超宽窗口纳入首要验收，再联合检查普通桌面与移动端；集中修复后最多确认一次。
+- Git 边界：本轮不提交、不推送，不刷新 `.impeccable/design.json`。
+
+## 结果审查
+
+### 字号收敛
+
+- 将 Hero 主字由 368px 降至 288px、副字由约 179px 降至 128px；首页 chapter 题名由 86.4px 降至最高 64px，近况事实句由 72px 降至 44px。
+- 页面真实题名桌面统一不超过 80px；装饰字仍承担纸层构图，但与真实标题分开设限。移动端首页 chapter 为 32px，内页题名约 40px，404 为 44px。
+- 近况事实句最大行宽由 10em 调至 14em，使缩小后的 44px 文案保持完整短行；正文继续为 16px、约 42rem 阅读宽度。
+
+### 验证证据
+
+- 静态：目标文件 Prettier 检查通过，`git diff --check` 通过；`pnpm check` 为 50 files、0 errors / 0 warnings / 0 hints；`pnpm build` 成功生成 24 页、99 个优化图像与 3 页 Pagefind 索引。
+- 宽屏：首页在 2560×1200 下实测 Hero 288 / 128px、chapter 64px、事实句 44px；在 1440×1000 下为 288 / 128px、chapter 61.2px、事实句 44px。笺录、器作、光影、此间与 404 的桌面真实题名均不超过 80px。
+- 移动：首页在 390×844 下 Hero 128 / 64px、chapter 32px、事实句 32px；代表内页真实题名为 40px，404 为 44px。
+- 联合巡检覆盖首页、笺录、器作、光影、此间和 404；各视口隐藏内容数为 0、页面级横向溢出为 false、控制台 warning / error 为 0。
+- 视觉证据：`type-wide-hero.png`、`type-wide-current.png`、`type-quiet-mobile.png` 保存在本次 Codex visualizations 目录。
+- Detector：全部 UI 完成后仅运行一次字号检测；返回 8 条 advisory、无 warning / error。命中项均为既有正文或小字常量与设计文档字号表的机械匹配差异，没有发现本轮展示字号回退或内容显隐问题。
+
+### 已知边界
+
+- 浏览器证据来自 Chromium 视口仿真，不替代真实移动设备测试；本轮以用户提供的 2560×1440 实际浏览器截图作为首要宽屏视觉基准。
+- `.impeccable/design.json` 仍按任务边界保持 stale，可在后续独立 `$impeccable document` 任务中刷新。
+- 本轮未启动 live、未新增依赖、未提交、未推送；生产预览与浏览器验证会话在收尾后停止。
+
+# 上一任务：全站字体收敛与内容显隐修复
+
+目标：修复普通揭示元素进入视口后仍保持透明的问题，并按“明显克制”档统一收敛装饰巨字与真实标题；保留现有叙事动效、正文尺度、内容与接口。
+
+- [x] 降低揭示初态选择器权重，确保 `is-revealed` 终态与媒体遮罩可靠生效
+- [x] 建立装饰字、页面标题与章节标题的统一展示字号角色
+- [x] 将 Hero、PageIntro、SectionHeading 与各栏目入口收敛到目标尺度
+- [x] 同步 `DESIGN.md` 的字号层级与可见性降级约束
+- [x] 执行格式、类型、构建与生产预览三视口联合巡检
+- [x] 仅运行一次 Impeccable detector，并记录结果审查与已知边界
+
+## 计划确认
+
+- 根因边界：IntersectionObserver 已正确添加 `is-revealed`；内容持续透明来自初态选择器权重高于终态选择器，因此只修正层叠契约，不改用其他动画库。
+- 字号边界：装饰巨字缩小约 35–40%，真实标题缩小约 45–55%；正文维持 1rem、约 42rem 阅读宽度，小字仍使用 0.62 / 0.68 / 0.72rem 三档。
+- 动效边界：Motion 继续负责 React 交互，GSAP 继续负责 Hero、桌面长卷、暗室与页面接棒，普通揭示继续使用 CSS + IntersectionObserver。
+- 内容边界：不改文案、URL、内容模型、公开组件接口、颜色、字体或依赖；只在字号缩小造成空洞时同步收紧局部留白。
+- 降级边界：无 JS、`prefers-reduced-motion`、不支持 IntersectionObserver 或模块异常时，内容必须直接呈现完整终态。
+- 验证边界：联合巡检桌面 / 平板 / 移动端，集中修复后最多复核一次；全部 UI 完成后 detector 仅运行一次。
+- Git 边界：本轮不提交、不推送；`.impeccable/design.json` 的 stale 状态不在本轮顺带修复。
+
+## 结果审查
+
+### 修复与设计收敛
+
+- 显隐根因：IntersectionObserver 原本已正确添加 `is-revealed`，但 `html.js.reveal-ready …` 初态选择器权重更高。现以 `:where(html.js.reveal-ready)` 将门控权重归零，标题、列表子项、墨线、媒体遮罩和 PageIntro 终态均能可靠覆盖；普通揭示继续使用 CSS + IntersectionObserver，没有移除 Motion 或 GSAP。
+- 字号系统：全局新增 Hero 主 / 副字、页面装饰字、页面题名、章节装饰字、chapter / section / card 题名共九个内部展示角色。Hero 主字桌面 368px、移动 179.4px；页面真实标题桌面最高 96px、移动最高 54.6px；首页 chapter 题名为 86.4px / 39px；正文保持 16px 与约 42rem 阅读宽度。
+- 版式节奏：PageIntro 普通 / 展陈场景同步收紧最小高度与留白，暗室仍保留视口级停顿；文章卷首由 92svh 收至 72svh。联合巡检发现移动文章页装饰“录”字造成 31px 横向溢出，已在卷首建立 `overflow: clip` 装饰裁切边界，确认 `scrollWidth 390 === clientWidth 390`。
+- 设计文档：`DESIGN.md` 已记录装饰字与真实标题的双轨规则、各展示字号角色和 `:where()` 低权重 reveal 契约；文案、URL、内容模型、公开组件接口、字体、颜色与依赖均未改变。
+
+### 验证证据
+
+- 静态：本轮目标文件定向 Prettier 通过；`git diff --check` 通过；`pnpm check` 为 50 files、0 errors / 0 warnings / 0 hints；`pnpm build` 成功生成 24 页、99 个优化图像与 3 页 Pagefind 索引。
+- 格式基线：全仓 `pnpm format:check` 仍只命中 32 个既有、未触及文件，本轮目标文件全部通过，未批量改写无关基线。
+- 联合巡检：生产预览覆盖首页、笺录列表 / 正文、器作列表 / 详情、光影 / 灯箱、此间、留墨与 404；1440×1000 和 390×844 全覆盖，首页 / 器作详情 / 此间另覆盖 768×1024。全部视口 reveal 隐藏数为 0、媒体遮罩残留数为 0，最终无页面级横向溢出，控制台 warning / error 为 0。
+- 交互与降级：器作轮播控制已水合且可点击；灯箱可打开、Escape 关闭并归还焦点；主题 dark → light 后无过渡类残留；reduced-motion 与无 JS 的隐藏元素数均为 0，无 JS 移动首页无溢出且正文仍为 16px。
+- 视觉证据：`type-reveal-home-desktop.png`、`type-reveal-journal-mobile.png`、`type-reveal-article-mobile.png` 保存在本次 Codex visualizations 目录。
+- Detector：全部 UI 完成后仅运行一次。两条 warning 为既有且已文档化的 prose h2 3px 墨线题签与 `ease-seal` 印章回弹；其余 advisory 来自本地设计侧车尚未刷新及既有字号 / 材料字面量，未发现本轮新增的内容裁切或可见性机械缺陷。
+
+### 已知边界
+
+- 浏览器证据来自 Chromium 桌面 / 平板 / 移动仿真，不替代真实 iOS / Android 硬件测试。
+- `.impeccable/design.json` 继续保持 stale，本轮遵循边界不顺带修复；可由后续独立 `$impeccable document` 任务刷新。
+- 本轮未启动 live、未新增依赖、未提交、未推送；验证会话与生产预览在收尾后停止。
+
+# 上一任务：全站「夺卷入画」大胆化重构
+
+目标：把现有“标题 + 网格 + 小角度错位”的章节模板重构成可滚动展开的数字手卷；以巨幅汉字、真实图像、纸层接棒和少数夺屏场面建立鲜明观看机制，同时保持正文与表单安静可读。
+
+- [x] 建立横向拉卷页面转场、卷尺式页眉章标与 chapter / quiet 标题模式
+- [x] 重写 Hero 为巨字入画、纸层揭卷与向下一章接棒的单一主秀
+- [x] 让首页近况、器作、长卷、笺录、光影、年谱各自形成不同场面
+- [x] 为笺录、器作、光影、此间、留墨与 404 建立极端但可读的独立卷首
+- [x] 完成桌面动效、触屏静态构图、低动态与无 JS 完整终态
+- [x] 同步 `DESIGN.md` 与本地 Impeccable 设计侧车
+- [x] 执行格式、类型、构建、生产预览与三视口联合浏览器巡检
+- [x] 记录结果审查、截图证据、性能结果与已知边界
+
+## 计划确认
+
+- 视觉方向：采用用户确认的“夺卷入画 + 全站入口极端”；大胆必须来自观看机制、巨字裁切、纸层空间和媒体接棒，不以增加零碎 hover 或粒子数量代替结构变化。
+- 内容边界：保留事实文案、首页章节顺序、URL、内容集合与配置 schema；不虚构身份、经历、社会证明或新作品。
+- 材料边界：只使用现有汉字字体、宣纸、墨色、朱砂与真实图片资产；不新增颜色、字体、远程素材、WebGL 或依赖。
+- 动效边界：Hero、桌面长卷、暗室和页面接棒承担低频叙事；高频交互继续使用 150 / 250ms 可中断反馈，章节揭卷 550–700ms，页面拉卷约 400ms。
+- 降级边界：触屏不执行位移型 hover，移动端取消 pinned 与大范围视差；`prefers-reduced-motion`、无 JS 与动画异常时直接显示完整终态。
+- 验证边界：全部 UI 完成后联合巡检桌面 / 平板 / 移动端，集中修复后最多复核一次；Impeccable detector 仅运行一次。
+- Git 边界：本轮不提交、不推送。
+
+## 结果审查
+
+### 设计与实现
+
+- 卷轴骨架：页面切换改为只作用于正文的横向拉卷，刊头与卷尾保持稳定；Header 变成读取 `data-home-chapter` 的卷尺导航，滚动时显示章号 / 章名，朱砂圆目沿墨线移动；`SectionHeading` 落成 chapter / quiet 两档。
+- 夺卷入画：Hero 推倒左右网格，以完整巨“墨”承载山水、朱砂“笺”从侧纸压入，纸层、图像、题字与钤印组成单一时间线；首页近况、器作、长卷、笺录、暗室与年谱分别采用手记压页、跨视口展墙、唯一 pinned 长卷、巨“录”书脊、主片接触印样与细卷尾。
+- 全站入口：`PageIntro` 以 `glyph` / `artTreatment` 形成 reading、exhibition、darkroom、personal 四种空间；笺录 / 归档 / 标签 / 分类使用“录／年／签／类”，器作 / 光影 / 此间 / 留墨使用“器／影／间／留”，404 使用断裂空卷与巨“无”。文章正文仍保持约 42rem 阅读宽度。
+- 动效契约：普通题名、墨线、展签与媒体揭示改为 CSS + IntersectionObserver，GSAP 只留给 Hero、桌面长卷和有限视差；普通隐藏由 `html.js.reveal-ready` 门控，初始化异常 2.2s 自动解除。灯箱使用原图与所点缩略图的原位 View Transition 接棒，并保留 250 / 400ms 导航与手势节拍。
+- 文档同步：`DESIGN.md` 与本地 `.impeccable/design.json` 已记录“夺卷入画”、横向拉卷、卷尺页眉、四类卷首、chapter / quiet 与内部动效契约；URL、内容集合、frontmatter、配置 schema、依赖和事实文案均未改变。
+
+### 验证证据
+
+- 静态：变更目标定向 Prettier 全部通过；`git diff --check` 通过；`pnpm check` 为 50 files、0 errors / 0 warnings / 0 hints；`pnpm build` 成功生成 24 页、99 个优化图像与 3 页 Pagefind 索引。
+- 格式基线：全仓 `pnpm format:check` 仍只命中 32 个既有、未触及文件；本轮修改文件不在警告清单，未批量改写无关基线。
+- 联合巡检：生产预览覆盖首页六章、笺录入口、器作入口 / 详情、光影 / 灯箱、此间与 404，视口为 1440×1000、768×1024、390×844。最终 Hero 巨字桌面边界为 272–813px，桌面 / 移动 transform 均归零且无页面级横向溢出；1024px 器作详情 `scrollWidth === clientWidth`。
+- 交互与降级：主题快速往返后过渡类与定位变量均清空；灯箱可打开、Escape 关闭并归还焦点，共享图像名称与 `is-gallery-transitioning` 均零残留；reduced-motion 与无 JS 的隐藏元素数为 0；控制台 warning / error 为 0。
+- 视觉证据：最终截图保存在本次 Codex visualizations 目录，核心文件为 `bold-final-hero-desktop.png`、`bold-final-hero-mobile.png`；联合巡检另含 `bold-home-projects-desktop.png`、`bold-home-darkroom-desktop.png`、`bold-projects-desktop.png`、`bold-gallery-desktop.png`、`bold-about-tablet.png`、`bold-journal-mobile.png` 与 `bold-404-mobile.png`。
+- Detector：按 Impeccable 要求只运行一次。可见 warning 对应设计系统已明确允许的印章 `ease-seal` 回弹和 prose h2 3px 墨线题签；字号 advisory 主要来自本轮有意加入的裁切巨字 / 流体端点，已在 DESIGN 与侧车中建立语义，不据此退回保守尺度。
+
+### 性能与已知边界
+
+- Hero 的可访问 fallback 与字形填图复用同一原图 URL，避免再生成一份最高规格位图；PageIntro 字形背景上限收敛到 720px，移动端停用第二份字形位图；构建优化图像由巡检前的 102 个降至 99 个。
+- Header 滚动帧只读取缓存的章节坐标并写 transform；章节测量只在初始化、resize、load、字体就绪与 ResizeObserver 触发时更新，避免每帧强制布局。
+- 浏览器证据来自 Chromium 桌面 / 平板 / 移动仿真，不替代真实 iOS / Android 硬件；灯箱共享图像在不支持 View Transition 或低动态环境中直接切换，功能保持完整。
+- `.impeccable/design.json` 继续作为本地忽略侧车；本轮未启动 live、未新增依赖、未提交、未推送，验证浏览器与预览服务均已停止。
+
 # 当前任务：全站「六章墨场」大胆化重设计
 
 目标：沿用「墨笺书房」既有纸、墨、朱砂与字体资产，把全站升级为“章节戏剧化、阅读区安静”的体验；压缩无叙事作用的长空段，只在 Hero、桌面长卷与暗室保留大尺度停顿。

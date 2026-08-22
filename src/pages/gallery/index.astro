@@ -42,9 +42,13 @@ const items = await Promise.all(
         <PageIntro
           id="gallery"
           title="光影"
+          glyph="影"
           note="IMAGE FOLIO"
           description="以光为墨，收存纸张的肌理、山水的层次与四时一瞬。点击画面，可入暗室细看。"
           scene="darkroom"
+          artTreatment="contact-sheet"
+          artwork={entries[0]?.data.image}
+          artworkAlt={entries[0]?.data.alt}
         >
           <p slot="meta" class="m-0">共 {String(items.length).padStart(2, '0')} 幅 · 概念影像</p>
         </PageIntro>
@@ -63,6 +67,6 @@ const items = await Promise.all(
   }
 
   .gallery-stage {
-    padding-block: 2rem clamp(7rem, 14vw, 12rem);
+    padding-block: 2rem clamp(4rem, 7vw, 6rem);
   }
 </style>

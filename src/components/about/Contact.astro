@@ -89,7 +89,7 @@ const endpoint = site.formspree.endpoint;
   .contact__grid {
     display: grid;
     grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
-    gap: clamp(3rem, 8vw, 8rem);
+    gap: clamp(2.5rem, 5vw, 5rem);
     align-items: start;
   }
 
@@ -129,7 +129,7 @@ const endpoint = site.formspree.endpoint;
   .contact__form,
   .contact__pending {
     position: relative;
-    padding: clamp(2rem, 5vw, 4rem);
+    padding: clamp(1.75rem, 3vw, 2.75rem);
     border-top: 2px solid var(--ink);
     background: color-mix(in oklab, var(--paper-deep) 52%, transparent);
     box-shadow: var(--shadow-md);
@@ -235,7 +235,7 @@ const endpoint = site.formspree.endpoint;
     margin: 0 0 1.25rem;
     color: color-mix(in oklab, var(--ink) 30%, transparent);
     font-family: var(--font-ma-shan-zheng);
-    font-size: clamp(3rem, 7vw, 6rem);
+    font-size: var(--type-title-section);
     letter-spacing: 0.12em;
     transform: rotate(-2deg);
   }

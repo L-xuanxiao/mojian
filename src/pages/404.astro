@@ -8,9 +8,11 @@ import { withBase } from '../site.config';
 <BaseLayout title="迷途 · 墨笺" description="此处无卷：你要寻的那一页，或已散佚，或从未写就。">
   <main class="mx-auto max-w-stage px-5 md:px-8 lg:px-10">
     <section class="lost" aria-labelledby="lost-heading">
+      <span class="lost__glyph" aria-hidden="true">无</span>
+
       <div class="lost__copy" data-reveal-group>
         <p class="folio-label">404 / 迷途</p>
-        <h1 id="lost-heading" class="font-display" data-reveal-title>此处无卷</h1>
+        <h1 id="lost-heading" class="font-display">此处无卷</h1>
         <p class="lost__note">你要寻的那一页，或已散佚，或从未写就。山水之间，不妨原路折返。</p>
         <nav class="lost__nav" aria-label="折返">
           <a class="btn" href={withBase('/')}>返回卷首</a>
@@ -18,15 +20,27 @@ import { withBase } from '../site.config';
         </nav>
       </div>
 
-      <figure class="lost__art media-reveal" aria-hidden="true">
-        <Image
-          src={lostArtwork}
-          alt=""
-          widths={[720, 1080]}
-          sizes="(min-width: 1024px) 44vw, 100vw"
-          quality={86}
-          loading="eager"
-        />
+      <figure class="lost__art" aria-hidden="true">
+        <span class="lost__sheet lost__sheet--left">
+          <Image
+            src={lostArtwork}
+            alt=""
+            widths={[720, 1080]}
+            sizes="(min-width: 1024px) 44vw, 100vw"
+            quality={86}
+            loading="eager"
+          />
+        </span>
+        <span class="lost__sheet lost__sheet--right">
+          <Image
+            src={lostArtwork}
+            alt=""
+            widths={[720, 1080]}
+            sizes="(min-width: 1024px) 44vw, 100vw"
+            quality={86}
+            loading="eager"
+          />
+        </span>
         <figcaption>纸山 · 迷途</figcaption>
       </figure>
     </section>
@@ -40,21 +54,37 @@ import { withBase } from '../site.config';
     grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: clamp(1.25rem, 3vw, 2.5rem);
     align-items: center;
-    min-height: calc(100svh - 5rem);
-    padding-block: clamp(4rem, 8vw, 7rem);
+    min-height: calc(72svh - 5rem);
+    overflow: clip;
+    padding-block: clamp(3rem, 5vw, 4.5rem);
   }
 
   .lost::before {
     position: absolute;
-    inset: 9% 3% 13% 38%;
-    border: 1px solid var(--line);
+    inset: 7% -5% 9% 34%;
+    border-block: 1px solid var(--line);
+    background: color-mix(in oklab, var(--paper-deep) 54%, transparent);
     content: '';
     pointer-events: none;
+    transform: rotate(-1.5deg);
+  }
+
+  .lost__glyph {
+    position: absolute;
+    top: 49%;
+    left: -0.12em;
+    z-index: 1;
+    color: color-mix(in oklab, var(--ink) 9%, transparent);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: var(--type-glyph-page);
+    line-height: 0.7;
+    transform: translateY(-50%) rotate(-4deg);
+    user-select: none;
   }
 
   .lost__copy {
     z-index: 2;
-    grid-column: 1 / span 7;
+    grid-column: 1 / span 6;
   }
 
   .lost__copy > .folio-label {
@@ -63,7 +93,7 @@ import { withBase } from '../site.config';
 
   .lost__copy h1 {
     margin: 0;
-    font-size: clamp(5rem, 12vw, 10rem);
+    font-size: var(--type-title-page-emphasis);
     font-weight: 400;
     line-height: 0.86;
     letter-spacing: -0.02em;
@@ -83,25 +113,77 @@ import { withBase } from '../site.config';
   }
 
   .lost__art {
-    z-index: 1;
-    grid-column: 6 / -1;
+    position: relative;
+    z-index: 2;
+    grid-column: 5 / -1;
     grid-row: 1;
     width: calc(100% + clamp(1rem, 4vw, 4rem));
+    aspect-ratio: 5 / 4;
     margin: 0;
-    overflow: hidden;
-    padding: clamp(0.55rem, 1.2vw, 0.9rem);
-    background: var(--paper-deep);
-    box-shadow: var(--shadow-lg);
-    transform: translateY(clamp(2rem, 7vw, 6rem));
+    transform: translateY(clamp(2rem, 6vw, 5rem)) rotate(0.7deg);
   }
 
-  .lost__art img {
+  .lost__sheet {
+    position: absolute;
+    inset-block: 0;
+    display: block;
+    overflow: hidden;
+    background: var(--paper-deep);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .lost__sheet--left {
+    left: 0;
+    width: 57%;
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      93% 17%,
+      100% 31%,
+      92% 48%,
+      99% 65%,
+      91% 82%,
+      100% 100%,
+      0 100%
+    );
+  }
+
+  .lost__sheet--right {
+    right: 0;
+    width: 47%;
+    clip-path: polygon(
+      13% 0,
+      100% 0,
+      100% 100%,
+      12% 100%,
+      1% 82%,
+      10% 65%,
+      2% 48%,
+      11% 31%,
+      3% 17%
+    );
+    transform: translate(1.5rem, 2rem) rotate(2deg);
+  }
+
+  .lost__sheet :global(img) {
     display: block;
     width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .lost__sheet--left :global(img) {
+    object-position: left center;
+  }
+
+  .lost__sheet--right :global(img) {
+    object-position: right center;
   }
 
   .lost__art figcaption {
-    padding-top: 0.7rem;
+    position: absolute;
+    right: 0;
+    bottom: -3.25rem;
     color: var(--bronze);
     font-family: var(--font-noto-sans);
     font-size: 0.68rem;
@@ -113,21 +195,47 @@ import { withBase } from '../site.config';
     .lost {
       display: block;
       min-height: 0;
-      padding-block: 4rem 6rem;
+      padding-block: 3rem 4rem;
     }
 
     .lost::before {
-      inset: 2rem 0 auto 18%;
-      height: 16rem;
+      inset: 2rem -2rem auto 18%;
+      height: 21rem;
     }
 
     .lost__copy {
       position: relative;
     }
 
+    .lost__glyph {
+      top: 3.5rem;
+      right: -0.16em;
+      left: auto;
+      font-size: var(--type-glyph-page);
+      transform: rotate(2deg);
+    }
+
     .lost__art {
       width: calc(100% + 1.25rem);
+      aspect-ratio: 4 / 5;
       margin-top: 3rem;
+      transform: none;
+    }
+
+    .lost__sheet--left {
+      width: 59%;
+    }
+
+    .lost__sheet--right {
+      width: 49%;
+      transform: translate(0.8rem, 1.25rem) rotate(1.5deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lost__glyph,
+    .lost__art,
+    .lost__sheet {
       transform: none;
     }
   }

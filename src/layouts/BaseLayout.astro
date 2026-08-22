@@ -38,9 +38,11 @@ const {
       if (theme === 'light' || theme === 'dark') {
         document.documentElement.dataset.theme = theme;
       }
-      // 防揭示闪烁：有 JS 时尽早标记，CSS 据此在首绘前藏好待揭示元素（见 global.css 门控规则）；
-      // 无 JS 时无此类，内容直达最终态
-      document.documentElement.classList.add('js');
+      // 防揭示闪烁：reveal-ready 只门控普通入场；模块异常时超时解除，避免内容永久隐藏。
+      document.documentElement.classList.add('js', 'reveal-ready');
+      window.__mojianRevealFallback = window.setTimeout(() => {
+        document.documentElement.classList.remove('reveal-ready');
+      }, 2200);
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
@@ -66,7 +68,7 @@ const {
     <a class="skip-link" href="#main-content">跳到正文</a>
     <Header />
     <AmbientInkCanvas />
-    <div id="main-content" tabindex="-1">
+    <div id="main-content" tabindex="-1" data-page-reel>
       <slot />
     </div>
     <Footer />

@@ -55,7 +55,7 @@
   top: -0.75em;
   left: -0.08em;
   color: color-mix(in oklab, var(--paper) 14%, transparent);
-  font-size: clamp(5rem, 10vw, 9rem);
+  font-size: var(--type-title-section);
 }
 
 .gallery-entry__image {
@@ -168,7 +168,7 @@
 
 .gallery-entry:first-child h2 {
   font-family: var(--font-ma-shan-zheng);
-  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-size: var(--type-title-card);
   font-weight: 400;
 }
 
@@ -222,6 +222,20 @@
 
 .ink-lightbox .yarl__slide_image {
   border-radius: 2px;
+}
+
+/* 灯箱与所点照片共享同一快照：图像原位扩张，背景仍由灯箱自身显影。 */
+::view-transition-group(gallery-photo) {
+  z-index: 99999;
+  animation-duration: 250ms;
+  animation-timing-function: var(--ease-ink);
+}
+
+::view-transition-old(gallery-photo),
+::view-transition-new(gallery-photo) {
+  height: 100%;
+  object-fit: contain;
+  animation: none;
 }
 
 .ink-lightbox .yarl__button {
@@ -319,5 +333,9 @@
 
   .gallery-entry__image img {
     transition: none;
+  }
+
+  ::view-transition-group(gallery-photo) {
+    animation: none;
   }
 }

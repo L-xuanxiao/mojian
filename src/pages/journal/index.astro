@@ -17,10 +17,12 @@ const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
     <PageIntro
       id="journal"
       title="笺录"
+      glyph="录"
       note="JOURNAL FOLIO"
       description="关于设计、营造、阅读与日常的长短记录。文字不求喧哗，只求经得起再次翻阅。"
       variant="folio"
       scene="reading"
+      artTreatment="ink-glyph"
       artwork={folioArtwork}
       artworkAlt="层叠宣纸与墨晕构成的纸本残片"
     >
@@ -70,9 +72,9 @@ const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
   .journal-issue {
     display: grid;
     grid-template-columns: minmax(0, 8fr) minmax(18rem, 4fr);
-    gap: clamp(3rem, 8vw, 8rem);
+    gap: clamp(2.5rem, 5vw, 5rem);
     align-items: start;
-    padding-block: clamp(3rem, 7vw, 6rem);
+    padding-block: clamp(2.5rem, 4.5vw, 4rem);
   }
 
   .journal-issue__lead > .folio-label {
@@ -82,7 +84,7 @@ const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
   .journal-issue__search {
     position: sticky;
     top: 7.5rem;
-    margin-top: clamp(4rem, 10vw, 9rem);
+    margin-top: clamp(2rem, 4vw, 3.5rem);
     padding: 1.5rem 0 0;
     border-top: 2px solid var(--ink);
     border-bottom: 1px solid var(--line);
@@ -112,7 +114,7 @@ const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
   .journal-catalog {
     max-width: 64rem;
     margin-left: auto;
-    padding-block: 2rem clamp(6rem, 11vw, 9rem);
+    padding-block: 2rem clamp(4rem, 7vw, 6rem);
   }
 
   .journal-catalog > header {
@@ -126,11 +128,11 @@ const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
 
     .journal-issue__search {
       position: static;
-      margin-top: 4rem;
+      margin-top: 3rem;
     }
 
     .journal-catalog {
-      padding-bottom: 6rem;
+      padding-bottom: 5rem;
     }
   }
 </style>

@@ -158,10 +158,10 @@ import { aboutMilestones } from './about-timeline.data';
   .about-timeline__empty {
     position: relative;
     display: flex;
-    min-height: clamp(15rem, 30vw, 24rem);
+    min-height: clamp(10rem, 18vw, 14rem);
     align-items: flex-end;
     margin: 0;
-    padding: clamp(2rem, 4vw, 3.5rem);
+    padding: clamp(1.5rem, 3vw, 2.5rem);
     border-top: 2px solid var(--ink);
     border-bottom: 1px solid var(--line);
     overflow: hidden;
@@ -174,7 +174,7 @@ import { aboutMilestones } from './about-timeline.data';
     right: 0;
     color: color-mix(in oklab, var(--ink) 8%, transparent);
     font-family: var(--font-ma-shan-zheng);
-    font-size: clamp(10rem, 25vw, 22rem);
+    font-size: var(--type-glyph-chapter);
     line-height: 1;
   }
 
@@ -184,7 +184,7 @@ import { aboutMilestones } from './about-timeline.data';
     display: inline-block;
     color: color-mix(in oklab, var(--ink) 24%, transparent);
     font-family: var(--font-ma-shan-zheng);
-    font-size: clamp(2.4rem, 5vw, 4.5rem);
+    font-size: var(--type-title-section);
     letter-spacing: 0.12em;
     transform: rotate(-2deg);
   }

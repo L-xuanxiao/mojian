@@ -6,156 +6,219 @@ import heroFar from '../../assets/art/layers/hero-mountain-far.webp';
 import heroMid from '../../assets/art/layers/hero-mountain-mid.webp';
 import heroNear from '../../assets/art/layers/hero-mountain-near.webp';
 import { withBase } from '../../site.config';
+
+const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
 ---
 
-<section class="hero" aria-label="站点卷首" data-hero data-ink-scene="hero">
-  {/* 云气流岚：山水留白间的呼吸，纯装饰 */}
-  <span class="mist mist--a hero__mist-a" aria-hidden="true"></span>
-  <span class="mist mist--b hero__mist-b" aria-hidden="true"></span>
+<section
+  class="hero"
+  aria-label="站点卷首"
+  data-hero
+  data-home-chapter="卷"
+  data-home-chapter-title="卷首"
+  data-ink-scene="hero"
+>
+  <div class="hero__hold">
+    <span class="mist mist--a hero__mist-a" aria-hidden="true"></span>
+    <span class="mist mist--b hero__mist-b" aria-hidden="true"></span>
+    <span class="hero__under-sheet" data-hero-sheet aria-hidden="true"></span>
 
-  <div class="hero__folio" aria-hidden="true">
-    <span>MOJIAN · 2026</span>
-    <span>卷一 · 数字书卷</span>
-  </div>
+    <div class="hero__folio" aria-hidden="true">
+      <span>MOJIAN · 2026</span>
+      <span>个人数字书卷</span>
+      <span>卷一 · 夺卷入画</span>
+    </div>
 
-  <div class="hero__stage mx-auto max-w-stage px-5 md:px-8 lg:px-10">
-    <figure class="hero__art media-reveal" data-hero-art>
-      <Image
-        class="hero__fallback"
-        src={heroArtwork}
-        alt="层叠宣纸与墨色构成的抽象山形"
-        widths={[720, 1080, 1536]}
-        sizes="(min-width: 1024px) 68vw, 100vw"
-        quality={88}
-        loading="eager"
-      />
-      <div class="hero__layers" aria-hidden="true">
-        <div class="hero__layer hero__layer--far" data-hero-layer="far">
-          <Image
-            src={heroFar}
-            alt=""
-            widths={[720, 1080, 1536]}
-            sizes="(min-width: 1024px) 68vw, 100vw"
-            quality={86}
-            loading="eager"
-          />
+    <div class="hero__stage mx-auto max-w-stage px-5 md:px-8 lg:px-10">
+      <figure class="hero__art" data-hero-art>
+        <img
+          class="hero__fallback"
+          src={heroArtwork.src}
+          alt="层叠宣纸与墨色构成的抽象山形"
+          width={heroArtwork.width}
+          height={heroArtwork.height}
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+        />
+        <div class="hero__layers" aria-hidden="true">
+          <div class="hero__layer hero__layer--far" data-hero-layer="far">
+            <Image
+              src={heroFar}
+              alt=""
+              widths={[720, 1080, 1536]}
+              sizes="(min-width: 1024px) 72vw, 100vw"
+              quality={86}
+              loading="eager"
+            />
+          </div>
+          <span class="hero__layer-mist" aria-hidden="true"></span>
+          <div class="hero__layer hero__layer--mid" data-hero-layer="mid">
+            <Image
+              src={heroMid}
+              alt=""
+              widths={[720, 1080, 1536]}
+              sizes="(min-width: 1024px) 72vw, 100vw"
+              quality={86}
+              loading="eager"
+            />
+          </div>
+          <div class="hero__layer hero__layer--near" data-hero-layer="near">
+            <Image
+              src={heroNear}
+              alt=""
+              widths={[720, 1080, 1536]}
+              sizes="(min-width: 1024px) 72vw, 100vw"
+              quality={88}
+              loading="eager"
+            />
+          </div>
         </div>
-        <span class="hero__layer-mist" aria-hidden="true"></span>
-        <div class="hero__layer hero__layer--mid" data-hero-layer="mid">
-          <Image
-            src={heroMid}
-            alt=""
-            widths={[720, 1080, 1536]}
-            sizes="(min-width: 1024px) 68vw, 100vw"
-            quality={86}
-            loading="eager"
-          />
-        </div>
-        <div class="hero__layer hero__layer--near" data-hero-layer="near">
-          <Image
-            src={heroNear}
-            alt=""
-            widths={[720, 1080, 1536]}
-            sizes="(min-width: 1024px) 68vw, 100vw"
-            quality={88}
-            loading="eager"
-          />
+        <figcaption aria-hidden="true">纸山 · 卷首</figcaption>
+      </figure>
+
+      <div class="hero__copy" data-ink-avoid>
+        <p class="folio-label hero__eyebrow">纸上留白 · 墨分五色</p>
+        <h1 class="hero__title font-display" aria-label="墨笺" style={heroArtStyle}>
+          <span class="hero-title-mask hero-title-mask--ink"
+            ><span class="hero-title-line hero-title-line--ink">墨</span></span
+          >
+          <span class="hero-title-mask hero-title-mask--paper"
+            ><span class="hero-title-line hero-title-line--paper">笺</span></span
+          >
+        </h1>
+        <div class="hero__statement">
+          <p>写字、造物、看光影。让数字世界也保留纸张的呼吸。</p>
+          <nav class="hero__links" aria-label="卷首入口">
+            <a class="ink-link" href={withBase('/journal/')}>读笺录</a>
+            <a class="ink-link" href={withBase('/projects/')}>看器作</a>
+          </nav>
         </div>
       </div>
-      <figcaption aria-hidden="true">纸山 · 卷首</figcaption>
-    </figure>
 
-    <div class="hero__copy" data-ink-avoid>
-      <p class="folio-label hero__eyebrow">个人数字书卷</p>
-      <h1 class="hero__title font-display" aria-label="墨笺">
-        <span class="hero-title-mask"
-          ><span class="hero-title-line hero-title-line--cinnabar">墨</span></span
-        >
-        <span class="hero-title-mask hero-title-mask--offset"
-          ><span class="hero-title-line">笺</span></span
-        >
-      </h1>
-      <p class="hero__tagline">写字、造物、看光影。让数字世界也保留纸张的呼吸。</p>
-      <nav class="hero__links" aria-label="卷首入口">
-        <a class="ink-link" href={withBase('/journal/')}>读笺录</a>
-        <a class="ink-link" href={withBase('/projects/')}>看器作</a>
-      </nav>
+      <div class="hero__colophon">
+        <span aria-hidden="true">入画</span>
+        <InscriptionTip text="卷首钤印 · 墨" client:idle>
+          <span class="hero__seal" data-hero-seal aria-hidden="true">墨</span>
+        </InscriptionTip>
+        <span aria-hidden="true">展卷</span>
+      </div>
+
+      <p class="hero__scroll" aria-hidden="true">
+        <span>向下夺卷</span>
+        <span class="hero__scroll-line"></span>
+      </p>
     </div>
-
-    <div class="hero__colophon">
-      <span aria-hidden="true">纸上留白</span>
-      <InscriptionTip text="卷首钤印 · 墨" client:idle>
-        <span class="hero__seal" data-hero-seal aria-hidden="true">墨</span>
-      </InscriptionTip>
-      <span aria-hidden="true">墨分五色</span>
-    </div>
-
-    <p class="hero__scroll" aria-hidden="true">
-      <span>向下展卷</span>
-      <span class="hero__scroll-line"></span>
-    </p>
   </div>
 </section>
 
 <style>
   .hero {
     position: relative;
-    min-height: calc(100svh - 4rem);
-    overflow: hidden;
+    min-height: calc(100svh - 5rem);
+    overflow: clip;
+  }
+  .hero__hold {
+    position: relative;
+    isolation: isolate;
+    min-height: inherit;
+    overflow: clip;
+  }
+
+  .hero__under-sheet {
+    position: absolute;
+    z-index: -1;
+    top: clamp(4rem, 10vh, 7rem);
+    right: -8vw;
+    bottom: clamp(2rem, 7vh, 5rem);
+    left: clamp(12vw, 18vw, 22rem);
+    border-block: 1px solid var(--line);
+    background: color-mix(in oklab, var(--paper) 94%, var(--paper-deep));
+    box-shadow: -1.5rem 1.5rem 4rem var(--shadow-color);
+    transform: rotate(-0.8deg);
+    transform-origin: left center;
+  }
+  .hero__under-sheet::before,
+  .hero__under-sheet::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(transparent, var(--line) 16% 84%, transparent);
+  }
+  .hero__under-sheet::before {
+    left: clamp(1.5rem, 4vw, 4rem);
+  }
+  .hero__under-sheet::after {
+    right: clamp(1.5rem, 4vw, 4rem);
   }
 
   .hero__folio {
     position: absolute;
-    top: clamp(1.5rem, 4vw, 3rem);
+    top: clamp(1.1rem, 3vw, 2.25rem);
     right: clamp(1.25rem, 4vw, 3.5rem);
     left: clamp(1.25rem, 4vw, 3.5rem);
-    z-index: 3;
-    display: flex;
-    justify-content: space-between;
+    z-index: 7;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     color: var(--bronze);
     font-family: var(--font-noto-sans);
     font-size: 0.62rem;
     letter-spacing: 0.25em;
   }
+  .hero__folio span:nth-child(2) {
+    justify-self: center;
+  }
+  .hero__folio span:last-child {
+    justify-self: end;
+  }
 
   .hero__stage {
     position: relative;
     display: grid;
-    min-height: calc(100svh - 4rem);
+    min-height: inherit;
     grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: 1fr;
     align-items: center;
-    padding-block: 6.25rem 5rem;
+    padding-block: clamp(3.75rem, 7vh, 5.5rem) clamp(2.75rem, 5vh, 4rem);
   }
-
   .hero__art {
     position: relative;
     isolation: isolate;
+    z-index: 2;
     grid-row: 1;
     grid-column: 4 / -1;
-    width: calc(100% + clamp(2rem, 5vw, 5rem));
-    margin: 0 clamp(-5rem, -5vw, -2rem) 0 0;
+    width: calc(100% + clamp(4rem, 10vw, 10rem));
+    margin-right: clamp(-10rem, -10vw, -4rem);
+    border-block: 1px solid color-mix(in oklab, var(--ink) 24%, transparent);
+    background: var(--paper-deep);
     box-shadow: var(--shadow-lg);
-    background:
-      radial-gradient(
-        circle at 72% 42%,
-        color-mix(in oklab, var(--paper-deep) 54%, transparent),
-        transparent 48%
-      ),
-      var(--paper);
+    transform: rotate(0.65deg);
   }
-
+  .hero__art::before {
+    content: '';
+    position: absolute;
+    z-index: 7;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--paper) 86%, transparent),
+      transparent 22% 82%,
+      color-mix(in oklab, var(--paper-deep) 54%, transparent)
+    );
+    pointer-events: none;
+  }
   .hero__art :global(img) {
     display: block;
     width: 100%;
-    min-height: min(74vh, 52rem);
+    min-height: min(62vh, 44rem);
     object-fit: cover;
   }
-
   .hero__fallback {
     position: relative;
     z-index: 0;
   }
-
   .hero__layers {
     display: none;
     position: absolute;
@@ -163,21 +226,17 @@ import { withBase } from '../../site.config';
     z-index: 1;
     overflow: hidden;
   }
-
   :global(html.js) .hero__layers {
     display: block;
   }
-
   :global(html.js) .hero__fallback {
     opacity: 0;
   }
-
   .hero__layer {
     position: absolute;
     inset: 0;
     will-change: transform;
   }
-
   .hero__layer :global(img) {
     position: absolute;
     inset: 0;
@@ -187,12 +246,10 @@ import { withBase } from '../../site.config';
     object-fit: cover;
     will-change: transform;
   }
-
   .hero__layer--far {
     z-index: 1;
     opacity: 0.82;
   }
-
   .hero__layer-mist {
     position: absolute;
     z-index: 2;
@@ -206,21 +263,13 @@ import { withBase } from '../../site.config';
       transparent 72%
     );
     opacity: 0.44;
-    transform: translate3d(0, 0, 0);
   }
-
   .hero__layer--mid {
     z-index: 3;
   }
-
   .hero__layer--near {
     z-index: 4;
   }
-
-  .hero__art::after {
-    z-index: 8;
-  }
-
   .hero__art figcaption {
     position: absolute;
     right: 1rem;
@@ -236,67 +285,103 @@ import { withBase } from '../../site.config';
 
   .hero__copy {
     position: relative;
-    z-index: 4;
+    z-index: 5;
     grid-row: 1;
-    grid-column: 1 / span 8;
-    align-self: center;
-    padding-block: 2rem 4rem;
+    grid-column: 1 / -1;
+    min-height: min(62vh, 44rem);
+    pointer-events: none;
   }
-
   .hero__eyebrow {
-    margin: 0 0 1.5rem;
-  }
-
-  .hero__title {
-    display: flex;
+    position: absolute;
+    top: 8%;
+    left: 0;
     margin: 0;
-    color: var(--ink);
-    font-size: clamp(7.5rem, 19vw, 16rem);
+    writing-mode: vertical-rl;
+  }
+  .hero__title {
+    position: absolute;
+    inset: 0;
+    margin: 0;
     font-weight: 400;
-    line-height: 0.68;
+    line-height: 0.7;
     letter-spacing: -0.04em;
-    text-shadow: 0 0.04em 0.16em color-mix(in oklab, var(--paper) 75%, transparent);
+    pointer-events: none;
   }
-
   .hero-title-mask {
+    position: absolute;
     display: block;
-    overflow: clip;
-    padding: 0.14em 0.04em 0.22em;
-    margin: -0.14em -0.04em -0.22em;
-    line-height: 0.9;
+    overflow: visible;
+    padding: 0.12em 0.05em 0.2em;
+    margin: -0.12em -0.05em -0.2em;
   }
-
+  .hero-title-mask--ink {
+    top: 50%;
+    left: -6%;
+    transform: translateY(-52%);
+  }
+  .hero-title-mask--paper {
+    right: -2%;
+    bottom: -4%;
+  }
   .hero-title-line {
     display: block;
-    line-height: 0.9;
+    line-height: 0.94;
   }
-
-  /* 首字落砂：题名首字如落款朱砂 */
-  .hero-title-line--cinnabar {
+  .hero-title-line--ink {
+    background-image:
+      linear-gradient(
+        color-mix(in oklab, var(--ink) 82%, transparent),
+        color-mix(in oklab, var(--ink) 52%, transparent)
+      ),
+      var(--hero-art);
+    background-blend-mode: multiply;
+    background-position: 52% center;
+    background-size: cover;
+    color: transparent;
+    font-size: var(--type-hero-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: contrast(1.12) saturate(0.66);
+    -webkit-text-stroke: 1px color-mix(in oklab, var(--ink) 34%, transparent);
+    text-shadow: 0 0 1px color-mix(in oklab, var(--ink) 42%, transparent);
+  }
+  .hero-title-line--paper {
     color: var(--cinnabar);
+    font-size: var(--type-hero-secondary);
+    text-shadow:
+      0.045em 0.055em 0 var(--paper),
+      0.055em 0.065em 0 var(--line);
   }
 
-  .hero-title-mask--offset {
-    margin-top: 0.18em;
-    margin-left: -0.08em;
+  .hero__statement {
+    position: absolute;
+    bottom: 2%;
+    left: clamp(1.5rem, 8vw, 7rem);
+    display: grid;
+    width: min(38rem, 64vw);
+    grid-template-columns: minmax(15rem, 29rem) auto;
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: end;
+    padding: 1.1rem 1.25rem;
+    border-top: 1px solid var(--ink);
+    background: color-mix(in oklab, var(--paper) 88%, transparent);
+    backdrop-filter: blur(8px);
+    pointer-events: auto;
   }
-
-  .hero__tagline {
-    max-width: 29rem;
-    margin: clamp(2.5rem, 5vw, 4rem) 0 0 clamp(0rem, 4vw, 3.5rem);
-    color: var(--ink-soft);
-    font-size: clamp(1rem, 1.8vw, 1.22rem);
+  .hero__statement > p {
+    margin: 0;
+    color: var(--ink);
+    font-size: clamp(1rem, 1.45vw, 1.18rem);
     line-height: 1.9;
   }
-
   .hero__links {
     display: flex;
-    gap: 2rem;
-    margin: 2rem 0 0 clamp(0rem, 4vw, 3.5rem);
+    gap: 1.5rem;
+    margin: 0;
+    white-space: nowrap;
     font-family: var(--font-noto-sans);
     font-size: 0.82rem;
   }
-
   .hero__links a {
     color: var(--ink);
     text-decoration: none;
@@ -306,7 +391,7 @@ import { withBase } from '../../site.config';
     position: absolute;
     top: 50%;
     right: 0.75rem;
-    z-index: 4;
+    z-index: 8;
     display: flex;
     align-items: center;
     gap: 0.9rem;
@@ -316,25 +401,22 @@ import { withBase } from '../../site.config';
     font-size: 0.72rem;
     letter-spacing: 0.35em;
   }
-
   .hero__seal {
     position: relative;
     display: inline-flex;
     width: 2.6rem;
     height: 2.6rem;
-    font-size: 1.5rem;
-    box-shadow:
-      0 0 0 0.3rem var(--paper),
-      0 0 0 calc(0.3rem + 1px) var(--cinnabar);
     align-items: center;
     justify-content: center;
     background: var(--cinnabar);
+    box-shadow:
+      0 0 0 0.3rem var(--paper),
+      0 0 0 calc(0.3rem + 1px) var(--cinnabar);
     color: var(--paper);
     font-family: var(--font-ma-shan-zheng);
+    font-size: 1.5rem;
     letter-spacing: 0;
   }
-
-  /* 钤印墨晕：盖落时朱砂沿纸面晕开一圈（仅 JS 场景由脚本节奏触发，见底部 gate） */
   .hero__seal::after {
     content: '';
     position: absolute;
@@ -345,29 +427,31 @@ import { withBase } from '../../site.config';
     transform: scale(0.6);
     pointer-events: none;
   }
-
-  /* 云气定位：一团笼住山形，一团栖于卷尾 */
   .hero__mist-a {
-    top: 6%;
-    right: 2%;
-    width: 36rem;
-    height: 27rem;
+    top: 4%;
+    right: -2%;
+    width: 38rem;
+    height: 30rem;
   }
-
   .hero__mist-b {
-    bottom: 4%;
-    left: -8%;
-    width: 30rem;
-    height: 24rem;
+    bottom: 0;
+    left: -10%;
+    width: 34rem;
+    height: 26rem;
   }
 
-  /* 钤印墨晕节律：与 Hero 入场时间线对齐（约 1.5s 处盖落） */
   @media (prefers-reduced-motion: no-preference) {
     :global(html.js) .hero__seal::after {
       animation: seal-halo 0.85s var(--ease-ink) 1.55s 1 both;
     }
+    :global(html.js) .hero-title-line,
+    :global(html.js) .hero__eyebrow,
+    :global(html.js) .hero__statement,
+    :global(html.js) .hero__colophon,
+    :global(html.js) .hero__scroll {
+      opacity: 0;
+    }
   }
-
   @keyframes seal-halo {
     from {
       opacity: 0.55;
@@ -383,6 +467,7 @@ import { withBase } from '../../site.config';
     position: absolute;
     bottom: 0;
     left: 2.5rem;
+    z-index: 8;
     display: flex;
     align-items: center;
     gap: 0.8rem;
@@ -393,7 +478,6 @@ import { withBase } from '../../site.config';
     letter-spacing: 0.2em;
     writing-mode: vertical-rl;
   }
-
   .hero__scroll-line {
     width: 1px;
     height: 3.5rem;
@@ -401,7 +485,6 @@ import { withBase } from '../../site.config';
     transform-origin: top center;
     animation: scroll-breath 2.4s ease-in-out infinite;
   }
-
   @keyframes scroll-breath {
     0%,
     100% {
@@ -414,62 +497,71 @@ import { withBase } from '../../site.config';
     }
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    :global(html.js) .hero-title-line,
-    :global(html.js) .hero__eyebrow,
-    :global(html.js) .hero__tagline,
-    :global(html.js) .hero__links,
-    :global(html.js) .hero__colophon,
-    :global(html.js) .hero__scroll {
-      opacity: 0;
-    }
-
-    :global(html.js) .hero-title-line {
-      transform: translateY(100%);
-    }
-  }
-
   @media (max-width: 767px) {
     .hero {
-      min-height: auto;
+      min-height: calc(100svh - 5rem);
     }
-
+    .hero__hold {
+      position: relative;
+      top: auto;
+      min-height: inherit;
+    }
+    .hero__under-sheet {
+      top: 4.75rem;
+      right: -6rem;
+      bottom: 3rem;
+      left: 31%;
+      transform: rotate(-1.2deg);
+    }
     .hero__folio {
-      top: 1.5rem;
+      top: 1.25rem;
+      grid-template-columns: 1fr auto;
     }
-
-    .hero__folio span:first-child {
+    .hero__folio span:nth-child(2) {
       display: none;
     }
-
     .hero__stage {
-      display: flex;
-      min-height: auto;
-      flex-direction: column;
-      align-items: stretch;
-      padding-block: 6rem 5rem;
+      display: grid;
+      min-height: inherit;
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+      padding-block: 4.5rem 3.5rem;
     }
-
     .hero__copy {
-      order: 1;
-      padding: 0;
+      grid-row: 1;
+      grid-column: 1;
+      min-height: min(66svh, 32rem);
     }
-
-    .hero__title {
-      font-size: clamp(6.5rem, 36vw, 9.5rem);
+    .hero__eyebrow {
+      top: 2.5rem;
+      left: 0;
     }
-
-    .hero__tagline {
-      max-width: 21rem;
-      margin-top: 2.75rem;
-      margin-left: 0;
+    .hero-title-mask--ink {
+      top: 42%;
+      left: -16%;
     }
-
+    .hero-title-mask--paper {
+      right: -3%;
+      bottom: 1rem;
+    }
+    .hero-title-line--ink {
+      font-size: var(--type-hero-primary);
+    }
+    .hero-title-line--paper {
+      font-size: var(--type-hero-secondary);
+    }
+    .hero__statement {
+      bottom: 0;
+      left: 0;
+      display: block;
+      width: min(92%, 24rem);
+      padding: 0.9rem 0;
+      background: color-mix(in oklab, var(--paper) 92%, transparent);
+      backdrop-filter: none;
+    }
     .hero__links {
-      margin-left: 0;
+      margin-top: 1rem;
     }
-
-    /* 文字尺寸不变，只扩展可点击纸面，保证拇指触控热区不小于 44px */
     .hero__links a {
       display: inline-flex;
       min-width: 2.75rem;
@@ -477,26 +569,23 @@ import { withBase } from '../../site.config';
       align-items: center;
       padding-inline: 0.25rem;
     }
-
     .hero__art {
-      order: 2;
-      width: calc(100% + 1.25rem);
-      margin: 3.5rem -1.25rem 0 auto;
+      grid-row: 1;
+      grid-column: 1;
+      align-self: center;
+      width: calc(100% + 3rem);
+      margin: 0 -3rem 0 16%;
+      transform: rotate(0.8deg);
     }
-
     .hero__art :global(img) {
+      height: min(52svh, 27rem);
       min-height: 0;
-      aspect-ratio: 4 / 3;
+      aspect-ratio: auto;
     }
-
-    .hero__layer--mid {
-      display: none;
-    }
-
+    .hero__layer--mid,
     .hero__colophon {
       display: none;
     }
-
     .hero__scroll {
       right: 1.25rem;
       bottom: 0;
@@ -505,10 +594,7 @@ import { withBase } from '../../site.config';
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero__scroll-line {
-      animation: none;
-    }
-
+    .hero__scroll-line,
     .hero__seal::after {
       animation: none;
     }
@@ -522,108 +608,63 @@ import { withBase } from '../../site.config';
   if (hero && !prefersReducedMotion) {
     const titleLines = hero.querySelectorAll<HTMLElement>('.hero-title-line');
     const details = hero.querySelectorAll<HTMLElement>(
-      '.hero__eyebrow, .hero__tagline, .hero__links, .hero__colophon, .hero__scroll',
+      '.hero__eyebrow, .hero__statement, .hero__colophon, .hero__scroll',
     );
+    const sheet = hero.querySelector<HTMLElement>('[data-hero-sheet]');
     const art = hero.querySelector<HTMLElement>('[data-hero-art]');
+    const paperTitle = hero.querySelector<HTMLElement>('.hero-title-mask--paper');
+    const mobile = window.matchMedia('(max-width: 767px)').matches;
     const layers = [
-      {
-        element: hero.querySelector<HTMLElement>('[data-hero-layer="far"]'),
-        yPercent: 2,
-        scale: 1.01,
-        x: 2,
-        y: 1,
-      },
-      {
-        element: hero.querySelector<HTMLElement>('[data-hero-layer="mid"]'),
-        yPercent: 5,
-        scale: 1.03,
-        x: 5,
-        y: 3,
-      },
-      {
-        element: hero.querySelector<HTMLElement>('[data-hero-layer="near"]'),
-        yPercent: 8,
-        scale: 1.06,
-        x: 9,
-        y: 6,
-      },
-    ].filter(
-      (
-        layer,
-      ): layer is { element: HTMLElement; yPercent: number; scale: number; x: number; y: number } =>
-        Boolean(layer.element),
+      { element: hero.querySelector<HTMLElement>('[data-hero-layer="far"]'), yPercent: 2 },
+      { element: hero.querySelector<HTMLElement>('[data-hero-layer="mid"]'), yPercent: 5 },
+      { element: hero.querySelector<HTMLElement>('[data-hero-layer="near"]'), yPercent: 8 },
+    ].filter((layer): layer is { element: HTMLElement; yPercent: number } =>
+      Boolean(layer.element),
     );
 
-    const timeline = gsap.timeline({ defaults: { ease: 'expo.out' } });
-    timeline
+    const entrance = gsap.timeline({ defaults: { ease: 'expo.out' } });
+    if (sheet)
+      entrance.fromTo(
+        sheet,
+        { clipPath: 'inset(0 100% 0 0)' },
+        { clipPath: 'inset(0 0% 0 0)', duration: 0.75 },
+        0,
+      );
+    if (art)
+      entrance.fromTo(
+        art,
+        { clipPath: 'inset(0 100% 0 0)', xPercent: 4 },
+        { clipPath: 'inset(0 0% 0 0)', xPercent: 0, duration: 0.9 },
+        0.12,
+      );
+    entrance
       .fromTo(
         titleLines,
-        { y: 0, yPercent: 100 },
-        { y: 0, yPercent: 0, opacity: 1, duration: 1.15, stagger: 0.16 },
-        0.15,
+        { yPercent: 100 },
+        { yPercent: 0, opacity: 1, duration: 1.05, stagger: 0.14 },
+        0.18,
       )
-      .to(details, { y: 0, opacity: 1, duration: 0.7, stagger: 0.08 }, 0.5);
+      .to(details, { opacity: 1, duration: 0.65, stagger: 0.07 }, 0.58);
 
-    // 钤印落定：细节浮现后盖落，带回弹（墨晕由 CSS animation 在同时刻扩散）
     const seal = hero.querySelector<HTMLElement>('[data-hero-seal]');
-    if (seal) {
-      timeline.fromTo(
+    if (seal)
+      entrance.fromTo(
         seal,
         { scale: 1.4, rotate: -7 },
         { scale: 1, rotate: 0, duration: 0.5, ease: 'back.out(2.4)' },
-        1.5,
+        1.45,
       );
-    }
 
-    if (art) {
-      const mobile = window.matchMedia('(max-width: 767px)').matches;
-      layers.forEach((layer) => {
-        gsap.to(layer.element, {
-          yPercent: mobile ? Math.min(layer.yPercent, 4) : layer.yPercent,
-          scale: mobile ? 1.01 : layer.scale,
-          ease: 'none',
-          scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
-        });
+    if (!mobile) {
+      const handoff = gsap.timeline({
+        scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
       });
-
-      // 指针只轻推山水内层，题名保持稳定；移出后用同族 ease-out 在 900ms 内归位。
-      if (!mobile && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-        const movers = layers
-          .map((layer) => {
-            const image = layer.element.querySelector<HTMLElement>('img');
-            return image
-              ? {
-                  ...layer,
-                  moveX: gsap.quickTo(image, 'x', { duration: 0.9, ease: 'power3.out' }),
-                  moveY: gsap.quickTo(image, 'y', { duration: 0.9, ease: 'power3.out' }),
-                }
-              : null;
-          })
-          .filter((layer) => layer !== null);
-
-        hero.addEventListener('pointermove', (event) => {
-          const bounds = hero.getBoundingClientRect();
-          const horizontal = Math.max(
-            -1,
-            Math.min(1, ((event.clientX - bounds.left) / bounds.width) * 2 - 1),
-          );
-          const vertical = Math.max(
-            -1,
-            Math.min(1, ((event.clientY - bounds.top) / bounds.height) * 2 - 1),
-          );
-          movers.forEach((layer) => {
-            layer.moveX(horizontal * layer.x);
-            layer.moveY(vertical * layer.y);
-          });
-        });
-
-        hero.addEventListener('pointerleave', () => {
-          movers.forEach((layer) => {
-            layer.moveX(0);
-            layer.moveY(0);
-          });
-        });
-      }
+      if (sheet) handoff.to(sheet, { xPercent: -7, ease: 'none' }, 0);
+      if (art) handoff.to(art, { xPercent: 9, ease: 'none' }, 0);
+      if (paperTitle) handoff.to(paperTitle, { xPercent: 16, ease: 'none' }, 0);
+      layers.forEach((layer) =>
+        handoff.to(layer.element, { yPercent: layer.yPercent, ease: 'none' }, 0),
+      );
     }
   }
 </script>

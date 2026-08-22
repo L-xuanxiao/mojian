@@ -12,10 +12,12 @@ import artwork from '../assets/art/journey-paper-scroll.webp';
     <PageIntro
       id="about"
       title="此间"
+      glyph="间"
       note="ABOUT / COLOPHON"
       description="关于此间主人：所来之路、逐年所记，以及鱼雁往来之处。"
       variant="folio"
       scene="personal"
+      artTreatment="handnote"
       artwork={artwork}
       artworkAlt="纸墨长卷，山水行旅"
     >
@@ -33,7 +35,7 @@ import artwork from '../assets/art/journey-paper-scroll.webp';
 <style>
   .about-stage {
     display: grid;
-    gap: clamp(5rem, 10vw, 9rem);
-    padding-block: 3rem clamp(7rem, 12vw, 10rem);
+    gap: clamp(3.5rem, 6vw, 5.5rem);
+    padding-block: 2.5rem clamp(4rem, 7vw, 6rem);
   }
 </style>

@@ -136,8 +136,8 @@ const { posts, variant = 'catalog', startIndex = 0 } = Astro.props;
 
   .entry-list--feature article {
     display: block;
-    min-height: clamp(20rem, 38vw, 34rem);
-    padding: clamp(3rem, 6vw, 5rem) 0 clamp(3rem, 6vw, 5rem) clamp(3rem, 10vw, 9rem);
+    min-height: clamp(16rem, 24vw, 24rem);
+    padding: clamp(2.5rem, 4vw, 3.5rem) 0 clamp(2.5rem, 4vw, 3.5rem) clamp(2.5rem, 7vw, 6rem);
   }
 
   .entry-list--feature .entry-index {
@@ -145,7 +145,7 @@ const { posts, variant = 'catalog', startIndex = 0 } = Astro.props;
     top: 0.18em;
     left: -0.03em;
     color: color-mix(in oklab, var(--cinnabar) 18%, transparent);
-    font-size: clamp(8rem, 19vw, 16rem);
+    font-size: var(--type-glyph-chapter);
     line-height: 0.9;
   }
 
@@ -157,7 +157,7 @@ const { posts, variant = 'catalog', startIndex = 0 } = Astro.props;
   .entry-list--feature h3 {
     max-width: 12em;
     font-family: var(--font-ma-shan-zheng);
-    font-size: clamp(3.2rem, 7.5vw, 6.2rem);
+    font-size: var(--type-title-card);
     font-weight: 400;
     line-height: 1.15;
   }
@@ -203,7 +203,7 @@ const { posts, variant = 'catalog', startIndex = 0 } = Astro.props;
   @media (max-width: 767px) {
     .entry-list--feature article {
       min-height: 0;
-      padding: 4.5rem 0 3rem;
+      padding: 3rem 0 2rem;
     }
 
     .entry-list--feature .entry-index {
@@ -212,7 +212,7 @@ const { posts, variant = 'catalog', startIndex = 0 } = Astro.props;
     }
 
     .entry-list--feature h3 {
-      font-size: clamp(2.7rem, 14vw, 4rem);
+      font-size: var(--type-title-card);
     }
   }
 
@@ -229,7 +229,7 @@ const { posts, variant = 'catalog', startIndex = 0 } = Astro.props;
     }
 
     .entry-list--feature h3 {
-      font-size: clamp(2.1rem, 12vw, 3.2rem);
+      font-size: var(--type-title-card);
     }
 
     .entry-description {

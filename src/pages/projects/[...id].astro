@@ -75,29 +75,51 @@ const slides = await Promise.all(
 <style>
   .project-hero {
     position: relative;
+    isolation: isolate;
+    overflow: clip;
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: 2rem clamp(1.5rem, 4vw, 4rem);
     align-items: center;
-    min-height: calc(100svh - 4rem);
-    padding-block: clamp(4rem, 8vw, 7rem);
+    min-height: clamp(32rem, 60svh, 46rem);
+    padding-block: clamp(2.5rem, 4vw, 3.5rem);
     border-bottom: 1px solid var(--line);
+  }
+
+  .project-hero::before {
+    position: absolute;
+    z-index: 0;
+    top: 50%;
+    left: -0.12em;
+    content: '器';
+    color: color-mix(in oklab, var(--ink) 9%, transparent);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: var(--type-glyph-page-emphasis);
+    line-height: 0.7;
+    transform: translateY(-50%);
+    pointer-events: none;
   }
 
   .project-hero__copy {
     position: relative;
-    z-index: 2;
-    grid-column: 1 / span 6;
-    padding-block: clamp(2rem, 5vw, 4rem);
+    z-index: 3;
+    grid-column: 1 / span 5;
+    grid-row: 1;
+    align-self: end;
+    margin-bottom: clamp(0.75rem, 2vh, 1.5rem);
+    padding: clamp(1.25rem, 2.5vw, 2.25rem);
+    border-top: 1px solid var(--ink);
+    background: color-mix(in oklab, var(--paper) 90%, transparent);
+    backdrop-filter: blur(8px);
   }
 
   .project-hero__kicker {
-    margin: clamp(3rem, 7vw, 6rem) 0 1rem;
+    margin: clamp(2rem, 3vw, 2.75rem) 0 1rem;
   }
 
   .project-hero h1 {
     margin: 0;
-    font-size: clamp(5rem, 11vw, 10rem);
+    font-size: var(--type-title-page-emphasis);
     font-weight: 400;
     line-height: 0.95;
     letter-spacing: 0.04em;
@@ -105,7 +127,7 @@ const slides = await Promise.all(
 
   .project-hero__summary {
     max-width: 30rem;
-    margin: 2rem 0 0;
+    margin: 1.25rem 0 0;
     color: var(--ink-soft);
     font-size: clamp(1rem, 1.4vw, 1.16rem);
     line-height: 2;
@@ -115,7 +137,7 @@ const slides = await Promise.all(
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
-    margin: 3rem 0 0;
+    margin: 1.5rem 0 0;
     padding-top: 1.2rem;
     border-top: 1px solid var(--line);
   }
@@ -138,17 +160,27 @@ const slides = await Promise.all(
     position: relative;
     z-index: 1;
     grid-row: 1;
-    grid-column: 5 / -1;
+    grid-column: 3 / -1;
     width: calc(100% + clamp(2rem, 6vw, 6rem));
     margin-right: clamp(-6rem, -6vw, -2rem);
     min-width: 0;
     box-shadow: var(--shadow-lg);
+    transform: rotate(0.55deg);
+  }
+
+  .project-hero__media :global(.project-carousel__slide img) {
+    aspect-ratio: 16 / 8;
+  }
+
+  .project-hero__media :global(.project-carousel__controls) {
+    /* 文案与画面同屏叠放时，将控制区让出左侧展签，避免可见按钮被上层纸页截获。 */
+    margin-left: clamp(11rem, 24vw, 18rem);
   }
 
   .project-hero__folio {
     position: absolute;
     right: 0;
-    bottom: 1.5rem;
+    bottom: 0.85rem;
     color: var(--bronze);
     font-family: var(--font-noto-sans);
     font-size: 0.62rem;
@@ -159,7 +191,7 @@ const slides = await Promise.all(
     display: grid;
     grid-template-columns: minmax(12rem, 3fr) minmax(0, 7fr) minmax(0, 1fr);
     gap: clamp(3rem, 8vw, 8rem);
-    padding-block: clamp(5rem, 10vw, 9rem);
+    padding-block: clamp(3rem, 6vw, 5rem);
   }
 
   .project-story-layout aside {
@@ -199,7 +231,7 @@ const slides = await Promise.all(
     display: flex;
     justify-content: space-between;
     gap: 2rem;
-    padding-block: 2rem clamp(6rem, 12vw, 10rem);
+    padding-block: 2rem clamp(4rem, 7vw, 6rem);
     border-top: 1px solid var(--line);
   }
 
@@ -220,6 +252,10 @@ const slides = await Promise.all(
 
     .project-hero__copy {
       order: 1;
+      margin-bottom: 0;
+      padding-inline: 0;
+      background: transparent;
+      backdrop-filter: none;
     }
 
     .project-hero__media {
@@ -228,6 +264,15 @@ const slides = await Promise.all(
       margin-right: 0;
       margin-top: 2rem;
       box-shadow: none;
+      transform: none;
+    }
+
+    .project-hero__media :global(.project-carousel__slide img) {
+      aspect-ratio: 16 / 9;
+    }
+
+    .project-hero__media :global(.project-carousel__controls) {
+      margin-left: 0;
     }
 
     .project-story-layout {
@@ -241,16 +286,22 @@ const slides = await Promise.all(
 
   @media (max-width: 639px) {
     .project-hero {
-      padding-block: 3.5rem 4rem;
+      padding-block: 2.75rem 3.25rem;
     }
 
     .project-hero h1 {
-      font-size: clamp(3.8rem, 20vw, 6rem);
+      font-size: var(--type-title-page-emphasis);
+    }
+
+    .project-hero::before {
+      top: 19rem;
+      left: -0.18em;
+      font-size: var(--type-glyph-page-emphasis);
     }
 
     .project-story-layout {
       display: block;
-      padding-block: 4rem 6rem;
+      padding-block: 3.5rem 5rem;
     }
 
     .project-story-layout aside {

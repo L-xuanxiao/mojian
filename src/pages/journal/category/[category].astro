@@ -29,9 +29,12 @@ const { category, posts } = Astro.props;
     <PageIntro
       id="category"
       title={category}
+      glyph="类"
       note="CATEGORY"
       description={`归入「${category}」一章的文字，共 ${posts.length} 篇。`}
       variant="compact"
+      scene="reading"
+      artTreatment="ink-glyph"
     >
       <p slot="meta" class="m-0">
         <a class="page-backlink" href={withBase('/journal/')}>返回笺录</a>
@@ -48,6 +51,6 @@ const { category, posts } = Astro.props;
   .aggregation-list {
     max-width: 64rem;
     margin-left: auto;
-    padding-block: 1rem clamp(5rem, 10vw, 8rem);
+    padding-block: 1rem clamp(4rem, 7vw, 6rem);
   }
 </style>

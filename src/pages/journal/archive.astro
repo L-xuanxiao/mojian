@@ -26,9 +26,12 @@ const years = [...byYear.keys()].sort((a, b) => b - a);
     <PageIntro
       id="archive"
       title="年谱归档"
+      glyph="年"
       note="CHRONICLE"
       description="按年份重新翻阅旧墨。每一篇都有它落纸的时节。"
       variant="compact"
+      scene="reading"
+      artTreatment="ink-glyph"
     >
       <p slot="meta" class="m-0">
         共 {posts.length} 篇 · <a class="ink-link" href={withBase('/journal/')}>返回笺录</a>
@@ -55,7 +58,7 @@ const years = [...byYear.keys()].sort((a, b) => b - a);
 
 <style>
   .archive-years {
-    padding-block: 1rem clamp(5rem, 10vw, 8rem);
+    padding-block: 1rem clamp(4rem, 7vw, 6rem);
   }
 
   .archive-year {
@@ -85,7 +88,7 @@ const years = [...byYear.keys()].sort((a, b) => b - a);
     margin: 0;
     color: color-mix(in oklab, var(--ink) 34%, transparent);
     font-family: var(--font-ma-shan-zheng);
-    font-size: clamp(5rem, 11vw, 10rem);
+    font-size: var(--type-title-chapter);
     font-weight: 400;
     line-height: 0.72;
     letter-spacing: -0.06em;
@@ -102,7 +105,7 @@ const years = [...byYear.keys()].sort((a, b) => b - a);
     }
 
     .archive-year h2 {
-      font-size: clamp(4.5rem, 23vw, 7.5rem);
+      font-size: var(--type-title-chapter);
     }
   }
 </style>

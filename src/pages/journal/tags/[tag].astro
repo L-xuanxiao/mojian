@@ -29,9 +29,12 @@ const { tag, posts } = Astro.props;
     <PageIntro
       id="tag"
       title={tag}
+      glyph="签"
       note="TAG INDEX"
       description={`留下「${tag}」印记的篇目，共 ${posts.length} 篇。`}
       variant="compact"
+      scene="reading"
+      artTreatment="ink-glyph"
     >
       <p slot="meta" class="m-0">
         <a class="page-backlink" href={withBase('/journal/tags/')}>全部标签</a>
@@ -50,6 +53,6 @@ const { tag, posts } = Astro.props;
   .aggregation-list {
     max-width: 64rem;
     margin-left: auto;
-    padding-block: 1rem clamp(5rem, 10vw, 8rem);
+    padding-block: 1rem clamp(4rem, 7vw, 6rem);
   }
 </style>

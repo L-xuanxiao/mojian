@@ -9,13 +9,19 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
   .slice(0, 4);
 ---
 
-<section class="darkroom home-gallery" aria-labelledby="gallery" data-ink-scene="darkroom">
+<section
+  class="darkroom home-gallery"
+  aria-labelledby="gallery"
+  data-home-chapter="伍"
+  data-ink-scene="darkroom"
+>
   <span class="mist mist--a home-gallery__mist" aria-hidden="true"></span>
-  <div class="home-gallery__inner mx-auto max-w-stage px-5 py-20 md:px-8 md:py-36 lg:px-10">
-    <SectionHeading id="gallery" title="光影集" index="伍" note="GALLERY" />
+  <div class="home-gallery__inner mx-auto max-w-stage px-5 py-12 md:px-8 md:py-12 lg:px-10">
+    <span class="home-gallery__stage-mark" aria-hidden="true">影</span>
+    <SectionHeading id="gallery" title="光影集" index="伍" note="GALLERY" mode="chapter" />
     <p class="mt-4 max-w-[32rem] text-ink-soft">以光为墨，收存纸张、山水与四时一瞬。</p>
     <ol
-      class="gallery-preview mt-10 list-none p-0 md:mt-14"
+      class="gallery-preview mt-6 list-none p-0 md:mt-8"
       data-reveal-group
       data-reveal-variant="contact-sheet"
     >
@@ -46,7 +52,7 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
         ))
       }
     </ol>
-    <p class="mt-10 mb-0 text-right font-sans text-sm md:mt-14">
+    <p class="mt-6 mb-0 text-right font-sans text-sm md:mt-8">
       <a class="ink-link" href={withBase('/gallery/')}>展开全部光影</a>
     </p>
   </div>
@@ -57,19 +63,33 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
   .home-gallery__inner {
     position: relative;
     z-index: 1;
+    isolation: isolate;
   }
 
   .home-gallery__inner::before {
     content: '';
     position: absolute;
     z-index: -1;
-    top: 24%;
-    right: 9%;
-    width: 38%;
-    height: 28%;
+    top: 19%;
+    right: -4%;
+    width: 56%;
+    height: 46%;
     border: 1px solid var(--line);
-    transform: rotate(2.5deg);
+    transform: rotate(3deg);
     pointer-events: none;
+  }
+
+  .home-gallery__stage-mark {
+    position: absolute;
+    z-index: -1;
+    top: clamp(11rem, 16vw, 17rem);
+    right: -0.12em;
+    color: color-mix(in oklab, var(--ink) 7%, transparent);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: var(--type-glyph-chapter);
+    line-height: 0.8;
+    pointer-events: none;
+    transform: rotate(5deg);
   }
 
   /* 云气在暗室里呈淡白微光，如暗室浮尘 */
@@ -81,33 +101,46 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
   }
 
   .gallery-preview {
+    position: relative;
+    left: 50%;
     display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: clamp(2.5rem, 6vw, 5rem) clamp(1rem, 3vw, 2rem);
+    grid-template-columns: repeat(16, minmax(0, 1fr));
+    width: min(calc(100vw - 1rem), 84rem);
+    gap: clamp(1.25rem, 2.5vw, 2.5rem) clamp(0.75rem, 1.5vw, 1.5rem);
     align-items: start;
+    transform: translateX(-50%);
   }
 
   .gallery-preview__item--1 {
     position: relative;
-    grid-column: 1 / span 8;
+    z-index: 1;
+    grid-row: 1 / span 2;
+    grid-column: 1 / span 10;
   }
 
   .gallery-preview__item--2 {
     position: relative;
-    grid-column: 10 / span 3;
-    margin-top: 10rem;
+    z-index: 2;
+    grid-row: 1;
+    grid-column: 11 / span 3;
+    margin-top: clamp(1rem, 2vw, 1.5rem);
+    transform: rotate(1.7deg);
   }
 
   .gallery-preview__item--3 {
     position: relative;
-    grid-column: 2 / span 4;
-    margin-top: 2rem;
+    grid-row: 1;
+    grid-column: 14 / -1;
+    margin-top: 0;
+    transform: rotate(-1.2deg);
   }
 
   .gallery-preview__item--4 {
     position: relative;
-    grid-column: 7 / span 6;
-    margin-top: 6rem;
+    grid-row: 2;
+    grid-column: 11 / -1;
+    margin-top: 0;
+    transform: rotate(0.7deg);
   }
 
   .gallery-preview__image {
@@ -115,6 +148,12 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
     overflow: hidden;
     background: var(--paper-deep);
     box-shadow: var(--shadow-md);
+  }
+
+  .gallery-preview__item:not(.gallery-preview__item--1) .gallery-preview__image {
+    padding: clamp(0.25rem, 0.55vw, 0.5rem);
+    border: 1px solid var(--line);
+    background: color-mix(in oklab, var(--ink) 9%, transparent);
   }
 
   .gallery-preview__folio {
@@ -131,26 +170,32 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
     width: 100%;
     aspect-ratio: 3 / 2;
     object-fit: cover;
-    transition:
-      transform 250ms var(--ease-ink),
-      filter 500ms var(--ease-ink);
+    transition: transform 250ms var(--ease-ink);
   }
 
   .gallery-preview__item--1 .gallery-preview__image :global(img) {
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 16 / 6;
   }
 
   .gallery-preview__item--2 .gallery-preview__image :global(img) {
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 4 / 3;
+  }
+
+  .gallery-preview__item--3 .gallery-preview__image :global(img) {
+    aspect-ratio: 4 / 3;
   }
 
   .gallery-preview__item--4 .gallery-preview__image :global(img) {
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 16 / 7;
   }
 
   @media (hover: hover) and (pointer: fine) {
     .gallery-preview__image:hover :global(img) {
-      transform: scale(1.028);
+      transform: scale(1.035);
+    }
+
+    .gallery-preview__item--1 .gallery-preview__image:hover :global(img) {
+      transform: scale(1.02);
     }
   }
 
@@ -166,7 +211,7 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
   .gallery-preview__item--1 > p span:first-child {
     color: var(--ink);
     font-family: var(--font-ma-shan-zheng);
-    font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+    font-size: var(--type-title-card);
   }
 
   .gallery-preview__item > p span:last-child {
@@ -176,15 +221,21 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
 
   @media (max-width: 767px) {
     .home-gallery__inner::before {
-      top: 34%;
+      top: 30%;
       right: -10%;
       width: 70%;
-      height: 18%;
+      height: 24%;
+    }
+
+    .home-gallery__stage-mark {
+      top: 11rem;
+      font-size: var(--type-glyph-chapter);
     }
 
     .gallery-preview {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 2.5rem 1rem;
+      width: 100%;
+      gap: 2rem 1rem;
     }
 
     .gallery-preview__item--1,
@@ -192,19 +243,25 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
     .gallery-preview__item--3,
     .gallery-preview__item--4 {
       grid-column: auto;
+      grid-row: auto;
       margin-top: 0;
+      transform: none;
     }
 
     .gallery-preview__item--1 {
       grid-column: 1 / -1;
     }
 
-    .gallery-preview__item--2 .gallery-preview__image :global(img) {
-      aspect-ratio: 3 / 4;
+    .gallery-preview__item--4 {
+      grid-column: 1 / -1;
     }
 
     .gallery-preview__item--4 .gallery-preview__image :global(img) {
-      aspect-ratio: 3 / 2;
+      aspect-ratio: 16 / 7;
+    }
+
+    .gallery-preview__item--1 .gallery-preview__image :global(img) {
+      aspect-ratio: 16 / 8;
     }
   }
 

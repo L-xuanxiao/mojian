@@ -82,14 +82,14 @@ const displayName = site.profile.displayName;
 
   .self-intro__column {
     position: relative;
-    padding: clamp(1rem, 3vw, 2rem) clamp(0rem, 5vw, 4rem) clamp(5rem, 8vw, 7rem) 0;
+    padding: clamp(1rem, 2vw, 1.5rem) clamp(0rem, 4vw, 3rem) clamp(3.5rem, 6vw, 5rem) 0;
   }
 
   .self-intro__column::before {
     content: '';
     position: absolute;
     top: 0;
-    bottom: clamp(4rem, 7vw, 6rem);
+    bottom: clamp(3rem, 5vw, 4.5rem);
     left: clamp(0rem, 7vw, 6rem);
     width: 1px;
     background: linear-gradient(180deg, var(--cinnabar), var(--line) 28%, transparent);
@@ -111,7 +111,7 @@ const displayName = site.profile.displayName;
   .self-intro__body,
   .self-intro__empty {
     max-width: 36rem;
-    margin-top: clamp(2.5rem, 5vw, 4rem);
+    margin-top: clamp(1.75rem, 3vw, 2.5rem);
     margin-left: clamp(0rem, 10vw, 9rem);
     color: var(--ink-soft);
   }
@@ -120,7 +120,7 @@ const displayName = site.profile.displayName;
     position: relative;
     max-width: 42rem;
     margin-left: clamp(2.5rem, 12vw, 11rem);
-    padding: clamp(2rem, 4vw, 3.5rem);
+    padding: clamp(1.5rem, 3vw, 2.5rem);
     border-block: 1px solid var(--line);
     background: color-mix(in oklab, var(--paper-deep) 34%, transparent);
     font-size: clamp(1.05rem, 1.8vw, 1.3rem);

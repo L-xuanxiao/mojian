@@ -35,9 +35,11 @@ const navItems = [
 
 const pathname = Astro.url.pathname;
 const isActive = (href: string) => pathname === href || pathname.startsWith(href);
+const homePath = withBase('/');
+const isHome = pathname === homePath || pathname === homePath.replace(/\/$/, '');
 ---
 
-<header class="site-header sticky top-0 z-40" data-site-header>
+<header class="site-header sticky top-0 z-40" data-site-header data-home={isHome || undefined}>
   <div class="mx-auto flex max-w-stage items-center gap-4 px-5 py-4 md:px-8 lg:px-10">
     <a
       href={withBase('/')}
@@ -46,10 +48,27 @@ const isActive = (href: string) => pathname === href || pathname.startsWith(href
     >
       <span class="brand__seal" aria-hidden="true">墨</span>
       <span class="brand__name font-display">墨笺</span>
-      <span class="brand__latin" aria-hidden="true">MOJIAN</span>
+      <span class="brand__edition" aria-hidden="true">
+        <span class="brand__latin">MOJIAN</span>
+        {
+          isHome && (
+            <span class="chapter-readout" data-chapter-readout>
+              <span class="chapter-readout__index" data-chapter-index>
+                序
+              </span>
+              <span class="chapter-readout__title" data-chapter-title>
+                卷首
+              </span>
+            </span>
+          )
+        }
+      </span>
     </a>
 
     <div class="nav-rail ml-auto min-w-0">
+      <span class="nav-rail__track" aria-hidden="true">
+        {isHome && <span class="nav-rail__marker" data-chapter-marker />}
+      </span>
       <nav aria-label="主导航">
         <ul class="m-0 flex list-none items-center gap-5 overflow-x-auto p-0 md:gap-8">
           {
@@ -193,36 +212,85 @@ const isActive = (href: string) => pathname === href || pathname.startsWith(href
     letter-spacing: 0.08em;
   }
 
-  /* 刊名拉丁小字：细线隔开，呼应 Hero 与卷尾的 folio 行 */
-  .brand__latin {
+  /* 刊名侧栏与当前章共用同一格：滚动后由英文刊名接棒为卷中坐标。 */
+  .brand__edition {
+    position: relative;
     overflow: hidden;
-    max-width: 6rem;
+    width: 7.5rem;
+    height: 1.15rem;
     margin-left: 0.1rem;
     padding-left: 0.7rem;
     border-left: 1px solid var(--line);
+    line-height: 1;
+    transition:
+      width 250ms var(--ease-ink),
+      margin 250ms var(--ease-ink),
+      padding 250ms var(--ease-ink),
+      border-color 150ms var(--ease-ink);
+  }
+
+  .brand__latin,
+  .chapter-readout {
+    position: absolute;
+    inset: 50% auto auto 0.7rem;
+    white-space: nowrap;
+    transform: translateY(-50%);
+    transition:
+      transform 250ms var(--ease-ink),
+      opacity 150ms var(--ease-ink);
+  }
+
+  .brand__latin {
     color: var(--bronze);
     font-family: var(--font-noto-sans);
     font-size: 0.6rem;
     letter-spacing: 0.32em;
-    line-height: 1;
-    white-space: nowrap;
-    transition:
-      max-width 250ms var(--ease-ink),
-      margin 250ms var(--ease-ink),
-      padding 250ms var(--ease-ink),
-      border-color 150ms var(--ease-ink),
-      opacity 150ms var(--ease-ink);
   }
 
-  .site-header.is-scrolled .brand__latin {
-    max-width: 0;
+  .chapter-readout {
+    display: inline-flex;
+    max-width: 6.8rem;
+    align-items: baseline;
+    gap: 0.45rem;
+    color: var(--ink-soft);
+    font-family: var(--font-noto-sans);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    opacity: 0;
+    transform: translate(0.7rem, -50%);
+  }
+
+  .chapter-readout__index {
+    color: var(--cinnabar);
+    font-family: var(--font-ma-shan-zheng);
+    font-size: 0.88rem;
+  }
+
+  .chapter-readout__title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .site-header.is-scrolled:not([data-home]) .brand__edition {
+    width: 0;
     margin-left: 0;
     padding-left: 0;
     border-color: transparent;
+  }
+
+  .site-header[data-home].is-scrolled .brand__latin {
     opacity: 0;
+    transform: translate(-0.7rem, -50%);
+  }
+
+  .site-header[data-home].is-scrolled .chapter-readout {
+    opacity: 1;
+    transform: translate(0, -50%);
   }
 
   .nav-rail {
+    --chapter-offset: 0px;
+    position: relative;
     mask-image: linear-gradient(
       90deg,
       transparent,
@@ -233,11 +301,54 @@ const isActive = (href: string) => pathname === href || pathname.startsWith(href
     padding-inline: 1rem;
   }
 
+  /* 卷尺墨线横贯全部导航；首页朱砂目按整卷阅读进度连续行走。 */
+  .nav-rail__track {
+    position: absolute;
+    right: 1rem;
+    bottom: 0.1rem;
+    left: 1rem;
+    height: 1px;
+    background: var(--line);
+    pointer-events: none;
+  }
+
+  .nav-rail__track::before,
+  .nav-rail__track::after {
+    content: '';
+    position: absolute;
+    bottom: -0.18rem;
+    width: 1px;
+    height: 0.38rem;
+    background: var(--ink-soft);
+  }
+
+  .nav-rail__track::before {
+    left: 0;
+  }
+
+  .nav-rail__track::after {
+    right: 0;
+  }
+
+  .nav-rail__marker {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 0.45rem;
+    height: 0.45rem;
+    border: 2px solid var(--paper);
+    border-radius: 50%;
+    background: var(--cinnabar);
+    box-shadow: 0 0.16rem 0.45rem color-mix(in oklab, var(--cinnabar) 34%, transparent);
+    transform: translateX(calc(var(--chapter-offset) - 50%)) translateY(-50%);
+    will-change: transform;
+  }
+
   .nav-rail ul {
     scrollbar-width: none;
   }
 
-  /* 目录砂目：导航项之间落 4px 朱砂圆点，取卷中句读之意 */
+  /* 导航分隔收成卷尺刻线，朱砂只留给沿线移动的当前位置。 */
   .nav-rail li {
     position: relative;
   }
@@ -245,18 +356,17 @@ const isActive = (href: string) => pathname === href || pathname.startsWith(href
   .nav-rail li + li::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: calc(-0.625rem - 2px);
-    width: 4px;
-    height: 4px;
-    margin-top: -2px;
-    border-radius: 50%;
-    background: var(--cinnabar);
+    bottom: 0.1rem;
+    left: calc(-0.625rem - 0.5px);
+    width: 1px;
+    height: 0.38rem;
+    background: var(--ink-soft);
+    opacity: 0.55;
   }
 
   @media (min-width: 768px) {
     .nav-rail li + li::before {
-      left: calc(-1rem - 2px);
+      left: calc(-1rem - 0.5px);
     }
   }
 
@@ -389,12 +499,48 @@ const isActive = (href: string) => pathname === href || pathname.startsWith(href
 
   @media (max-width: 639px) {
     .brand__seal,
-    .brand__latin {
+    .brand__latin,
+    .site-header:not([data-home]) .brand__edition {
       display: none;
+    }
+
+    .brand {
+      position: relative;
+      width: 3rem;
+      min-height: 2.75rem;
+      justify-content: center;
     }
 
     .brand__name {
       font-size: 1rem;
+      transform: translateY(-0.28rem);
+    }
+
+    .site-header[data-home] .brand__edition {
+      position: absolute;
+      inset: auto 0 0.32rem;
+      width: 3rem;
+      height: 0.65rem;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    .chapter-readout {
+      inset: 50% auto auto 50%;
+      max-width: 3rem;
+      gap: 0.18rem;
+      font-size: 0.5rem;
+      letter-spacing: 0;
+      transform: translate(0.35rem, -50%);
+    }
+
+    .chapter-readout__index {
+      font-size: 0.65rem;
+    }
+
+    .site-header[data-home].is-scrolled .chapter-readout {
+      transform: translate(-50%, -50%);
     }
 
     .nav-rail {
@@ -410,16 +556,20 @@ const isActive = (href: string) => pathname === href || pathname.startsWith(href
       );
     }
 
+    .nav-rail__track {
+      right: 0.5rem;
+      left: 0.5rem;
+    }
+
     /* 窄屏压缩间距：五项尽量完整入视口（390 下末项半隐），余量由横滑兜底 */
     .nav-rail ul {
       gap: 0.55rem;
     }
 
     .nav-rail li + li::before {
-      left: calc(-0.275rem - 1.5px);
-      width: 3px;
-      height: 3px;
-      margin-top: -1.5px;
+      left: calc(-0.275rem - 0.5px);
+      width: 1px;
+      height: 0.3rem;
     }
 
     .nav-link {
@@ -444,11 +594,14 @@ const isActive = (href: string) => pathname === href || pathname.startsWith(href
 
   @media (prefers-reduced-motion: reduce) {
     .brand__seal,
+    .brand__edition,
     .brand__latin,
+    .chapter-readout,
     .nav-link,
     .nav-link::after,
     .nav-link__icon,
     .site-header::after,
+    .nav-rail__marker,
     .theme-toggle,
     .theme-toggle__box,
     .theme-glyph {
@@ -551,8 +704,103 @@ const isActive = (href: string) => pathname === href || pathname.startsWith(href
 <script>
   const header = document.querySelector<HTMLElement>('[data-site-header]');
   if (header) {
-    const syncScrolled = () => header.classList.toggle('is-scrolled', window.scrollY > 24);
-    window.addEventListener('scroll', syncScrolled, { passive: true });
-    syncScrolled();
+    const rail = header.querySelector<HTMLElement>('.nav-rail');
+    const track = header.querySelector<HTMLElement>('.nav-rail__track');
+    const indexLabel = header.querySelector<HTMLElement>('[data-chapter-index]');
+    const titleLabel = header.querySelector<HTMLElement>('[data-chapter-title]');
+    let frame = 0;
+    let layoutFrame = 0;
+    let chapterAnchors: number[] = [];
+    let trackWidth = 0;
+    const fallbackTitles: Record<string, string> = {
+      卷: '卷首',
+      壹: '此间近况',
+      贰: '器作',
+      叁: '山水长卷',
+      肆: '近来所记',
+      伍: '光影集',
+      陆: '卷尾年谱',
+    };
+
+    // 首页章节由各 section 的 data-home-chapter 声明；标题优先复用 aria-labelledby 的真实文本。
+    const chapters = Array.from(document.querySelectorAll<HTMLElement>('[data-home-chapter]')).map(
+      (section) => {
+        const labelledBy = section.getAttribute('aria-labelledby');
+        const labelledElement = labelledBy ? document.getElementById(labelledBy) : null;
+        return {
+          element: section,
+          index: section.dataset.homeChapter ?? '',
+          title:
+            section.dataset.homeChapterTitle ??
+            labelledElement?.textContent?.trim() ??
+            fallbackTitles[section.dataset.homeChapter ?? ''] ??
+            '',
+        };
+      },
+    );
+
+    const syncHeader = () => {
+      frame = 0;
+      header.classList.toggle('is-scrolled', window.scrollY > 24);
+      if (!rail || chapterAnchors.length === 0) return;
+
+      const readingLine = window.scrollY + Math.min(window.innerHeight * 0.36, 320);
+      const lastIndex = chapters.length - 1;
+      let active = -1;
+
+      for (let index = 0; index <= lastIndex; index += 1) {
+        if (readingLine >= chapterAnchors[index]) active = index;
+      }
+
+      let progress = 0;
+      if (active >= 0 && lastIndex > 0) {
+        if (active >= lastIndex) {
+          progress = 1;
+        } else {
+          const start = chapterAnchors[active];
+          const end = chapterAnchors[active + 1];
+          const localProgress = end > start ? (readingLine - start) / (end - start) : 0;
+          progress = (active + Math.min(Math.max(localProgress, 0), 1)) / lastIndex;
+        }
+      }
+
+      rail.style.setProperty('--chapter-offset', `${progress * trackWidth}px`);
+      const chapter = active >= 0 ? chapters[active] : null;
+      if (indexLabel) indexLabel.textContent = chapter?.index || '序';
+      if (titleLabel) titleLabel.textContent = chapter?.title || '卷首';
+    };
+
+    const requestSync = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(syncHeader);
+    };
+
+    // 章节坐标只在版式发生变化时测量；滚动帧只消费缓存，避免连续强制布局。
+    const measureLayout = () => {
+      layoutFrame = 0;
+      const scrollY = window.scrollY;
+      chapterAnchors = chapters.map(
+        (chapter) => chapter.element.getBoundingClientRect().top + scrollY,
+      );
+      trackWidth = track?.getBoundingClientRect().width ?? 0;
+      requestSync();
+    };
+
+    const requestMeasure = () => {
+      if (layoutFrame) return;
+      layoutFrame = window.requestAnimationFrame(measureLayout);
+    };
+
+    window.addEventListener('scroll', requestSync, { passive: true });
+    window.addEventListener('resize', requestMeasure, { passive: true });
+    window.addEventListener('load', requestMeasure, { once: true });
+    document.fonts?.ready.then(requestMeasure);
+
+    if ('ResizeObserver' in window) {
+      const layoutObserver = new ResizeObserver(requestMeasure);
+      layoutObserver.observe(document.body);
+    }
+
+    measureLayout();
   }
 </script>

@@ -9,9 +9,11 @@ import GiscusWall from '../components/guestbook/GiscusWall.astro';
     <PageIntro
       id="guestbook"
       title="留墨"
+      glyph="留"
       note="GUESTBOOK"
       description="路过此间，不妨题字一行。问候、读后感、或只是证明曾到此一游，皆是纸上墨痕。"
       scene="personal"
+      artTreatment="handnote"
     >
       <p slot="meta" class="m-0">公开题写 · 经 GitHub 账号</p>
     </PageIntro>
@@ -35,9 +37,9 @@ import GiscusWall from '../components/guestbook/GiscusWall.astro';
   .guestbook-stage {
     display: grid;
     grid-template-columns: minmax(13rem, 3fr) minmax(0, 9fr);
-    gap: clamp(3rem, 8vw, 8rem);
+    gap: clamp(2.5rem, 5vw, 5rem);
     align-items: start;
-    padding-block: 3rem clamp(7rem, 12vw, 10rem);
+    padding-block: 2.5rem clamp(4rem, 7vw, 6rem);
   }
 
   .guestbook-stage__aside {
@@ -67,7 +69,7 @@ import GiscusWall from '../components/guestbook/GiscusWall.astro';
 
     .guestbook-stage__aside {
       position: static;
-      margin-bottom: 3rem;
+      margin-bottom: 2.5rem;
     }
   }
 </style>

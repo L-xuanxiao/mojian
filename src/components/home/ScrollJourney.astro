@@ -7,61 +7,77 @@ import journeyNear from '../../assets/art/layers/journey-mountain-near.webp';
 import SectionHeading from '../SectionHeading.astro';
 ---
 
-<section class="journey" aria-labelledby="scroll-journey" data-journey data-ink-scene="journey">
+<section
+  class="journey"
+  aria-labelledby="scroll-journey"
+  data-journey
+  data-home-chapter="叁"
+  data-ink-scene="journey"
+>
   <div class="journey__sticky">
     <div class="mx-auto w-full max-w-stage px-5 md:px-8 lg:px-10">
       <header class="journey__header" data-journey-header>
-        <SectionHeading id="scroll-journey" title="山水长卷" index="叁" note="SCROLL FOLIO" />
+        <SectionHeading
+          id="scroll-journey"
+          title="山水长卷"
+          index="叁"
+          note="SCROLL FOLIO"
+          mode="chapter"
+        />
         <p>一卷不必讲完故事。山势缓移，水路留白，行至卷尾只钤一方小印。</p>
       </header>
 
-      <div class="journey__frame">
-        <div class="journey__art media-reveal" data-journey-art>
-          <Image
-            class="journey__fallback"
-            src={journeyArtwork}
-            alt="层叠纸山与留白水路组成的横向长卷"
-            widths={[960, 1400, 1838]}
-            sizes="(min-width: 768px) 120vw, 100vw"
-            quality={88}
-          />
-          <div class="journey__layers" aria-hidden="true">
-            <div class="journey__layer journey__layer--far" data-journey-layer="far">
-              <Image
-                src={journeyFar}
-                alt=""
-                widths={[960, 1400, 1838]}
-                sizes="(min-width: 768px) 140vw, 190vw"
-                quality={86}
-              />
-            </div>
-            <div class="journey__layer journey__layer--mid" data-journey-layer="mid">
-              <Image
-                src={journeyMid}
-                alt=""
-                widths={[960, 1400, 1838]}
-                sizes="(min-width: 768px) 140vw, 190vw"
-                quality={88}
-              />
-            </div>
-            <div class="journey__layer journey__layer--near" data-journey-layer="near">
-              <Image
-                src={journeyNear}
-                alt=""
-                widths={[960, 1400, 1838]}
-                sizes="(min-width: 768px) 140vw, 190vw"
-                quality={88}
-              />
+      <div class="journey__mount">
+        <div class="journey__frame">
+          <div class="journey__art media-reveal" data-journey-art>
+            <Image
+              class="journey__fallback"
+              src={journeyArtwork}
+              alt="层叠纸山与留白水路组成的横向长卷"
+              widths={[960, 1400, 1838]}
+              sizes="(min-width: 768px) 120vw, 100vw"
+              quality={88}
+            />
+            <div class="journey__layers" aria-hidden="true">
+              <div class="journey__layer journey__layer--far" data-journey-layer="far">
+                <Image
+                  src={journeyFar}
+                  alt=""
+                  widths={[960, 1400, 1838]}
+                  sizes="(min-width: 768px) 140vw, 190vw"
+                  quality={86}
+                />
+              </div>
+              <div class="journey__layer journey__layer--mid" data-journey-layer="mid">
+                <Image
+                  src={journeyMid}
+                  alt=""
+                  widths={[960, 1400, 1838]}
+                  sizes="(min-width: 768px) 140vw, 190vw"
+                  quality={88}
+                />
+              </div>
+              <div class="journey__layer journey__layer--near" data-journey-layer="near">
+                <Image
+                  src={journeyNear}
+                  alt=""
+                  widths={[960, 1400, 1838]}
+                  sizes="(min-width: 768px) 140vw, 190vw"
+                  quality={88}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <p class="journey__inscription" data-journey-inscription>起笔处，山色尚轻</p>
-        <p class="journey__poem font-display" data-journey-poem>行到水穷处，坐看云起时</p>
-        <div class="journey__ending" data-journey-ending>
-          <span>卷尾 · 二〇二六</span>
-          <span class="journey__seal">山水</span>
+          <p class="journey__inscription" data-journey-inscription>起笔处，山色尚轻</p>
+          <p class="journey__poem font-display" data-journey-poem>行到水穷处，坐看云起时</p>
+          <div class="journey__ending" data-journey-ending>
+            <span>卷尾 · 二〇二六</span>
+            <span class="journey__seal">山水</span>
+          </div>
         </div>
+        <span class="journey__roll-edge journey__roll-edge--start" aria-hidden="true"></span>
+        <span class="journey__roll-edge journey__roll-edge--end" aria-hidden="true"></span>
       </div>
 
       <div class="journey__progress" aria-hidden="true">
@@ -104,9 +120,32 @@ import SectionHeading from '../SectionHeading.astro';
     color: var(--ink-soft);
   }
 
+  .journey__mount {
+    position: relative;
+    left: 50%;
+    width: min(calc(100vw - 1rem), 108rem);
+    transform: translateX(-50%);
+  }
+
+  .journey__mount::after {
+    content: '';
+    position: absolute;
+    right: 4%;
+    bottom: -1rem;
+    left: 4%;
+    height: 1rem;
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--ink) 11%, transparent),
+      transparent
+    );
+    filter: blur(0.5rem);
+    pointer-events: none;
+  }
+
   .journey__frame {
     position: relative;
-    height: clamp(24rem, 58svh, 41rem);
+    height: clamp(25rem, 61svh, 44rem);
     overflow: hidden;
     border-block: 1px solid var(--line);
     background:
@@ -116,13 +155,16 @@ import SectionHeading from '../SectionHeading.astro';
         var(--paper) 62%
       ),
       var(--paper);
-    box-shadow: var(--shadow-lg);
+    box-shadow:
+      var(--shadow-lg),
+      inset 0 1.25rem 2rem color-mix(in oklab, var(--ink) 5%, transparent),
+      inset 0 -1.5rem 2.5rem color-mix(in oklab, var(--ink) 7%, transparent);
   }
 
   .journey__art {
     position: absolute;
     inset: 0 auto 0 0;
-    width: 152%;
+    width: 168%;
     height: 100%;
   }
 
@@ -190,9 +232,14 @@ import SectionHeading from '../SectionHeading.astro';
     position: absolute;
     top: 0;
     bottom: 0;
-    z-index: 2;
-    width: clamp(1.25rem, 4vw, 3.5rem);
-    background: linear-gradient(90deg, var(--paper), transparent);
+    z-index: 5;
+    width: clamp(2rem, 6vw, 6rem);
+    background: linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--paper) 98%, transparent),
+      color-mix(in oklab, var(--paper) 68%, transparent) 38%,
+      transparent
+    );
     pointer-events: none;
   }
 
@@ -202,6 +249,33 @@ import SectionHeading from '../SectionHeading.astro';
 
   .journey__frame::after {
     right: 0;
+    transform: rotate(180deg);
+  }
+
+  .journey__roll-edge {
+    position: absolute;
+    z-index: 7;
+    top: -0.45rem;
+    bottom: -0.45rem;
+    width: clamp(0.85rem, 1.7vw, 1.6rem);
+    border: 1px solid color-mix(in oklab, var(--ink) 18%, transparent);
+    background: linear-gradient(
+      90deg,
+      var(--paper-deep),
+      var(--paper) 42%,
+      var(--paper-deep) 78%,
+      color-mix(in oklab, var(--ink) 14%, var(--paper-deep))
+    );
+    box-shadow: var(--shadow-md);
+    pointer-events: none;
+  }
+
+  .journey__roll-edge--start {
+    left: clamp(-0.4rem, -0.6vw, -0.1rem);
+  }
+
+  .journey__roll-edge--end {
+    right: clamp(-0.4rem, -0.6vw, -0.1rem);
     transform: rotate(180deg);
   }
 
@@ -234,8 +308,8 @@ import SectionHeading from '../SectionHeading.astro';
   }
 
   .journey__ending {
-    right: 7%;
-    bottom: 11%;
+    right: 8%;
+    bottom: 9%;
     display: flex;
     align-items: flex-end;
     gap: 1rem;
@@ -247,14 +321,14 @@ import SectionHeading from '../SectionHeading.astro';
 
   .journey__seal {
     display: inline-flex;
-    width: 3rem;
-    height: 3rem;
+    width: 3.6rem;
+    height: 3.6rem;
     align-items: center;
     justify-content: center;
     background: var(--cinnabar);
     color: var(--paper);
     font-family: var(--font-ma-shan-zheng);
-    font-size: 1rem;
+    font-size: 1.15rem;
     letter-spacing: 0;
     writing-mode: vertical-rl;
   }
@@ -313,6 +387,14 @@ import SectionHeading from '../SectionHeading.astro';
     .journey__frame {
       height: auto;
       aspect-ratio: 4 / 5;
+    }
+
+    .journey__mount {
+      width: 100%;
+    }
+
+    .journey__roll-edge {
+      width: 0.7rem;
     }
 
     .journey__art {
