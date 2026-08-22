@@ -115,7 +115,8 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
 <style>
   .hero {
     position: relative;
-    min-height: calc(100svh - 5rem);
+    /* 桌面卷首约七成半屏：首屏底部露出近况章头，与全站编辑流密度一致；移动端保持近满屏 */
+    min-height: min(75svh, 46rem);
     overflow: clip;
   }
   .hero__hold {
@@ -212,7 +213,8 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
   .hero__art :global(img) {
     display: block;
     width: 100%;
-    min-height: min(62vh, 44rem);
+    /* 固定高而非 min-height：宽视口下自然比例（3:2）会把图撑过 75svh 上限 */
+    height: min(48vh, 36rem);
     object-fit: cover;
   }
   .hero__fallback {
@@ -288,7 +290,7 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
     z-index: 5;
     grid-row: 1;
     grid-column: 1 / -1;
-    min-height: min(62vh, 44rem);
+    min-height: min(48vh, 36rem);
     pointer-events: none;
   }
   .hero__eyebrow {

@@ -72,7 +72,9 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
     left: 50%;
     display: grid;
     grid-template-columns: repeat(14, minmax(0, 1fr));
-    width: min(calc(100vw - 1rem), 96rem);
+    /* 展墙宽度不超过 section 裁切边界（stage 内容宽 84rem）再留贴边余量：
+       按 100vw 定宽会超出 overflow:clip 的父级，右侧展签与摘要被裁 */
+    width: min(calc(100vw - 1rem), 82rem);
     gap: clamp(1.25rem, 2.5vw, 2.5rem);
     align-items: start;
     margin-top: 0;

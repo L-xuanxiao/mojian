@@ -109,8 +109,8 @@ const slides = await Promise.all(
     margin-bottom: clamp(0.75rem, 2vh, 1.5rem);
     padding: clamp(1.25rem, 2.5vw, 2.25rem);
     border-top: 1px solid var(--ink);
-    background: color-mix(in oklab, var(--paper) 90%, transparent);
-    backdrop-filter: blur(8px);
+    /* 纸底 90% 已可承托文字；全站玻璃拟态仅页眉一处 */
+    background: color-mix(in oklab, var(--paper) 92%, transparent);
   }
 
   .project-hero__kicker {
