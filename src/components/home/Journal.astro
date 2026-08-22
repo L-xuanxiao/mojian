@@ -15,11 +15,12 @@ const latestLabel = latest ? `${latest.getFullYear()} 年 ${latest.getMonth() + 
 
 <section
   class="home-journal"
+  id="home-journal"
   aria-labelledby="journal"
   data-home-chapter="肆"
   data-ink-scene="reading"
 >
-  <div class="home-journal__inner mx-auto max-w-stage px-5 py-12 md:px-8 md:py-16 lg:px-10">
+  <div class="home-journal__inner mx-auto max-w-stage px-5 py-12 md:px-8 lg:px-10">
     <span class="home-journal__spine" aria-hidden="true">录</span>
     <SectionHeading id="journal" title="近来所记" index="肆" note="JOURNAL" mode="chapter" />
 
@@ -132,7 +133,7 @@ const latestLabel = latest ? `${latest.getFullYear()} 年 ${latest.getMonth() + 
     margin-top: 1.25rem;
     color: var(--ink);
     font-family: var(--font-noto-sans);
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     text-decoration: none;
   }
 
@@ -141,7 +142,7 @@ const latestLabel = latest ? `${latest.getFullYear()} 年 ${latest.getMonth() + 
   }
 
   .home-journal__lead :global(.entry-list--feature article) {
-    min-height: clamp(16rem, 23vw, 20rem);
+    min-height: clamp(14rem, 21vw, 18rem);
     padding: clamp(2rem, 3vw, 2.75rem) 0 clamp(1.5rem, 2.5vw, 2rem) clamp(1.5rem, 3vw, 2.5rem);
   }
 

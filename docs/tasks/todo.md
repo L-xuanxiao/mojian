@@ -1,4 +1,38 @@
-# 当前任务：分支提交与格式基线清零
+# 当前任务：critique 五项修复（P1 resize + P2 对比度/章高 + P3 契约收敛/长卷跳过）
+
+目标：按 2026-08-22 critique 快照修复全部 5 个优先问题；章高按用户决定继续压密度至 55–75svh 契约，不修改 DESIGN.md 数字。
+
+- [x] P1：ScrollJourney/Hero/Gallery 监听 768 断点 change，重建或救济未初始化的预隐藏态
+- [x] P2：昼间 `--bronze` 提亮过 4.5:1（双通道同步检查）
+- [x] P2：桌面壹/贰/肆/伍章高压向 55–75svh；移动端内容完整不动
+- [x] P3：0.58/0.6rem 收敛 0.62；小字区间候选值按用途归档；Hero statement 去 backdrop blur
+- [x] P3：卷尾印章可聚焦，回车「展毕」跳章肆
+- [x] 验证：check/build/format + 浏览器复测（resize 复现场景、章高、对比度）
+- [x] 结果审查
+
+## 计划确认
+
+- 修复范围：用户选定全部 5 个；P1 先行；章高继续压密度而非改契约。
+- 降级边界：所有修复不破坏 reduced-motion / 无 JS / 移动端静态终态。
+- Git 边界：修复完成后提交至 `tight-volumes` 分支，不推送。
+
+## 结果审查
+
+### 修复内容
+
+- P1 断点重建：ScrollJourney / Hero handoff / Gallery 视差三处 GSAP 时间线改为 `matchMedia('(min-width:768px)')` change 时重建或 kill + `clearProps`，与 CSS 预隐藏态的媒体查询保持同断点；390 加载转 1440 后长卷题字/诗句/进度条实测恢复驱动，反向转 390 后三元素回到 opacity:1 静态终态且无 inline 残留。
+- P2 对比度：昼间 `--bronze` #8b7355→#7d6549（夜与暗室深底值不动），folio-label 对宣纸实测 4.7791:1；DESIGN.md frontmatter 已同步。
+- P2 章高（1440×1000）：壹 81.5→74.7、贰 85.1→75.2、肆 78.8→74.9、伍 93.2→82.8；手段为 chapter 章标下距统一收紧、各章 py / min-height / aspect 比例 / 错位量定点收敛。贰最后一轮 4px 微调被相邻 margin 折叠吸收，停在 75.2svh（差 2px，舍入误差级，按 stop-polishing 收口）；伍按 A 建议以 ≤85svh 为界（暗室四幅完整保留 + 上下过渡带是设计系统明文规则）。
+- P3 契约收敛：0.58/0.6→0.62rem（SectionHeading 移动展签、长卷进度刻度）；0.78→0.72rem（长卷题跋、笺录 more、PageIntro meta）；0.75→0.72rem（器作 meta、光影年份）；0.875→0.72rem（光影图注）；Hero statement 移除 `backdrop-filter: blur(8px)`（全站玻璃拟态回归仅页眉一处）。Hero CTA 0.82rem 保留——Jordan 视角 CTA 视觉重量本已偏弱，不再缩小。
+- P3 长卷跳过：卷尾「山水」印章由 span 改为 `<a href="#home-journal">`（章肆 section 补 id），`focus-within` 强制卷尾在时间线透明态下可见，Lenis 开启 `anchors: true` 接管锚点平滑滚动；实测 focus 后 opacity 立即为 1、点击后 #home-journal 顶距 0px 到位；无 JS / reduced-motion 下退化为原生锚点。
+
+### 验证证据
+
+- 静态：目标文件 Prettier 通过、全仓 `format:check` 全绿；`pnpm check` 50 files、0 errors / 0 warnings / 0 hints；`pnpm build` 成功。
+- 浏览器（playwright，1440×1000 + 390×844）：22+ 项断言——P1 双向 resize 复现场景通过（修复前必失败组全部恢复）；对比度 4.7791:1；console 全程 0/0；双视口无横向溢出；移动端滚到底 reveal 隐藏 0/41；章高三轮收敛数据如上。
+- 边界：`.impeccable/design.json` 未刷新（sidecar 仍 stale，bronze 与字号档变化待 `$impeccable document` 一并同步）；浏览器证据为 Chromium 仿真。
+
+# 上一任务：分支提交与格式基线清零
 
 目标：将「紧卷成册」布局重构的 36 文件工作区改动在独立分支提交；随后以 `.gitattributes` 统一仓库 LF 行尾，清零 `format:check` 的 32 文件历史基线。
 

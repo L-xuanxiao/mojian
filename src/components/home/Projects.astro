@@ -10,17 +10,13 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
 ---
 
 <section
-  class="home-projects mx-auto max-w-stage px-5 py-12 md:px-8 md:py-16 lg:px-10"
+  class="home-projects mx-auto max-w-stage px-5 py-12 md:px-8 lg:px-10"
   aria-labelledby="projects"
   data-home-chapter="贰"
   data-ink-scene="exhibition"
 >
   <SectionHeading id="projects" title="器作" index="贰" note="WORKS" mode="chapter" />
-  <ol
-    class="project-preview mt-6 list-none p-0 md:mt-8"
-    data-reveal-group
-    data-reveal-variant="exhibit"
-  >
+  <ol class="project-preview mt-6 list-none p-0" data-reveal-group data-reveal-variant="exhibit">
     {
       projects.map((project, index) => (
         <li
@@ -60,7 +56,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
       ))
     }
   </ol>
-  <p class="mt-6 mb-0 text-right font-sans text-sm md:mt-8">
+  <p class="mt-3 mb-0 text-right font-sans text-sm">
     <a class="ink-link" href={withBase('/projects/')}>查看全部器作</a>
   </p>
 </section>
@@ -129,13 +125,13 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
   .project-preview__item--2 {
     grid-row: 1;
     grid-column: 8 / span 3;
-    margin-top: clamp(2rem, 4vw, 3.5rem);
+    margin-top: clamp(1.5rem, 3vw, 2.5rem);
   }
 
   .project-preview__item--3 {
     grid-row: 1;
     grid-column: 11 / -1;
-    margin-top: clamp(0.75rem, 2vw, 1.5rem);
+    margin-top: clamp(0.5rem, 1.5vw, 1rem);
   }
 
   .project-preview__item--2::before {
@@ -172,7 +168,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
   }
 
   .project-preview__item--1 .project-preview__image :global(img) {
-    aspect-ratio: 16 / 8;
+    aspect-ratio: 16 / 6.5;
   }
 
   .project-preview__item--2 .project-preview__image :global(img) {
@@ -218,7 +214,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
     width: calc(100% - clamp(1rem, 3vw, 2.5rem));
     max-width: 36rem;
     margin: clamp(-2rem, -2vw, -1.25rem) 0 0 clamp(1rem, 3vw, 2.5rem);
-    padding: 1.25rem clamp(1rem, 2vw, 1.75rem);
+    padding: 1rem clamp(1rem, 2vw, 1.75rem);
     border-left: 2px solid var(--ink);
     background: color-mix(in oklab, var(--paper) 94%, transparent);
     box-shadow: var(--shadow-sm);
@@ -247,7 +243,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
     margin: 0;
     color: var(--ink-soft);
     font-family: var(--font-noto-sans);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
   }
 
   /* 状态小签：描边铭牌样式，与笺录的纯文本 meta 拉开 */
@@ -259,13 +255,13 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
   }
 
   .project-preview h3 {
-    margin: 0.65rem 0 0;
+    margin: 0.5rem 0 0;
     font-size: var(--type-title-card);
     font-weight: 400;
   }
 
   .project-preview__copy > p:last-child {
-    margin: 0.75rem 0 0;
+    margin: 0.5rem 0 0;
     color: var(--ink-soft);
   }
 

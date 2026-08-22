@@ -16,12 +16,12 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
   data-ink-scene="darkroom"
 >
   <span class="mist mist--a home-gallery__mist" aria-hidden="true"></span>
-  <div class="home-gallery__inner mx-auto max-w-stage px-5 py-12 md:px-8 md:py-12 lg:px-10">
+  <div class="home-gallery__inner mx-auto max-w-stage px-5 py-12 md:px-8 md:py-10 lg:px-10">
     <span class="home-gallery__stage-mark" aria-hidden="true">影</span>
     <SectionHeading id="gallery" title="光影集" index="伍" note="GALLERY" mode="chapter" />
-    <p class="mt-4 max-w-[32rem] text-ink-soft">以光为墨，收存纸张、山水与四时一瞬。</p>
+    <p class="mt-3 max-w-[32rem] text-ink-soft">以光为墨，收存纸张、山水与四时一瞬。</p>
     <ol
-      class="gallery-preview mt-6 list-none p-0 md:mt-8"
+      class="gallery-preview mt-6 list-none p-0"
       data-reveal-group
       data-reveal-variant="contact-sheet"
     >
@@ -52,7 +52,7 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
         ))
       }
     </ol>
-    <p class="mt-6 mb-0 text-right font-sans text-sm md:mt-8">
+    <p class="mt-6 mb-0 text-right font-sans text-sm">
       <a class="ink-link" href={withBase('/gallery/')}>展开全部光影</a>
     </p>
   </div>
@@ -106,7 +106,7 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
     display: grid;
     grid-template-columns: repeat(16, minmax(0, 1fr));
     width: min(calc(100vw - 1rem), 84rem);
-    gap: clamp(1.25rem, 2.5vw, 2.5rem) clamp(0.75rem, 1.5vw, 1.5rem);
+    gap: clamp(1rem, 2vw, 1.75rem) clamp(0.75rem, 1.5vw, 1.5rem);
     align-items: start;
     transform: translateX(-50%);
   }
@@ -174,19 +174,19 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
   }
 
   .gallery-preview__item--1 .gallery-preview__image :global(img) {
-    aspect-ratio: 16 / 6;
+    aspect-ratio: 16 / 5;
   }
 
   .gallery-preview__item--2 .gallery-preview__image :global(img) {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 3 / 2;
   }
 
   .gallery-preview__item--3 .gallery-preview__image :global(img) {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 3 / 2;
   }
 
   .gallery-preview__item--4 .gallery-preview__image :global(img) {
-    aspect-ratio: 16 / 7;
+    aspect-ratio: 16 / 6;
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -203,9 +203,9 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
     display: flex;
     justify-content: space-between;
     gap: 1rem;
-    margin: 0.75rem 0 0;
+    margin: 0.5rem 0 0;
     color: var(--ink-soft);
-    font-size: 0.875rem;
+    font-size: 0.72rem;
   }
 
   .gallery-preview__item--1 > p span:first-child {
@@ -216,7 +216,7 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
 
   .gallery-preview__item > p span:last-child {
     font-family: var(--font-noto-sans);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
   }
 
   @media (max-width: 767px) {
@@ -275,17 +275,39 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
 <script>
   import { gsap, prefersReducedMotion } from '../../scripts/scroll';
 
-  if (!prefersReducedMotion && window.matchMedia('(min-width: 768px)').matches) {
-    document.querySelectorAll<HTMLElement>('[data-gallery-parallax]').forEach((media, index) => {
-      gsap.fromTo(
-        media,
-        { yPercent: index % 2 === 0 ? 2 : -2 },
-        {
-          yPercent: index % 2 === 0 ? -3 : 3,
-          ease: 'none',
-          scrollTrigger: { trigger: media, start: 'top bottom', end: 'bottom top', scrub: true },
-        },
-      );
+  if (!prefersReducedMotion) {
+    // 暗室视差与首页其余动效同策略：跨 768 断点时重建或清理，避免移动布局残留位移
+    const desktopQuery = window.matchMedia('(min-width: 768px)');
+    let teardownAll: Array<() => void> = [];
+
+    const setupParallax = () => {
+      document.querySelectorAll<HTMLElement>('[data-gallery-parallax]').forEach((media, index) => {
+        const tween = gsap.fromTo(
+          media,
+          { yPercent: index % 2 === 0 ? 2 : -2 },
+          {
+            yPercent: index % 2 === 0 ? -3 : 3,
+            ease: 'none',
+            scrollTrigger: { trigger: media, start: 'top bottom', end: 'bottom top', scrub: true },
+          },
+        );
+        teardownAll.push(() => {
+          tween.scrollTrigger?.kill();
+          tween.kill();
+          gsap.set(media, { clearProps: 'transform' });
+        });
+      });
+    };
+
+    if (desktopQuery.matches) setupParallax();
+
+    desktopQuery.addEventListener('change', (event) => {
+      if (event.matches) {
+        setupParallax();
+      } else {
+        teardownAll.forEach((teardown) => teardown());
+        teardownAll = [];
+      }
     });
   }
 </script>

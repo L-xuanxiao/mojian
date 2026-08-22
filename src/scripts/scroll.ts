@@ -11,8 +11,9 @@ export const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: 
 let lenis: Lenis | null = null;
 
 if (!prefersReducedMotion) {
-  // Lenis 统一接管平滑滚动，并把滚动帧同步给 ScrollTrigger
-  lenis = new Lenis();
+  // Lenis 统一接管平滑滚动，并把滚动帧同步给 ScrollTrigger；
+  // anchors 让站内锚点（如长卷卷尾「展毕」印章）也走 Lenis，避免原生跳转与其状态脱节
+  lenis = new Lenis({ anchors: true });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((time) => {
     lenis?.raf(time * 1000);

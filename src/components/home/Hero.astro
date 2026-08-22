@@ -364,8 +364,8 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
     align-items: end;
     padding: 1.1rem 1.25rem;
     border-top: 1px solid var(--ink);
+    /* 纸底已 88% 不透明，可承托文字；全站玻璃拟态仅页眉一处，此处不再 blur */
     background: color-mix(in oklab, var(--paper) 88%, transparent);
-    backdrop-filter: blur(8px);
     pointer-events: auto;
   }
   .hero__statement > p {
@@ -613,7 +613,6 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
     const sheet = hero.querySelector<HTMLElement>('[data-hero-sheet]');
     const art = hero.querySelector<HTMLElement>('[data-hero-art]');
     const paperTitle = hero.querySelector<HTMLElement>('.hero-title-mask--paper');
-    const mobile = window.matchMedia('(max-width: 767px)').matches;
     const layers = [
       { element: hero.querySelector<HTMLElement>('[data-hero-layer="far"]'), yPercent: 2 },
       { element: hero.querySelector<HTMLElement>('[data-hero-layer="mid"]'), yPercent: 5 },
@@ -655,7 +654,15 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
         1.45,
       );
 
-    if (!mobile) {
+    /*
+     * 桌面滚动视差跟随 768 断点重建或清理：
+     * 视口判定只在加载时读一次的话，旋转屏后要么残留移动布局上的 transform，
+     * 要么转桌面后缺少视差；与长卷时间线保持同一救济策略。
+     */
+    const desktopQuery = window.matchMedia('(min-width: 768px)');
+    let teardownHandoff: (() => void) | null = null;
+
+    const setupHandoff = () => {
       const handoff = gsap.timeline({
         scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
       });
@@ -665,6 +672,27 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
       layers.forEach((layer) =>
         handoff.to(layer.element, { yPercent: layer.yPercent, ease: 'none' }, 0),
       );
-    }
+
+      teardownHandoff = () => {
+        handoff.scrollTrigger?.kill();
+        handoff.kill();
+        const parallaxTargets = [sheet, art, paperTitle, ...layers.map((layer) => layer.element)];
+        gsap.set(
+          parallaxTargets.filter((target): target is HTMLElement => Boolean(target)),
+          { clearProps: 'transform' },
+        );
+        teardownHandoff = null;
+      };
+    };
+
+    if (desktopQuery.matches) setupHandoff();
+
+    desktopQuery.addEventListener('change', (event) => {
+      if (event.matches) {
+        setupHandoff();
+      } else {
+        teardownHandoff?.();
+      }
+    });
   }
 </script>

@@ -9,7 +9,7 @@ colors:
   ink-line: 'rgb(37 38 34 / 0.18)'
   cinnabar: '#a44736'
   pine: '#49574c'
-  bronze: '#8b7355'
+  bronze: '#7d6549'
   paper-glass: 'rgb(244 239 227 / 0.86)'
   darkroom-ink: 'rgb(16 17 15)'
 typography:

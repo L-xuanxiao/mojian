@@ -15,7 +15,8 @@
   --line: rgb(37 38 34 / 0.18);
   --cinnabar: #a44736;
   --pine: #49574c;
-  --bronze: #8b7355;
+  /* 昼间古铜提亮一档过 4.5:1：folio-label 等小字标签在宣纸上的可读性下限 */
+  --bronze: #7d6549;
   --shadow-color: rgb(37 38 34 / 0.08);
   --paper-glass: rgb(244 239 227 / 0.86);
 

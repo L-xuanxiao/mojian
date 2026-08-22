@@ -73,7 +73,7 @@ import SectionHeading from '../SectionHeading.astro';
           <p class="journey__poem font-display" data-journey-poem>行到水穷处，坐看云起时</p>
           <div class="journey__ending" data-journey-ending>
             <span>卷尾 · 二〇二六</span>
-            <span class="journey__seal">山水</span>
+            <a class="journey__seal" href="#home-journal" aria-label="展毕 · 继续读笺录">山水</a>
           </div>
         </div>
         <span class="journey__roll-edge journey__roll-edge--start" aria-hidden="true"></span>
@@ -291,7 +291,7 @@ import SectionHeading from '../SectionHeading.astro';
     top: 13%;
     left: 7%;
     color: var(--ink-soft);
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     letter-spacing: 0.38em;
     writing-mode: vertical-rl;
   }
@@ -330,7 +330,27 @@ import SectionHeading from '../SectionHeading.astro';
     font-family: var(--font-ma-shan-zheng);
     font-size: 1.15rem;
     letter-spacing: 0;
+    line-height: 1;
+    text-decoration: none;
     writing-mode: vertical-rl;
+    transition: transform 250ms var(--ease-ink);
+  }
+
+  /* 键盘聚焦「展毕」印章时，卷尾整体强制可见，覆盖滚动时间线的透明中间态 */
+  .journey__ending:focus-within {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .journey__seal:focus-visible {
+    outline: 2px solid var(--cinnabar);
+    outline-offset: 0.3rem;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .journey__seal:hover {
+      transform: translateY(-0.2rem);
+    }
   }
 
   .journey__progress {
@@ -351,7 +371,7 @@ import SectionHeading from '../SectionHeading.astro';
     margin-top: 0.55rem;
     color: var(--ink-soft);
     font-family: var(--font-noto-sans);
-    font-size: 0.6rem;
+    font-size: 0.62rem;
     letter-spacing: 0.16em;
   }
 
@@ -458,7 +478,7 @@ import SectionHeading from '../SectionHeading.astro';
   import { gsap, prefersReducedMotion } from '../../scripts/scroll';
 
   const section = document.querySelector<HTMLElement>('[data-journey]');
-  if (section && !prefersReducedMotion && window.matchMedia('(min-width: 768px)').matches) {
+  if (section && !prefersReducedMotion) {
     const art = section.querySelector<HTMLElement>('[data-journey-art]');
     const farLayer = section.querySelector<HTMLElement>('[data-journey-layer="far"]');
     const midLayer = section.querySelector<HTMLElement>('[data-journey-layer="mid"]');
@@ -469,17 +489,29 @@ import SectionHeading from '../SectionHeading.astro';
     const ending = section.querySelector<HTMLElement>('[data-journey-ending]');
     const progress = section.querySelector<HTMLElement>('[data-journey-progress]');
 
-    if (
-      art &&
-      farLayer &&
-      midLayer &&
-      nearLayer &&
-      header &&
-      inscription &&
-      poem &&
-      ending &&
-      progress
-    ) {
+    /*
+     * 桌面长卷时间线必须跟随 768 断点重建或清理：
+     * CSS 预隐藏态挂在 min-width:768 媒体查询上，若在移动视口加载后再转桌面
+     * （旋转屏、放大字号的低视力用户），预隐藏生效而时间线不存在，内容将永久透明。
+     */
+    const desktopQuery = window.matchMedia('(min-width: 768px)');
+    let teardown: (() => void) | null = null;
+
+    const setupTimeline = () => {
+      if (!(
+        art &&
+        farLayer &&
+        midLayer &&
+        nearLayer &&
+        header &&
+        inscription &&
+        poem &&
+        ending &&
+        progress
+      )) {
+        return;
+      }
+
       gsap.set([inscription, poem, ending], { opacity: 0 });
       gsap.set(progress, { scaleX: 0 });
 
@@ -504,6 +536,24 @@ import SectionHeading from '../SectionHeading.astro';
           { y: 0, rotate: 0, opacity: 1, duration: 1.2, ease: 'back.out(1.5)' },
           7.6,
         );
-    }
+
+      teardown = () => {
+        timeline.scrollTrigger?.kill();
+        timeline.kill();
+        // 清除 scrub 残留的内联中间态，让移动布局回到完整静态终态
+        gsap.set([inscription, poem, ending, progress], { clearProps: 'all' });
+        teardown = null;
+      };
+    };
+
+    if (desktopQuery.matches) setupTimeline();
+
+    desktopQuery.addEventListener('change', (event) => {
+      if (event.matches) {
+        setupTimeline();
+      } else {
+        teardown?.();
+      }
+    });
   }
 </script>
