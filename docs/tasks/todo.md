@@ -1,4 +1,49 @@
-# 当前任务：code-review 八项审查修复（契约收敛 + 定向去重）
+# 当前任务：合并 `tight-volumes` 到 `main` 并发布
+
+目标：将已验证的 `tight-volumes` 全部工作合并到 `main`，推送 `origin/main` 触发 GitHub Pages 部署，并清理已完成的特性分支。
+
+- [ ] 提交全项目代码续审记录
+- [ ] 以 `--ff-only` 将 `tight-volumes` 合并到 `main`
+- [ ] 在合并后的 `main` 上复验 check / build / format
+- [ ] 补充本任务结果审查并提交
+- [ ] 推送 `origin/main` 并核对远端 SHA
+- [ ] 删除本地 `tight-volumes`；若存在远端同名分支则一并删除
+
+## 计划确认
+
+- 当前 `main`（`9e60c2d`）是 `tight-volumes`（`43f34d8`）的直接祖先，使用 fast-forward，不制造无信息量的合并提交。
+- 工作区仅 `docs/tasks/todo.md` 含本轮审查记录；先独立提交，避免切分支时丢失。
+- `main` 推送会触发 GitHub Pages 自动部署；用户已明确授权提交、推送与分支清理。
+- 删除前先核对分支已被 `main` 包含；远端分支仅在确认存在后删除。
+
+# 上一任务：全项目代码续审（Standards / Spec 双轴）
+
+目标：以 `main` 为固定点，审查 `main...HEAD` 的 9 个提交与 49 个变更文件；在上一轮八项修复后继续发现标准违例、代码异味、规格遗漏、实现偏差和范围蔓延。本轮只审查与记录，不修改业务代码、不提交。
+
+- [x] 固定审查点并确认差异非空：`main` / merge-base `9e60c2d`
+- [x] 确认图索引状态、架构概览与变更影响范围
+- [x] 确认规格来源、标准来源与图索引覆盖
+- [x] 并行完成 Standards 与 Spec 双轴审查
+- [x] 复核每项发现的代码证据与严重度
+- [x] 汇总审查结论并补充结果审查
+
+## 计划确认
+
+- 审查命令固定为 `git diff main...HEAD`，提交清单固定为 `git log main..HEAD --oneline`。
+- 规格以 `docs/tasks/todo.md` 各任务目标、计划确认和结果审查为主，辅以 `DESIGN.md` 与 `docs/progress.md`；提交信息未引用 GitHub Issue。
+- 标准以根 `AGENTS.md` 及 `docs/agents/` 相关约定、`DESIGN.md` 为主，并应用 `$code-review` 的 Fowler 异味基线；格式、类型等工具已覆盖项不重复报告。
+- 代码图谱采用 Tier 2；对所有实际引用路径检查覆盖，覆盖缺口回退到源码读取。
+- 本轮不执行修复、不提交、不推送；审查结论待用户选择后另开修复任务。
+
+## 结果审查
+
+- Standards：5 项——4 项硬违例（档外小字、阴影契约、灯箱第二处玻璃、GSAP 职责越界）与 1 项判断项（Header 不可达 fallback / Speculative Generality）；最严重为阴影契约系统性漂移。
+- Spec：4 项——普通揭示迁移超出布局任务边界、两处 `shadow-sm` 与设计契约冲突、`docs/progress.md` 漏记 `43f34d8` 阶段、三项打磨任务顺带加入 `.zcode/` 忽略项；前三项 P2，末项 P3。
+- 图谱证据：本轮全量索引为 544 节点 / 798 边，0 skipped / 0 parse-partial；覆盖服务仍把 49 个差异路径标为 `metadata_changed`，因此所有结论均回退到完整 diff 与当前源码复核，15 个未索引 WebP 仅为二进制资产。
+- 验证：`git diff --check`、`pnpm check`（52 文件 0/0/0）、`pnpm build`（24 页 + Pagefind）与 `pnpm format:check` 全绿。
+- 边界：本轮未做浏览器视觉验收、未修复发现、未提交、未推送；待用户选择修复项后另开任务。
+
+# 上一任务：code-review 八项审查修复（契约收敛 + 定向去重）
 
 目标：按全项目 code-review（Standards/Spec 双轴 + 架构审计）结论修复用户选定的八项：三档小字回归、journal 取数共享、年月格式化、主题解析共享、断点生命周期与磁吸工具化、navItems 集中、白文方印原语。
 
