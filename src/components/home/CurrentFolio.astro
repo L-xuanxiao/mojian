@@ -2,6 +2,8 @@
 import { getCollection } from 'astro:content';
 import SectionHeading from '../SectionHeading.astro';
 import { site } from '../../site.config';
+import { getJournalPosts } from '../../utils/journal';
+import { formatYearMonth } from '../../utils/date';
 
 // 演示数据：案头三事待主人按近况更新，条目即改即生效
 const statusItems = [
@@ -11,18 +13,14 @@ const statusItems = [
 ];
 
 const [journalEntries, projectEntries, galleryEntries] = await Promise.all([
-  getCollection('journal', ({ data }) => !data.draft),
+  getJournalPosts(),
   getCollection('projects', ({ data }) => !data.draft),
   getCollection('gallery', ({ data }) => !data.draft),
 ]);
 
 // 最近更新：自动取笺录最新文章的月份；无文章时不渲染该行
-const latestPost = journalEntries.sort(
-  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
-)[0];
-const latestUpdate = latestPost
-  ? `${latestPost.data.pubDate.getFullYear()} 年 ${latestPost.data.pubDate.getMonth() + 1} 月`
-  : '';
+const latestPost = journalEntries[0];
+const latestUpdate = latestPost ? formatYearMonth(latestPost.data.pubDate) : '';
 
 // 身份资料未填写时不臆造姓名或职业，改用构建期真实内容数量证明作者正在做什么
 const identityName = site.profile.displayName || '墨笺作者';

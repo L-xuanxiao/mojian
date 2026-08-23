@@ -273,41 +273,27 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
 </style>
 
 <script>
-  import { gsap, prefersReducedMotion } from '../../scripts/scroll';
+  import { gsap, onDesktopViewport } from '../../scripts/scroll';
 
-  if (!prefersReducedMotion) {
-    // 暗室视差与首页其余动效同策略：跨 768 断点时重建或清理，避免移动布局残留位移
-    const desktopQuery = window.matchMedia('(min-width: 768px)');
-    let teardownAll: Array<() => void> = [];
-
-    const setupParallax = () => {
-      document.querySelectorAll<HTMLElement>('[data-gallery-parallax]').forEach((media, index) => {
-        const tween = gsap.fromTo(
-          media,
-          { yPercent: index % 2 === 0 ? 2 : -2 },
-          {
-            yPercent: index % 2 === 0 ? -3 : 3,
-            ease: 'none',
-            scrollTrigger: { trigger: media, start: 'top bottom', end: 'bottom top', scrub: true },
-          },
-        );
-        teardownAll.push(() => {
-          tween.scrollTrigger?.kill();
-          tween.kill();
-          gsap.set(media, { clearProps: 'transform' });
-        });
+  // 暗室视差与首页其余动效同策略：跨 768 断点时重建或清理，避免移动布局残留位移
+  onDesktopViewport(() => {
+    const teardowns: Array<() => void> = [];
+    document.querySelectorAll<HTMLElement>('[data-gallery-parallax]').forEach((media, index) => {
+      const tween = gsap.fromTo(
+        media,
+        { yPercent: index % 2 === 0 ? 2 : -2 },
+        {
+          yPercent: index % 2 === 0 ? -3 : 3,
+          ease: 'none',
+          scrollTrigger: { trigger: media, start: 'top bottom', end: 'bottom top', scrub: true },
+        },
+      );
+      teardowns.push(() => {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+        gsap.set(media, { clearProps: 'transform' });
       });
-    };
-
-    if (desktopQuery.matches) setupParallax();
-
-    desktopQuery.addEventListener('change', (event) => {
-      if (event.matches) {
-        setupParallax();
-      } else {
-        teardownAll.forEach((teardown) => teardown());
-        teardownAll = [];
-      }
     });
-  }
+    return () => teardowns.forEach((teardown) => teardown());
+  });
 </script>

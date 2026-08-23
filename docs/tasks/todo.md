@@ -1,4 +1,26 @@
-# 当前任务：三项动效落地（合卷收束 / 翻页接棒 / 印泥磁吸）
+# 当前任务：code-review 八项审查修复（契约收敛 + 定向去重）
+
+目标：按全项目 code-review（Standards/Spec 双轴 + 架构审计）结论修复用户选定的八项：三档小字回归、journal 取数共享、年月格式化、主题解析共享、断点生命周期与磁吸工具化、navItems 集中、白文方印原语。
+
+- [x] ① Header 小字：0.6→0.62×2、移动 0.5→0.62 / 0.65→0.68；edition 移动端左外扩 0.75rem 容纳内容
+- [x] ② 新建 utils/journal.ts（getJournalPosts + byPubDateDesc），六处取数替换（category/tags 的 getStaticPaths filter 后免再 sort）
+- [x] ③ utils/date.ts 新增 formatYearMonth，替换 CurrentFolio/home Journal 两处手写
+- [x] ④ 新建 scripts/theme.ts（resolveTheme）；Header 主题脚本 is:inline→打包 module（补参数类型），GiscusWall 同步接入
+- [x] ⑤ scroll.ts 新增 onDesktopViewport（命名弃 use 前缀：非 React 环境）；Hero/ScrollJourney/Gallery 三处替换
+- [x] ⑥ scroll.ts 新增 attachSealMagnet；两处磁吸各缩为 1 行调用
+- [x] ⑦ navItems 集中 site.config.ts（href 根路径 + Lucide path），Header 改 import + withBase
+- [x] ⑧ global.css 新增 .seal-block 白文原语；SectionHeading/Hero×2/ScrollJourney/终印四处组合类收敛；DESIGN.md 入册
+- [x] 验证：check/build/format 全绿 + 浏览器八项复测全 PASS
+
+## 结果审查
+
+- 契约回归：页眉三处档外小字收敛后移动端 readout 初测溢出 2.7px/侧（edition 固定 3rem < 0.62rem 内容 53.5px），以移动端 inset 左外扩 0.75rem 修复，复测 53.45px ≤ 72px 容器、单行、零裁剪、零页面溢出。
+- 去重收益：journal 取数六处→1 个共享函数；主题解析两处→1；断点重建三处→onDesktopViewport；磁吸两处→attachSealMagnet；印章共性四处→.seal-block；navItems 出 Header 入 site.config（新增页面少改一处）。
+- 行为差异声明：Header 主题脚本由 is:inline 改为打包 module（defer 执行）——绑定时机略晚但无渲染期时序依赖，且获得类型检查（补了 applyTheme/clearTransition 参数类型）与 bundle 缓存。
+- 验证证据：桌面/移动字号计算值精确命中（9.92/10.88px）；journal 六路由数据回归（列表 3 篇最新在前、archive 分组、分类/标签计数、RSS 3 item、首页期次文案）；主题往返与 aria-pressed 同步；390→1440 断点重建与反向清零；磁吸 ±3px 归零；四处印章背景/字体/display 全中；双视口 console 0/0、零溢出、reveal 零残留。
+- 边界：页眉其余档外值（0.78/0.86/0.88/0.95rem）与 fallbackTitles、shadow-sm/灯箱 blur 契约裁决不在本轮清单，留待后续。
+
+# 上一任务：三项动效落地（合卷收束 / 翻页接棒 / 印泥磁吸）
 
 目标：按动效提案落地解评审遗留痛点的三项——长卷 peak-end 强化、章界接棒、钤印磁吸与移动端落款仪式。
 

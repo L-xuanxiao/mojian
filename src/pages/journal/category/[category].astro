@@ -1,22 +1,20 @@
 ---
 // 分类聚合页：某分类下的全部文章
-import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PageIntro from '../../../components/PageIntro.astro';
 import EntryList from '../../../components/journal/EntryList.astro';
 import { withBase } from '../../../site.config';
+import { getJournalPosts } from '../../../utils/journal';
 
 export const getStaticPaths = (async () => {
-  const posts = await getCollection('journal', ({ data }) => !data.draft);
+  const posts = await getJournalPosts();
   const categories = [...new Set(posts.map((post) => post.data.category))];
   return categories.map((category) => ({
     params: { category },
     props: {
       category,
-      posts: posts
-        .filter((post) => post.data.category === category)
-        .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()),
+      posts: posts.filter((post) => post.data.category === category),
     },
   }));
 }) satisfies GetStaticPaths;

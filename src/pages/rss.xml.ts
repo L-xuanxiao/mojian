@@ -1,13 +1,11 @@
 // RSS 订阅源：/rss.xml，文章发布后自动进入
 import rss from '@astrojs/rss';
-import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
 import { withBase } from '../site.config';
+import { getJournalPosts } from '../utils/journal';
 
 export async function GET(context: APIContext) {
-  const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
-    (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
-  );
+  const posts = await getJournalPosts();
 
   return rss({
     title: '墨笺 · 笺录',

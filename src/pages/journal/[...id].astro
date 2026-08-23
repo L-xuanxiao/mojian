@@ -86,7 +86,7 @@ const stats = readingStats(post.body ?? '');
 
       <footer class="article-ending" data-pagefind-ignore>
         <InscriptionTip text="收笔钤印 · 此篇终" client:idle>
-          <span class="article-ending__seal" aria-hidden="true">终</span>
+          <span class="seal-block article-ending__seal" aria-hidden="true">终</span>
         </InscriptionTip>
         <div>
           <p>此篇至此收笔。全篇约 {stats.words} 字 · 可读 {stats.minutes} 分钟。</p>
@@ -340,14 +340,8 @@ const stats = readingStats(post.body ?? '');
   }
 
   .article-ending__seal {
-    display: inline-flex;
     width: 2.75rem;
     height: 2.75rem;
-    align-items: center;
-    justify-content: center;
-    background: var(--cinnabar);
-    color: var(--paper);
-    font-family: var(--font-ma-shan-zheng);
     transform: rotate(-3deg);
   }
 

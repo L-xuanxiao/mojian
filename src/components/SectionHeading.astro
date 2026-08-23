@@ -30,7 +30,7 @@ const { id, title, index, note, mode = 'quiet' } = Astro.props;
   }
   {
     index && (
-      <span class="index-seal" aria-hidden="true" data-reveal-detail>
+      <span class="seal-block index-seal" aria-hidden="true" data-reveal-detail>
         {index}
       </span>
     )
@@ -85,19 +85,12 @@ const { id, title, index, note, mode = 'quiet' } = Astro.props;
     user-select: none;
   }
 
-  /* 白文小印：朱砂底、纸色字，与标题基线对齐 */
+  /* 白文小印：朱砂底、纸色字，与标题基线对齐；共性走 .seal-block 原语 */
   .index-seal {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     width: clamp(2.6rem, 4.5vw, 3.5rem);
     height: clamp(2.6rem, 4.5vw, 3.5rem);
     border-radius: var(--radius-sm);
-    background: var(--cinnabar);
-    color: var(--paper);
-    font-family: var(--font-ma-shan-zheng);
     font-size: clamp(1.25rem, 2.4vw, 1.85rem);
-    line-height: 1;
     transform: rotate(-2deg);
   }
 

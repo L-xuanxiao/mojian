@@ -585,6 +585,17 @@
     color: var(--bronze);
   }
 
+  /* 白文方印原语：朱砂底纸字、马善政、居中方形；尺寸/旋转/横竖排/印晕由各印章变体补齐 */
+  .seal-block {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--cinnabar);
+    color: var(--paper);
+    font-family: var(--font-ma-shan-zheng);
+    line-height: 1;
+  }
+
   .media-reveal {
     position: relative;
     isolation: isolate;

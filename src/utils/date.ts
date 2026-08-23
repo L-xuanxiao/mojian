@@ -10,3 +10,8 @@ export function formatDateISO(date: Date): string {
   const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
+
+/** 年月格式：2026 年 8 月，用于期次行与「最近更新」 */
+export function formatYearMonth(date: Date): string {
+  return `${date.getFullYear()} 年 ${date.getMonth() + 1} 月`;
+}

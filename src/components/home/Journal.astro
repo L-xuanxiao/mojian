@@ -1,16 +1,15 @@
 ---
-import { getCollection } from 'astro:content';
 import SectionHeading from '../SectionHeading.astro';
 import EntryList from '../journal/EntryList.astro';
 import { withBase } from '../../site.config';
+import { getJournalPosts } from '../../utils/journal';
+import { formatYearMonth } from '../../utils/date';
 
-const posts = (await getCollection('journal', ({ data }) => !data.draft))
-  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
-  .slice(0, 3);
+const posts = (await getJournalPosts()).slice(0, 3);
 
 // 刊物期次：取最近一篇的出版年月
 const latest = posts[0]?.data.pubDate;
-const latestLabel = latest ? `${latest.getFullYear()} 年 ${latest.getMonth() + 1} 月` : '';
+const latestLabel = latest ? formatYearMonth(latest) : '';
 ---
 
 <section

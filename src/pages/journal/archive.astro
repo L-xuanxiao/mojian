@@ -1,14 +1,12 @@
 ---
 // 年谱归档：文章按年份分组，取谱牒编年之意
-import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageIntro from '../../components/PageIntro.astro';
 import EntryList from '../../components/journal/EntryList.astro';
 import { withBase } from '../../site.config';
+import { getJournalPosts } from '../../utils/journal';
 
-const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
-);
+const posts = await getJournalPosts();
 
 // 按年份倒序分组
 const byYear = new Map<number, typeof posts>();

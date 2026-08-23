@@ -1,15 +1,13 @@
 ---
-import { getCollection } from 'astro:content';
 import folioArtwork from '../../assets/art/folio-ink-relief.webp';
 import PageIntro from '../../components/PageIntro.astro';
 import EntryList from '../../components/journal/EntryList.astro';
 import JournalSearch from '../../components/journal/JournalSearch';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { withBase } from '../../site.config';
+import { getJournalPosts } from '../../utils/journal';
 
-const posts = (await getCollection('journal', ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
-);
+const posts = await getJournalPosts();
 ---
 
 <BaseLayout title="笺录 · 墨笺" description="文章与随笔：设计、营造与阅读的记录。">

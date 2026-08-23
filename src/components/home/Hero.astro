@@ -94,14 +94,14 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
             <a class="ink-link" href={withBase('/projects/')}>看器作</a>
           </nav>
           {/* 移动端卷首钤印：竖排 colophon 被收起后，落款仪式移入 statement 卡角 */}
-          <span class="hero__seal hero__seal--inset" aria-hidden="true">墨</span>
+          <span class="seal-block hero__seal hero__seal--inset" aria-hidden="true">墨</span>
         </div>
       </div>
 
       <div class="hero__colophon">
         <span aria-hidden="true">入画</span>
         <InscriptionTip text="卷首钤印 · 墨" client:idle>
-          <span class="hero__seal" data-hero-seal aria-hidden="true">墨</span>
+          <span class="seal-block hero__seal" data-hero-seal aria-hidden="true">墨</span>
         </InscriptionTip>
         <span aria-hidden="true">展卷</span>
       </div>
@@ -415,17 +415,11 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
   }
   .hero__seal {
     position: relative;
-    display: inline-flex;
     width: 2.6rem;
     height: 2.6rem;
-    align-items: center;
-    justify-content: center;
-    background: var(--cinnabar);
     box-shadow:
       0 0 0 0.3rem var(--paper),
       0 0 0 calc(0.3rem + 1px) var(--cinnabar);
-    color: var(--paper);
-    font-family: var(--font-ma-shan-zheng);
     font-size: 1.5rem;
     letter-spacing: 0;
   }
@@ -581,7 +575,6 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
       position: absolute;
       top: -1.15rem;
       right: 0.8rem;
-      display: inline-flex;
       width: 2.2rem;
       height: 2.2rem;
       font-size: 1.15rem;
@@ -630,7 +623,12 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
 </style>
 
 <script>
-  import { gsap, prefersReducedMotion } from '../../scripts/scroll';
+  import {
+    gsap,
+    prefersReducedMotion,
+    onDesktopViewport,
+    attachSealMagnet,
+  } from '../../scripts/scroll';
 
   const hero = document.querySelector<HTMLElement>('[data-hero]');
   if (hero && !prefersReducedMotion) {
@@ -682,15 +680,8 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
         1.45,
       );
 
-    /*
-     * 桌面滚动视差跟随 768 断点重建或清理：
-     * 视口判定只在加载时读一次的话，旋转屏后要么残留移动布局上的 transform，
-     * 要么转桌面后缺少视差；与长卷时间线保持同一救济策略。
-     */
-    const desktopQuery = window.matchMedia('(min-width: 768px)');
-    let teardownHandoff: (() => void) | null = null;
-
-    const setupHandoff = () => {
+    // 桌面滚动视差跟随 768 断点重建或清理：避免旋转屏后残留位移或转桌面后缺少视差
+    onDesktopViewport(() => {
       const handoff = gsap.timeline({
         scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
       });
@@ -701,46 +692,23 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
         handoff.to(layer.element, { yPercent: layer.yPercent, ease: 'none' }, 0),
       );
 
-      teardownHandoff = () => {
+      return () => {
         handoff.scrollTrigger?.kill();
         handoff.kill();
         const parallaxTargets = [sheet, art, paperTitle, ...layers.map((layer) => layer.element)];
         gsap.set(
           parallaxTargets.filter((target): target is HTMLElement => Boolean(target)),
-          { clearProps: 'transform' },
+          {
+            clearProps: 'transform',
+          },
         );
-        teardownHandoff = null;
       };
-    };
-
-    if (desktopQuery.matches) setupHandoff();
-
-    desktopQuery.addEventListener('change', (event) => {
-      if (event.matches) {
-        setupHandoff();
-      } else {
-        teardownHandoff?.();
-      }
     });
 
-    /*
-     * 印泥磁吸：细指针下卷首钤印被指尖轻带、弹性回位（印泥有黏性）。
-     * 与入场动画同由 GSAP 统一管理 transform；触屏不启用。
-     */
-    const sealEl = hero.querySelector<HTMLElement>('[data-hero-seal]');
-    const colophon = hero.querySelector<HTMLElement>('.hero__colophon');
-    if (sealEl && colophon && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      const sealX = gsap.quickTo(sealEl, 'x', { duration: 0.45, ease: 'power3.out' });
-      const sealY = gsap.quickTo(sealEl, 'y', { duration: 0.45, ease: 'power3.out' });
-      colophon.addEventListener('pointermove', (event) => {
-        const rect = colophon.getBoundingClientRect();
-        sealX(gsap.utils.clamp(-3, 3, (event.clientX - (rect.left + rect.width / 2)) * 0.12));
-        sealY(gsap.utils.clamp(-3, 3, (event.clientY - (rect.top + rect.height / 2)) * 0.12));
-      });
-      colophon.addEventListener('pointerleave', () => {
-        sealX(0);
-        sealY(0);
-      });
+    // 印泥磁吸：细指针下卷首钤印被指尖轻带、弹性回位（印泥有黏性）
+    if (seal) {
+      const colophon = hero.querySelector<HTMLElement>('.hero__colophon');
+      if (colophon) attachSealMagnet(seal, colophon);
     }
   }
 </script>

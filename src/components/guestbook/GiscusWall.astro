@@ -106,15 +106,12 @@ const configured = Boolean(giscus.repo && giscus.repoId && giscus.category && gi
 
 <script>
   // giscus 留言墙：运行时注入 client.js，主题跟随站点昼夜（含手动切换）
+  import { resolveTheme } from '../../scripts/theme';
+
   const stage = document.querySelector<HTMLElement>('[data-giscus-wall]');
   if (stage) {
     const GISCUS_ORIGIN = 'https://giscus.app';
     const media = window.matchMedia('(prefers-color-scheme: dark)');
-
-    const resolveTheme = () => {
-      const t = document.documentElement.dataset.theme;
-      return t === 'dark' || t === 'light' ? t : media.matches ? 'dark' : 'light';
-    };
 
     const syncTheme = () => {
       const iframe = stage.querySelector<HTMLIFrameElement>('iframe.giscus-frame');

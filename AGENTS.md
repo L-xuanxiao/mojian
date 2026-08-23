@@ -18,6 +18,19 @@ mojian —— 基于 Astro 7 + React Islands 的个人静态网站（现代东�
 - [依赖管理](docs/agents/dependencies.md) — 新增依赖的判定标准
 - [验证流程](docs/agents/verification.md) — check / build / format 与浏览器验证要求
 - [Git 工作流](docs/agents/git.md) — 提交授权、提交信息规范、禁止操作
-- [Issue tracker](docs/agents/issue-tracker.md) · [Triage 标签](docs/agents/triage-labels.md) · [领域文档](docs/agents/domain.md)
 
 当前开发进度见 [docs/progress.md](docs/progress.md)。
+
+## Agent skills
+
+### Issue tracker
+
+Issues 跟踪于 GitHub Issues（`gh` CLI）。见 `docs/agents/issue-tracker.md`。
+
+### Triage labels
+
+使用五个规范 triage 角色的默认标签名（`needs-triage` / `needs-info` / `ready-for-agent` / `ready-for-human` / `wontfix`）。见 `docs/agents/triage-labels.md`。
+
+### Domain docs
+
+单上下文：根目录 `CONTEXT.md` + `docs/adr/`（尚未创建，待后续补充）。见 `docs/agents/domain.md`。

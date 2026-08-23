@@ -1,22 +1,20 @@
 ---
 // 单标签聚合页：某标签下的全部文章
-import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PageIntro from '../../../components/PageIntro.astro';
 import EntryList from '../../../components/journal/EntryList.astro';
 import { withBase } from '../../../site.config';
+import { getJournalPosts } from '../../../utils/journal';
 
 export const getStaticPaths = (async () => {
-  const posts = await getCollection('journal', ({ data }) => !data.draft);
+  const posts = await getJournalPosts();
   const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
   return tags.map((tag) => ({
     params: { tag },
     props: {
       tag,
-      posts: posts
-        .filter((post) => post.data.tags.includes(tag))
-        .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()),
+      posts: posts.filter((post) => post.data.tags.includes(tag)),
     },
   }));
 }) satisfies GetStaticPaths;

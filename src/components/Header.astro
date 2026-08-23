@@ -3,35 +3,7 @@
  * 导航图标取自 Lucide（项目既有图标库，React 岛屿同款视觉源）。
  * Header 为纯静态展示，按 AGENTS.md 不引入 React，故将图标路径内联为构建期 SVG。
  */
-import { withBase } from '../site.config';
-
-const navItems = [
-  {
-    href: withBase('/journal/'),
-    label: '笺录',
-    icon: '<path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/>',
-  },
-  {
-    href: withBase('/projects/'),
-    label: '器作',
-    icon: '<path d="m12.99 6.74l1.93 3.44M19.136 12a10 10 0 0 1-14.271 0M21 21l-2.16-3.84M3 21l8.02-14.26"/><circle cx="12" cy="5" r="2"/>',
-  },
-  {
-    href: withBase('/gallery/'),
-    label: '光影',
-    icon: '<circle cx="12" cy="12" r="10"/><path d="m14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83m13.79-4l-5.74 9.94"/>',
-  },
-  {
-    href: withBase('/about/'),
-    label: '此间',
-    icon: '<path d="m8 3l4 8l5-5l5 15H2z"/>',
-  },
-  {
-    href: withBase('/guestbook/'),
-    label: '留墨',
-    icon: '<path d="M14.086 18.412A2 2 0 0 1 12.67 19H5v-7.672a2 2 0 0 1 .586-1.414L11.75 3.75a6 6 0 1 1 8.49 8.49zM16 8L2 22m15.488-7H9"/>',
-  },
-];
+import { navItems, withBase } from '../site.config';
 
 const pathname = Astro.url.pathname;
 const isActive = (href: string) => pathname === href || pathname.startsWith(href);
@@ -73,11 +45,12 @@ const isHome = pathname === homePath || pathname === homePath.replace(/\/$/, '')
         <ul class="m-0 flex list-none items-center gap-5 overflow-x-auto p-0 md:gap-8">
           {
             navItems.map((item) => {
-              const active = isActive(item.href);
+              const href = withBase(item.href);
+              const active = isActive(href);
               return (
                 <li class="shrink-0">
                   <a
-                    href={item.href}
+                    href={href}
                     aria-current={active ? 'page' : undefined}
                     class:list={['nav-link', active && 'nav-link--active']}
                   >
@@ -243,7 +216,7 @@ const isHome = pathname === homePath || pathname === homePath.replace(/\/$/, '')
   .brand__latin {
     color: var(--bronze);
     font-family: var(--font-noto-sans);
-    font-size: 0.6rem;
+    font-size: 0.62rem;
     letter-spacing: 0.32em;
   }
 
@@ -254,7 +227,7 @@ const isHome = pathname === homePath || pathname === homePath.replace(/\/$/, '')
     gap: 0.45rem;
     color: var(--ink-soft);
     font-family: var(--font-noto-sans);
-    font-size: 0.6rem;
+    font-size: 0.62rem;
     letter-spacing: 0.1em;
     opacity: 0;
     transform: translate(0.7rem, -50%);
@@ -518,8 +491,9 @@ const isHome = pathname === homePath || pathname === homePath.replace(/\/$/, '')
 
     .site-header[data-home] .brand__edition {
       position: absolute;
-      inset: auto 0 0.32rem;
-      width: 3rem;
+      /* 左向外扩：0.62rem 档位下「序号+章名」约 54px，超出 3rem 刊名区，借页缘内边距容纳 */
+      inset: auto -0.75rem 0.32rem;
+      width: auto;
       height: 0.65rem;
       margin: 0;
       padding: 0;
@@ -528,15 +502,15 @@ const isHome = pathname === homePath || pathname === homePath.replace(/\/$/, '')
 
     .chapter-readout {
       inset: 50% auto auto 50%;
-      max-width: 3rem;
+      max-width: min(4rem, 22vw);
       gap: 0.18rem;
-      font-size: 0.5rem;
+      font-size: 0.62rem;
       letter-spacing: 0;
       transform: translate(0.35rem, -50%);
     }
 
     .chapter-readout__index {
-      font-size: 0.65rem;
+      font-size: 0.68rem;
     }
 
     .site-header[data-home].is-scrolled .chapter-readout {
@@ -610,7 +584,9 @@ const isHome = pathname === homePath || pathname === homePath.replace(/\/$/, '')
   }
 </style>
 
-<script is:inline>
+<script>
+  import { resolveTheme } from '../scripts/theme';
+
   (() => {
     const root = document.documentElement;
     const button = document.getElementById('theme-toggle');
@@ -620,16 +596,11 @@ const isHome = pathname === homePath || pathname === homePath.replace(/\/$/, '')
 
     let transitionId = 0;
 
-    const current = () => {
-      const theme = root.dataset.theme;
-      return theme === 'dark' || theme === 'light' ? theme : media.matches ? 'dark' : 'light';
-    };
+    let requestedTheme = resolveTheme();
 
-    let requestedTheme = current();
+    const sync = () => button.setAttribute('aria-pressed', String(resolveTheme() === 'dark'));
 
-    const sync = () => button.setAttribute('aria-pressed', String(current() === 'dark'));
-
-    const applyTheme = (next) => {
+    const applyTheme = (next: 'dark' | 'light') => {
       root.dataset.theme = next;
       try {
         localStorage.setItem('theme', next);
@@ -639,7 +610,7 @@ const isHome = pathname === homePath || pathname === homePath.replace(/\/$/, '')
       sync();
     };
 
-    const clearTransition = (id) => {
+    const clearTransition = (id: number) => {
       if (id !== transitionId) return;
       root.classList.remove('is-theme-transitioning');
       root.style.removeProperty('--theme-x');
@@ -692,7 +663,7 @@ const isHome = pathname === homePath || pathname === homePath.replace(/\/$/, '')
 
     media.addEventListener('change', () => {
       if (!localStorage.getItem('theme')) {
-        requestedTheme = current();
+        requestedTheme = resolveTheme();
         sync();
       }
     });
