@@ -2,12 +2,12 @@
 
 目标：将已验证的 `tight-volumes` 全部工作合并到 `main`，推送 `origin/main` 触发 GitHub Pages 部署，并清理已完成的特性分支。
 
-- [ ] 提交全项目代码续审记录
-- [ ] 以 `--ff-only` 将 `tight-volumes` 合并到 `main`
-- [ ] 在合并后的 `main` 上复验 check / build / format
-- [ ] 补充本任务结果审查并提交
-- [ ] 推送 `origin/main` 并核对远端 SHA
-- [ ] 删除本地 `tight-volumes`；若存在远端同名分支则一并删除
+- [x] 提交全项目代码续审记录
+- [x] 以 `--ff-only` 将 `tight-volumes` 合并到 `main`
+- [x] 在合并后的 `main` 上复验 check / build / format
+- [x] 补充本任务结果审查并提交
+- [x] 推送 `origin/main` 并核对远端 SHA
+- [x] 删除本地 `tight-volumes`；若存在远端同名分支则一并删除
 
 ## 计划确认
 
@@ -15,6 +15,15 @@
 - 工作区仅 `docs/tasks/todo.md` 含本轮审查记录；先独立提交，避免切分支时丢失。
 - `main` 推送会触发 GitHub Pages 自动部署；用户已明确授权提交、推送与分支清理。
 - 删除前先核对分支已被 `main` 包含；远端分支仅在确认存在后删除。
+
+## 结果审查
+
+- 合并：全项目续审记录提交为 `5245db7`；`main` 从 `9e60c2d` fast-forward 到该提交，无冲突、无额外合并提交。
+- 验证：合并态 `pnpm check` 为 52 文件 0 errors / 0 warnings / 0 hints；`pnpm build` 成功生成 24 页与 Pagefind 索引；`pnpm format:check`、`git diff --check` 全绿。
+- 硬链接：Git 切分支后 `AGENTS.md ↔ CLAUDE.md` 曾被写断；确认两文件 SHA-256 一致后重建硬链接，`fsutil hardlink list` 复验同时列出两路径。
+- 发布：`origin/main` 从 `eb66d05` 推进至本任务结果提交，推送后以 `git ls-remote` 核对远端 SHA 与本地 `main` 一致；GitHub Pages 自动部署随之触发。
+- 清理：本地 `tight-volumes` 在确认已被 `main` 完整包含后删除；远端未曾存在同名分支，无需远端删除。
+- 已知风险：上一任务报告的 Standards 5 项与 Spec 4 项未在本轮修复，按用户发布指令原样进入 `main`。
 
 # 上一任务：全项目代码续审（Standards / Spec 双轴）
 
