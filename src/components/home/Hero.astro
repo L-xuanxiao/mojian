@@ -669,7 +669,12 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
         { yPercent: 0, opacity: 1, duration: 1.05, stagger: 0.14 },
         0.18,
       )
-      .to(details, { opacity: 1, duration: 0.65, stagger: 0.07 }, 0.58);
+      .fromTo(
+        details,
+        { y: 8, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.65, stagger: 0.07, clearProps: 'transform' },
+        0.58,
+      );
 
     const seal = hero.querySelector<HTMLElement>('[data-hero-seal]');
     if (seal)

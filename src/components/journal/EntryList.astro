@@ -200,6 +200,24 @@ const { posts, variant = 'catalog', startIndex = 0 } = Astro.props;
     }
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .entry-list > li::before {
+      opacity: 0;
+      transform: scaleX(1);
+      transition: opacity 150ms var(--ease-ink);
+    }
+
+    .entry-list > li:hover::before,
+    .entry-list > li:focus-within::before {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+
+    .entry-index {
+      transition: color 150ms var(--ease-ink);
+    }
+  }
+
   @media (max-width: 767px) {
     .entry-list--feature article {
       min-height: 0;

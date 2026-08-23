@@ -347,5 +347,15 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft && d
     .project-preview__image :global(img) {
       transition: none;
     }
+
+    .project-preview__image:hover :global(img),
+    .project-preview__item:hover .project-preview__image,
+    .project-preview__item:focus-within .project-preview__image,
+    .project-preview__item:hover .project-preview__folio,
+    .project-preview__item:focus-within .project-preview__folio,
+    .project-preview__item--2:hover .project-preview__folio,
+    .project-preview__item--2:focus-within .project-preview__folio {
+      transform: none;
+    }
   }
 </style>

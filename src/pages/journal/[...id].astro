@@ -476,6 +476,16 @@ const stats = readingStats(post.body ?? '');
     .reading-progress {
       display: none !important;
     }
+
+    .article-header__tags a,
+    .article-header__tags a:hover,
+    .article-related a,
+    .article-related a:hover {
+      transform: none;
+      transition:
+        color 150ms var(--ease-ink),
+        border-color 150ms var(--ease-ink);
+    }
   }
 </style>
 

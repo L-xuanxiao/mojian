@@ -128,6 +128,10 @@
   transition: transform 250ms var(--ease-ink);
 }
 
+.project-carousel.is-instant .project-carousel__progress span {
+  transition: none;
+}
+
 @media (max-width: 767px) {
   .project-carousel__slide {
     flex-basis: 91%;

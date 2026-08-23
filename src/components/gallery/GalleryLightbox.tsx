@@ -169,14 +169,16 @@ export default function GalleryLightbox({ items }: Props) {
               data-gallery-index={itemIndex}
               onClick={(event) => openAt(itemIndex, event.currentTarget)}
             >
-              <img
-                src={item.thumb}
-                alt={item.alt}
-                width={item.width}
-                height={item.height}
-                loading={itemIndex < 2 ? 'eager' : 'lazy'}
-                decoding="async"
-              />
+              <span className="gallery-entry__develop">
+                <img
+                  src={item.thumb}
+                  alt={item.alt}
+                  width={item.width}
+                  height={item.height}
+                  loading={itemIndex < 2 ? 'eager' : 'lazy'}
+                  decoding="async"
+                />
+              </span>
               <span className="gallery-entry__zoom" aria-hidden="true">
                 细看
               </span>

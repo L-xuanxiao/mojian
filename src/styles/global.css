@@ -123,6 +123,11 @@
   navigation: auto;
 }
 
+/* View Transition 快照只负责绘制，不能遮住主题按钮等连续输入。 */
+::view-transition {
+  pointer-events: none;
+}
+
 @layer base {
   html {
     color-scheme: light dark;
@@ -145,7 +150,7 @@
   }
 
   ::view-transition-new(page-reel) {
-    animation: page-in 400ms var(--ease-ink) both;
+    animation: page-in 250ms var(--ease-ink) both;
     transform-origin: left center;
   }
 
@@ -161,7 +166,7 @@
   }
 
   :root.is-theme-transitioning::view-transition-new(root) {
-    animation: theme-paper-reveal 400ms var(--ease-ink) both;
+    animation: theme-paper-reveal 250ms var(--ease-ink) both;
   }
 
   /* 同主题换纸统一收进 root 快照，避免品牌与项目共享元素绕过圆形揭示。 */
@@ -417,18 +422,10 @@
     background: var(--ink-soft);
   }
 
-  /* 全局减少动态：压缩所有动画与过渡时长，退回原生滚动 */
+  /* 低动态只关闭跨页叙事与平滑滚动；组件各自保留轻微颜色/透明度反馈。 */
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
-    }
-
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
     }
 
     ::view-transition-group(*),
@@ -602,6 +599,17 @@
     overflow: hidden;
   }
 
+  .media-reveal::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: var(--ink);
+    opacity: 0;
+    transition: opacity 250ms var(--ease-ink);
+    pointer-events: none;
+  }
+
   .media-reveal::after {
     content: '';
     position: absolute;
@@ -616,9 +624,8 @@
 
   .media-reveal > img,
   .media-reveal picture > img {
-    transition:
-      transform 1100ms var(--ease-ink),
-      filter 500ms var(--ease-ink);
+    filter: none;
+    transition: transform 1100ms var(--ease-ink);
   }
 
   .media-reveal.is-revealed::after {
@@ -656,19 +663,18 @@
     );
   }
 
-  /* 揭示前的覆盖层与暗室同色，否则先看到一块亮纸 */
+  /* 揭示前的覆盖层与暗室同色，否则先看到一块亮纸。 */
+  .darkroom .media-reveal::before,
   .darkroom .media-reveal::after {
     background: #131412;
   }
 
   /*
-   * 显影：暗室内图像自暗处显影。仅 html.js + 允许动效时预置暗态，无 JS / reduced-motion 直达清晰；
-   * 用 :not(.is-revealed) 限定前态，揭示后不再设 filter，避免与 hover 提亮发生优先级冲突。
+   * 显影：暗室内以独立暗层淡出替代图像 filter。无 JS / reduced-motion 直达清晰。
    */
   @media (prefers-reduced-motion: no-preference) {
-    :where(html.js.reveal-ready) .darkroom .media-reveal:not(.is-revealed) > img,
-    :where(html.js.reveal-ready) .darkroom .media-reveal:not(.is-revealed) picture > img {
-      filter: brightness(0.5) contrast(0.86);
+    :where(html.js.reveal-ready) .darkroom .media-reveal:not(.is-revealed)::before {
+      opacity: 0.52;
     }
   }
 
@@ -716,12 +722,18 @@
     z-index: -1;
     border-radius: 50%;
     background: var(--cinnabar);
-    transform: scale(0);
-    transition: transform 400ms var(--ease-ink);
+    opacity: 0;
+    transform: scale(0.95);
+    transition:
+      transform 160ms var(--ease-ink),
+      opacity 160ms var(--ease-ink);
   }
 
   .btn {
-    transition: transform 160ms var(--ease-ink);
+    transition:
+      transform 160ms var(--ease-ink),
+      border-color 150ms var(--ease-ink),
+      color 150ms var(--ease-ink);
   }
 
   .btn:active {
@@ -737,6 +749,7 @@
   /* 触屏无真正悬停，transform 类 hover 仅在桌面细指针启用 */
   @media (hover: hover) and (pointer: fine) {
     .btn:hover::before {
+      opacity: 1;
       transform: scale(1);
     }
 
@@ -765,7 +778,7 @@
     background: currentColor;
     transform: scaleX(0);
     transform-origin: left center;
-    transition: transform 400ms var(--ease-ink);
+    transition: transform 250ms var(--ease-ink);
   }
 
   /* 次按钮：透明底、墨字、1px 墨线，hover 同步晕墨 */
@@ -782,6 +795,71 @@
   .btn--ghost:hover {
     border-color: var(--ink);
     color: var(--paper);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .media-reveal::before,
+    .media-reveal::after,
+    .media-reveal > img,
+    .media-reveal picture > img {
+      transition: none;
+    }
+
+    .media-reveal::before {
+      opacity: 0;
+    }
+
+    .media-reveal > img,
+    .media-reveal picture > img {
+      filter: none;
+      transform: none;
+    }
+
+    .btn {
+      transform: none;
+      transition:
+        border-color 150ms var(--ease-ink),
+        color 150ms var(--ease-ink);
+    }
+
+    .btn:active {
+      transform: none;
+    }
+
+    .btn::before {
+      opacity: 0;
+      transform: scale(1);
+      transition: opacity 150ms var(--ease-ink);
+    }
+
+    .btn:hover::before {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .ink-link::after {
+      opacity: 0;
+      transform: scaleX(1);
+      transition: opacity 150ms var(--ease-ink);
+    }
+
+    .ink-link:hover::after {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+
+    .page-backlink:hover::before {
+      transform: none;
+    }
+
+    .inscription-tip__popup {
+      transition: opacity 160ms var(--ease-ink);
+    }
+
+    .inscription-tip__popup[data-starting-style],
+    .inscription-tip__popup[data-ending-style] {
+      transform: none;
+    }
   }
 
   /* 检索结果高亮词：朱砂淡底，与行内码同材质 */

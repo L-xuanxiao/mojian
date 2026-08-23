@@ -31,3 +31,4 @@
 - 三项动效落地：✅ 完成（合卷收束 mount clip-path、`folio-turn` 翻页接棒变体、印泥磁吸 quickTo ±3px、移动端 statement 卡角钤印，`5739089`）
 - code-review 八项修复：✅ 完成（三档小字定向回归、journal / 日期 / 主题 / 断点 / 磁吸共享、navItems 集中、白文方印原语，`43f34d8`）
 - 全项目代码续审：✅ 完成（Standards 5 项、Spec 4 项；本轮仅报告未修复，详见 `docs/tasks/todo.md`）
+- 动效专项九项修复：✅ 完成（轮播/主题键盘即时响应，页面与主题换纸 ≤250ms，页眉仅写标记 `translate3d`，按钮 160ms 轻落，图片遮罩显影替代 filter，全站 reduced-motion 逐项温和降级；设计契约与本地 sidecar 已同步）

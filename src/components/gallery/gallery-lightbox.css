@@ -83,29 +83,44 @@
   box-shadow: 0 18px 48px rgb(0 0 0 / 0.42);
 }
 
-.gallery-entry__image img {
+.gallery-entry__develop {
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
+.gallery-entry__develop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #131412;
+  opacity: 0;
+  transition: opacity 250ms var(--ease-ink);
+  pointer-events: none;
+}
+
+.gallery-entry__develop img {
   display: block;
   width: 100%;
   aspect-ratio: 3 / 2;
+  filter: none;
   object-fit: cover;
-  transition:
-    transform 250ms var(--ease-ink),
-    filter 500ms var(--ease-ink);
+  transition: transform 250ms var(--ease-ink);
 }
 
-.gallery-entry--portrait .gallery-entry__image img {
+.gallery-entry--portrait .gallery-entry__develop img {
   aspect-ratio: 4 / 5;
 }
 
-.gallery-entry--wide .gallery-entry__image img {
+.gallery-entry--wide .gallery-entry__develop img {
   aspect-ratio: 16 / 7;
 }
 
-/* 显影：有 JS 且允许动效时画面预置暗态，入视口后组件加 .is-developed 渐次显影；
-   无 JS / reduced-motion 直达清晰；:not() 限定前态，揭示后 hover 提亮不受优先级干扰 */
+/* 显影：独立暗层淡出，不动画图像 filter；无 JS / reduced-motion 直达清晰。 */
 @media (prefers-reduced-motion: no-preference) {
-  html.js .gallery-entry:not(.is-developed) .gallery-entry__image img {
-    filter: brightness(0.45) contrast(0.82);
+  html.js .gallery-entry:not(.is-developed) .gallery-entry__develop::after {
+    opacity: 0.55;
   }
 }
 
@@ -116,7 +131,7 @@
   }
 
   /* 揭帘：画面微亮微显，如掀开覆画薄纱 */
-  .gallery-entry__image:hover img {
+  .gallery-entry__image:hover .gallery-entry__develop img {
     transform: scale(1.035);
   }
 
@@ -130,6 +145,7 @@
   position: absolute;
   right: 0.8rem;
   bottom: 0.8rem;
+  z-index: 2;
   display: inline-flex;
   width: 2.5rem;
   height: 2.5rem;
@@ -327,12 +343,40 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gallery-entry {
+  .gallery-entry,
+  .gallery-entry:hover,
+  .gallery-entry:focus-within {
+    transform: none;
     transition: none;
   }
 
-  .gallery-entry__image img {
+  .gallery-entry__develop::after,
+  .gallery-entry__develop img {
     transition: none;
+  }
+
+  .gallery-entry__develop::after {
+    opacity: 0;
+  }
+
+  .gallery-entry__develop img,
+  .gallery-entry__image:hover .gallery-entry__develop img {
+    filter: none;
+    transform: none;
+  }
+
+  .gallery-entry__zoom,
+  .gallery-entry__image:hover .gallery-entry__zoom,
+  .gallery-entry__image:focus-visible .gallery-entry__zoom {
+    transform: none;
+    transition: opacity 150ms var(--ease-ink);
+  }
+
+  .darkroom .gallery-entry figcaption > div > p,
+  .darkroom .gallery-entry:hover figcaption > div > p,
+  .darkroom .gallery-entry:focus-within figcaption > div > p {
+    transform: none;
+    transition: opacity 150ms var(--ease-ink);
   }
 
   ::view-transition-group(gallery-photo) {

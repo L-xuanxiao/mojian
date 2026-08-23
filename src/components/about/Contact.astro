@@ -258,4 +258,14 @@ const endpoint = site.formspree.endpoint;
       transform: none;
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .contact__submit,
+    .contact__submit:active {
+      transform: none;
+      transition:
+        background-color 150ms var(--ease-ink),
+        color 150ms var(--ease-ink);
+    }
+  }
 </style>

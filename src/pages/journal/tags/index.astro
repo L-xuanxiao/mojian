@@ -79,6 +79,14 @@ const tags = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeComp
     }
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .tag-index a,
+    .tag-index a:hover {
+      transform: none;
+      transition: color 150ms var(--ease-ink);
+    }
+  }
+
   .tag-index__number {
     color: color-mix(in oklab, var(--cinnabar) 48%, transparent);
     font-family: var(--font-ma-shan-zheng);

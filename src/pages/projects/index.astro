@@ -286,8 +286,31 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .project-index__media,
+    .project-index__item:hover .project-index__media,
+    .project-index__item:focus-within .project-index__media,
+    .project-index__media:hover :global(img) {
+      transform: none;
+      transition:
+        color 150ms var(--ease-ink),
+        box-shadow 150ms var(--ease-ink);
+    }
+
     .project-index__media :global(img) {
+      transform: none;
       transition: none;
+    }
+
+    .project-index__label::after {
+      opacity: 0;
+      transform: scaleX(1);
+      transition: opacity 150ms var(--ease-ink);
+    }
+
+    .project-index__item:hover .project-index__label::after,
+    .project-index__item:focus-within .project-index__label::after {
+      opacity: 1;
+      transform: scaleX(1);
     }
   }
 </style>

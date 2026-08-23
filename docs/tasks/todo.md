@@ -1,4 +1,76 @@
-# 当前任务：合并 `tight-volumes` 到 `main` 并发布
+# 当前任务：动效专项九项修复
+
+目标：落实已确认的动效专项修复方案，使键盘交互即时、高频反馈不超过 250ms、滚动只更新合成属性、图片不动画 `filter`，并将 reduced-motion 从全局清零改为逐项温和降级；不新增依赖、公开接口或共享抽象，不提交、不推送。
+
+- [x] 核对审查证据、调用路径、索引覆盖与设计契约冲突
+- [x] 修复轮播键盘导航、主题切换、页眉卷尺与 Hero 细节入场
+- [x] 收敛页面/链接/按钮时长并以遮罩替代图片 filter 显影
+- [x] 将 reduced-motion 改为逐项静止与轻反馈
+- [x] 同步 `DESIGN.md`、`.impeccable/design.json` 与 `docs/progress.md`
+- [x] 完成格式、类型、构建、差异及真实浏览器验收
+- [x] 补充结果审查，确认工作区仅含本轮与既有审查记录
+
+## 计划确认
+
+- 输入来源：轮播方向键与按钮 Enter/Space 即时切换，指针/触摸维持 250ms；主题按钮键盘/辅助技术即时切换，指针保留 250ms 圆形换纸。
+- 合成约束：页眉滚动只写标记自身 `translate3d`，非首页桌面刊号固定占位；Hero 次要信息从 8px 纵向来源归位。
+- 显影约束：按钮从 `scale(.95) + opacity: 0` 起步；通用媒体和画廊以 250ms 暗层遮罩替代 `filter` 过渡，最终图像固定 `filter: none`。
+- 低动态约束：删除全局 0.01ms 清零，仅禁用位移、缩放、裁切、滚动叙事和 View Transition；颜色、边框、透明度可保留至多 160ms。
+- 验证覆盖：`1707×735 @ DPR1.5`、`390×844`、明暗主题与 reduced-motion；静态执行 format / check / build / diff 四项，不提交、不推送。
+
+## 结果审查
+
+### 实施结果
+
+- 轮播按输入来源统一导航：方向键及按钮 Enter/Space 同帧关闭 Embla、Motion 与进度条过渡，指针/触摸仍保留平滑移动；reduced-motion 下所有幻灯片完整显示并即时切换。
+- 主题键盘/辅助技术激活不再启动 View Transition；指针换纸与页面进入均收至 250ms。补充快照层指针穿透和印钮坐标续接，真实 25ms 间隔三连点可全部接收，最终主题、类名与 CSS 变量正确收口。
+- 页眉删除父级 `--chapter-offset` 与桌面刊号布局折叠，滚动帧只写朱砂标记自身 `translate3d`；Hero 次要信息从 8px 纵向来源归位，完成后清理行内 transform。
+- 按钮墨层改为 `.95 + opacity 0` 到 `1 + opacity 1` 的 160ms 轻落；通用媒体与画廊均以 250ms 独立暗层显影，图像固定 `filter: none`，缩放提示位于遮罩之上。
+- 删除全局 0.01ms 清零，并补齐原先依赖该兜底的页眉、联系、笺录条目/标签/正文、器作列表与首页展墙路径：空间移动停用，颜色、边框、阴影或透明度反馈限制在 150–160ms。
+
+### 验证证据
+
+- 静态：`pnpm format:check` 全绿；`pnpm check` 为 52 files、0 errors / 0 warnings / 0 hints；`pnpm build` 成功生成 24 页、99 个优化图像与 3 页 Pagefind 索引；`git diff --check` 与 sidecar JSON 解析通过。
+- 桌面（Playwright，`1707×735 @ DPR1.5`）：Hero 初态实测 `translateY(8px)` / opacity 0，终态 transform none / opacity 1；页面与主题均 250ms；轮播两种键盘入口轨道前后 90ms 矩阵不变且 figure / progress 动画数为 0，指针入口连续变换；页眉父级变量为空、标记自身矩阵连续更新、非首页刊号宽 120px 且无布局 transition / 重叠。
+- 主题与显影：键盘换主题 View Transition 调用数 0；指针换纸期间时长 250ms；25ms 间隔三连点调用数 3，最后请求生效且无残留。按钮伪层 `.95→1` / `0→1` 于 160ms 收口；通用暗层 `.52→0`、画廊暗层 `.55→0` 于 250ms 收口，图像 transition-property 仅 transform、filter 为 none。
+- 低动态：View Transition 关闭、滚动为 auto、朱砂卷尺标记隐藏但章名继续更新；Hero 内容全显；轮播、画廊与图片无空间动画；按钮仍保留 150ms opacity 反馈，body 不存在 0.01ms 全局覆盖。
+- 移动（Playwright，`390×844 @ DPR1.5`，粗指针 / 无 hover）：首页、光影、器作详情逐屏即时滚动后 reveal 隐藏数均为 0，三页无横向溢出；非首页刊号保持隐藏，轮播按钮均为 44×44px。
+- 控制台 0 errors / 0 warnings；独立浏览器已关闭，preview PID 24996 已停止，4321 端口确认拒连。
+
+### 边界
+
+- `.impeccable/design.json` 已同步本轮动效契约但位于 `.gitignore` 的 `.impeccable/` 内，仅作为本地 sidecar；其余 17 个跟踪文件均属于本轮实现、契约/进度同步及此前已存在于同一 `todo.md` 的审查记录。
+- 未新增依赖、公开 API 或共享抽象；未提交、未推送、未部署。
+
+# 当前任务：全项目代码与动效专项审查
+
+目标：以当前 `main`（`85fda21`）的完整源码树为审查对象，同时执行 Standards / Spec 双轴代码审查与 Emil 动效专项审查；只报告并记录可复核问题，不修改业务代码、不提交、不推送。
+
+- [x] 固定完整源码树快照、规范/规格来源与图谱覆盖边界
+- [x] 并行完成 Standards 与 Spec 双轴审查
+- [x] 盘点全项目动画入口并按动效十项硬标准审查
+- [x] 逐项复核代码证据、严重度与建议修复方向
+- [x] 汇总代码审查双轴报告、动效 Findings 表与明确 Verdict
+- [x] 补充结果审查，确认工作区仅含本轮文档记录
+
+## 计划确认
+
+- 用户要求审查“项目代码”而非某个未合并分支；当前 `main...origin/main` 为空，因此以空树 `4b825dc` 到 `HEAD 85fda21` 的当前完整源码快照为等价审查范围，源码命令固定为 `git diff 4b825dc642cb6eb9a060e54bf8d69288fbee4904 HEAD -- src`。
+- Spec 以 `PRODUCT.md`、`docs/mojian_plan.md`、`DESIGN.md` 与 `docs/progress.md` 的已实现契约为主；Standards 以 `AGENTS.md`、`docs/agents/` 相关约定、`DESIGN.md` 与 Fowler 异味基线为主。
+- 动效审查覆盖 CSS transition / animation / keyframes、GSAP / ScrollTrigger、Motion、Canvas 动画、View Transitions 与 hover / reduced-motion 分支；精确时长和曲线以 `$review-animations` 的 `STANDARDS.md` 为准。
+- 代码图谱采用 Tier 2；结构发现优先图谱，字符串/CSS/配置检索回退源码；所有最终引用路径统一检查索引覆盖，缺口直接读取源码。
+- 本轮只审查和记录，不执行修复，也不提交或推送；发现待用户选择后另开修复任务。
+
+## 结果审查
+
+- Standards：6 项——5 项硬违例、1 项判断项；新增的最高风险为 Pagefind 首次输入不重跑/并发结果倒灌，以及 GalleryLightbox 在不支持 IntersectionObserver 时永久压暗；既有三档小字、shadow-sm/第二处玻璃、GSAP 职责越界与 Header fallback 仍成立。
+- Spec：6 项——搜索可用性与无 JS 项目轮播内容不可达为 P1；全站加载/越界使用 GSAP、三档小字、结构阴影与灯箱第二处玻璃为 P2/P3。真实资料、giscus/Formspree 等明确待配置项已排除。
+- 动效专项：9 项，Verdict 为 Block；硬阻断包括键盘切轮播仍平滑移动、键盘切主题仍播放 400ms 换纸、按钮从 `scale(0)` 晕出、页眉通过父级 CSS 变量驱动子节点且动画 width/margin/padding、图片 filter 过渡。另报告 400ms 全页导航、Hero 次要信息纯淡入与全局 0.01ms reduced-motion 清零策略。
+- 契约冲突：按钮 `scale(0→1)` / 400ms、页面与主题换纸 400ms、低动态整体静止均为当前 `DESIGN.md` 明文；它们符合项目契约但不通过 `$review-animations` 的 Emil 高工艺标准，修复时必须同步裁决设计契约，不能只改 CSS。
+- 图谱与源码：Tier 2，当前索引 545 节点 / 799 边、0 skipped / 0 parse-partial；`src` 范围唯一缺口为 15 个 WebP 二进制资产。精确路径覆盖仍返回 `metadata_changed`，因此所有最终结论均以当前源码逐行复核为准。
+- 边界：本轮未修改业务代码、未做浏览器慢放主观评判；仅记录可由静态代码证明的问题。工作区预期只包含 `docs/tasks/todo.md` 本轮审查记录，不提交、不推送。
+
+# 上一任务：合并 `tight-volumes` 到 `main` 并发布
 
 目标：将已验证的 `tight-volumes` 全部工作合并到 `main`，推送 `origin/main` 触发 GitHub Pages 部署，并清理已完成的特性分支。
 

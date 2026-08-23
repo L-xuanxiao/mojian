@@ -266,7 +266,10 @@ const works = (await getCollection('gallery', ({ data }) => !data.draft && data.
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .gallery-preview__image :global(img) {
+    .gallery-preview__image :global(img),
+    .gallery-preview__image:hover :global(img),
+    .gallery-preview__item--1 .gallery-preview__image:hover :global(img) {
+      transform: none;
       transition: none;
     }
   }
