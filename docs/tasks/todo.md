@@ -1,3 +1,42 @@
+# 当前任务：全项目代码质量五项修复
+
+目标：以内部脚本模块化收敛 Header / Hero 职责，修复灯箱快速切换与 Storage 异常，并以 Playwright 回归测试作为 GitHub Pages 部署门禁；不改变视觉、内容、路由或公开接口，不提交、不推送。
+
+- [x] 以一次性幻灯片身份修复灯箱快速切换重复曝光
+- [x] 抽离 `initHeaderInteractions()` 与 `initThemeToggle()`，消除收起定时器和 Storage 裸访问
+- [x] 抽离 `initHeroMotion()`，保持会话开场、主动跳过与卷首交棒不变
+- [x] 新增 Playwright 关键交互测试与 GitHub Actions quality 门禁
+- [x] 同步设计、验证、进度、命令文档与本地 sidecar
+- [x] 完成静态、自动化、真实视口验收和结果审查
+
+## 计划确认
+
+- 模块边界：`Header.astro`、`Hero.astro` 继续拥有原有 HTML / SVG / scoped CSS；只把客户端交互分别迁入 `src/scripts/header-interactions.ts`、`src/scripts/theme.ts` 与 `src/scripts/hero-motion.ts`，不新增展示组件或通用管理器。
+- 灯箱：用 `openingSlideSrc` 锁定首次打开的底片包装层，560ms 或关闭时清理；相邻页切换不得继承翻底片与曝光动画。
+- 安全边界：首屏主题恢复和运行时主题读写均容忍 Storage 抛错，仍建立 `js/reveal-ready` 并允许主题即时切换。
+- 自动化：根级 Playwright 配置与一个关键交互测试集覆盖灯箱快速切换、移动卷目、Storage 禁用、Hero 首访 / 回访 / 跳过 / reduced-motion；CI 先执行 format、check、E2E，成功后才允许 Pages build。
+- 验证：运行 `pnpm format:check`、`pnpm check`、`pnpm build`、`pnpm test`、`git diff --check`，并复核 `1707×735 @ DPR1.5`、`390×844 @ DPR1.5` 与 320px；结束后停止预览并确认端口无监听。
+
+## 结果审查
+
+### 实施结果
+
+- 灯箱以 `openingSlideSrc` 锁定首次打开的底片包装层，560ms 或关闭时清理；CSS 入场类直接落在匹配包装层。30ms 快速切换后，新当前页实测无 `negative-turn`、`negative-exposure` 或入场类，图片保持 `filter: none`。
+- `Header.astro` 从 1078 行降至 824 行：移动卷目与首页章节进度迁入 `initHeaderInteractions()`，收起以 `animationend / animationcancel` 收口并删除 110ms JS 定时器；主题交互迁入 `initThemeToggle()`，所有运行时 Storage 读写均走安全边界。
+- `Hero.astro` 从 986 行降至 756 行：会话级 full / light / short 开场、用户输入跳过、桌面滚动交棒与印章磁吸原样迁入 `initHeroMotion()`；HTML、SVG、scoped CSS、session key 和低动态静态终态保持不变。
+- 新增根级 Playwright 配置与 4 项关键交互回归；GitHub Actions 增加 `quality` job，完成依赖、Chromium、format、check 与 E2E 后，Pages `build` 才可启动。报告与测试产物已忽略，命令和验证文档已同步。
+- 生产回归同时捕获并修复了画廊 reveal 在 React 岛 hydration 前写入 class / style 的竞态：现在等待 `astro:hydrate` 后再启动观察器，服务端与客户端共享确定性的 `--reveal-order`，避免灯箱因 hydration mismatch 失效。
+- `pnpm test` 通过最小编排脚本启动生产预览，并在成功、失败和异常路径统一停止服务；移动卷目同帧重开再收起时会取消旧 CSS 时间线，仍仅由 `animationend / animationcancel` 完成收口。
+
+### 验证证据
+
+- 静态：`pnpm format:check` 全绿；`pnpm check` 为 57 files、0 errors / 0 warnings / 0 hints；`pnpm build` 成功生成 24 页、99 个优化图像与 3 页 Pagefind 索引；`git diff --check` 通过。
+- 自动化：`pnpm test` 的灯箱快切、Storage 禁用、移动卷目、Hero 首访 / 回访 / 跳过 / reduced-motion 共 4 项全绿；移动入口实测六项均 48px 高，快速撤销关闭、同帧重开再外点关闭和跨 640px 断点均无残留状态，测试结束后生产预览自动停止。
+- 生产预览 `1707×735 @ DPR1.5`：Hero 新会话为 full，200ms 内滚轮可立即到完整终态，刷新为 short；标题 opacity 1、无横向溢出。灯箱 30ms 切图后新页动画名均为 none。
+- 生产预览 `390×844 @ DPR1.5` 与 320px：Enter / Space、Escape 回焦、外点关闭和断点清理通过；六项完整、最小高度 48px，320px 无横向溢出。Storage 全部拒绝时 0 page errors，主题仍由 false 切为 true 并即时落到 dark。
+- reduced-motion 下 Hero 不建立 intro 中间态，题名完整可见；灯箱无位移或曝光且图片 `filter: none`。无 JS 下 Hero、题名、六个卷目入口及六幅画廊图均可见；生产会话控制台 0 errors / 0 warnings。
+- `AGENTS.md / CLAUDE.md` 硬链接已重建并由 `fsutil hardlink list` 验证。隔离浏览器已关闭，dev / preview 已停止，4321 与 4322 均确认拒连；本轮未提交、未推送。
+
 # 当前任务：移动端“卷目”二级菜单
 
 目标：将 `<640px` 的横滑主导航改为“当前栏目 + 卷目下拉”，在页眉下方悬浮展开 2×3 纸笺菜单；桌面六项导航、首页卷尺进度与既有路由保持不变，不提交、不推送。

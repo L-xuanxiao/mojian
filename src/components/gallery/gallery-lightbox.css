@@ -294,11 +294,11 @@
   object-fit: contain;
 }
 
-.ink-lightbox--negative-enter .yarl__slide_current .ink-lightbox__negative {
+.ink-lightbox__negative--enter {
   animation: negative-turn 520ms var(--ease-ink) both;
 }
 
-.ink-lightbox--negative-enter .yarl__slide_current .ink-lightbox__negative::after {
+.ink-lightbox__negative--enter::after {
   animation: negative-exposure 360ms var(--ease-ink) both;
 }
 
@@ -467,8 +467,8 @@
     animation: none;
   }
 
-  .ink-lightbox--negative-enter .yarl__slide_current .ink-lightbox__negative,
-  .ink-lightbox--negative-enter .yarl__slide_current .ink-lightbox__negative::after {
+  .ink-lightbox__negative--enter,
+  .ink-lightbox__negative--enter::after {
     animation: none;
   }
 

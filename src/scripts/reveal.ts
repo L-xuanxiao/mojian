@@ -11,6 +11,23 @@ const reveal = (element: HTMLElement) => {
   }
 };
 
+const afterHydration = (element: HTMLElement, action: () => void) => {
+  const island = element.closest<HTMLElement>('astro-island');
+  if (!island) {
+    action();
+    return;
+  }
+
+  const runAfterPaint = () => requestAnimationFrame(() => requestAnimationFrame(action));
+  if (island.hasAttribute('ssr')) {
+    // React 岛屿水合前不能写入其 SSR 标记，否则客户端首帧会出现属性不一致。
+    island.addEventListener('astro:hydrate', runAfterPaint, { once: true });
+  } else {
+    // Astro 移除 ssr 属性后 React 仍可能在提交首帧；再等两帧再写揭示样式。
+    runAfterPaint();
+  }
+};
+
 const targets = Array.from(
   document.querySelectorAll<HTMLElement>(
     '[data-page-intro], [data-reveal-variant="folio"], [data-reveal-variant="folio-turn"], [data-reveal-title], [data-reveal-line], [data-reveal-group], .media-reveal',
@@ -24,13 +41,15 @@ const targets = Array.from(
 });
 
 document.querySelectorAll<HTMLElement>('[data-reveal-group]').forEach((group) => {
-  Array.from(group.children).forEach((item, index) => {
-    if (item instanceof HTMLElement) item.style.setProperty('--reveal-order', String(index));
+  afterHydration(group, () => {
+    Array.from(group.children).forEach((item, index) => {
+      if (item instanceof HTMLElement) item.style.setProperty('--reveal-order', String(index));
+    });
   });
 });
 
 if (reducedMotion || !('IntersectionObserver' in window)) {
-  targets.forEach(reveal);
+  targets.forEach((target) => afterHydration(target, () => reveal(target)));
   root.classList.remove('reveal-ready');
 } else {
   const observer = new IntersectionObserver(
@@ -44,7 +63,7 @@ if (reducedMotion || !('IntersectionObserver' in window)) {
     { rootMargin: '0px 0px -10% 0px', threshold: 0.06 },
   );
 
-  targets.forEach((target) => observer.observe(target));
+  targets.forEach((target) => afterHydration(target, () => observer.observe(target)));
 
   // 只有观察器成功建立后才取消失败兜底；reveal-ready 保留，供未入视口元素维持初态。
   window.clearTimeout(

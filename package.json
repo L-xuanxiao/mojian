@@ -9,8 +9,10 @@
     "dev": "astro dev",
     "check": "astro check",
     "build": "astro build && pagefind --site dist",
-    "format": "prettier --write \"src/**/*.{astro,ts,tsx,css,md,mdx}\" \"*.{json,mjs,md,yaml,yml}\"",
-    "format:check": "prettier --check \"src/**/*.{astro,ts,tsx,css,md,mdx}\" \"*.{json,mjs,md,yaml,yml}\"",
+    "test": "pnpm test:e2e",
+    "test:e2e": "astro build && node scripts/run-e2e.mjs",
+    "format": "prettier --write \"src/**/*.{astro,ts,tsx,css,md,mdx}\" \"scripts/**/*.{mjs,ts}\" \"tests/**/*.{ts,tsx}\" \"*.{json,mjs,md,ts,yaml,yml}\"",
+    "format:check": "prettier --check \"src/**/*.{astro,ts,tsx,css,md,mdx}\" \"scripts/**/*.{mjs,ts}\" \"tests/**/*.{ts,tsx}\" \"*.{json,mjs,md,ts,yaml,yml}\"",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -35,6 +37,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@playwright/test": "^1.62.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "pagefind": "^1.5.2",

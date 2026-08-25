@@ -34,9 +34,13 @@ const {
     <meta charset="utf-8" />
     <script is:inline>
       // 防 FOUC：渲染前恢复手动选择的主题；无存储时不设属性，交给媒体查询
-      const theme = localStorage.getItem('theme');
-      if (theme === 'light' || theme === 'dark') {
-        document.documentElement.dataset.theme = theme;
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'light' || theme === 'dark') {
+          document.documentElement.dataset.theme = theme;
+        }
+      } catch {
+        // 隐私模式等环境可能禁用存储；首屏仍须继续建立 JS 与揭示终态。
       }
       // 防揭示闪烁：reveal-ready 只门控普通入场；模块异常时超时解除，避免内容永久隐藏。
       document.documentElement.classList.add('js', 'reveal-ready');

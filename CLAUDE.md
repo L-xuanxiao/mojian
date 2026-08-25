@@ -5,7 +5,8 @@ mojian —— 基于 Astro 7 + React Islands 的个人静态网站（现代东�
 ## 关键事实
 
 - 包管理器：**pnpm**（Node >= 22.12）
-- 命令：`pnpm dev` 开发 / `pnpm check` 类型检查 / `pnpm build` 构建（含 pagefind 索引）/ `pnpm format`、`pnpm format:check` 格式化
+- 命令：`pnpm dev` 开发 / `pnpm check` 类型检查 / `pnpm test` 浏览器回归 / `pnpm build` 构建（含 pagefind 索引）/ `pnpm format`、`pnpm format:check` 格式化
+- 部署门禁：GitHub Pages 的 `build` 必须等待 `quality` 完成 format、check 与 Playwright E2E；不要绕过该依赖。
 - 部署 base 为 `/mojian`：站内手写的根路径链接必须经 `src/site.config.ts` 的 `withBase()` 拼接；Astro 资产管线（Image/getImage/字体）已自动携带 base，勿重复拼接
 - 沟通：回复以"喵内が"开头，使用中文，简洁说明结果、验证和必要风险
 - 优先级：用户当前要求 > 项目实际代码、配置与约定 > 本文件 > 规划文档（`docs/mojian_plan.md` 是路线图，不代表能力已实现）

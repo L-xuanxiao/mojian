@@ -47,7 +47,7 @@ export default function GalleryLightbox({ items }: Props) {
     typeof document !== 'undefined' && typeof document.startViewTransition === 'function';
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
-  const [negativeOpening, setNegativeOpening] = useState(false);
+  const [openingSlideSrc, setOpeningSlideSrc] = useState<string | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const gridRef = useRef<HTMLElement | null>(null);
   const transitionTargetRef = useRef<HTMLImageElement | null>(null);
@@ -62,10 +62,10 @@ export default function GalleryLightbox({ items }: Props) {
   }, [open]);
 
   useEffect(() => {
-    if (!negativeOpening) return;
-    const cleanupTimer = window.setTimeout(() => setNegativeOpening(false), 560);
+    if (!openingSlideSrc) return;
+    const cleanupTimer = window.setTimeout(() => setOpeningSlideSrc(null), 560);
     return () => window.clearTimeout(cleanupTimer);
-  }, [negativeOpening]);
+  }, [openingSlideSrc]);
 
   // 显影：入视口的画面渐次加 .is-developed（暗态预置在 gallery-lightbox.css，仅 html.js + no-preference 生效）
   useEffect(() => {
@@ -152,7 +152,7 @@ export default function GalleryLightbox({ items }: Props) {
       gridImageAt(nextIndex),
       () => {
         setIndex(nextIndex);
-        setNegativeOpening(!reducedMotion);
+        setOpeningSlideSrc(reducedMotion ? null : (items[nextIndex]?.src ?? null));
         setOpen(true);
       },
       () => document.querySelector<HTMLImageElement>('.ink-lightbox .yarl__slide_image'),
@@ -163,7 +163,7 @@ export default function GalleryLightbox({ items }: Props) {
     transitionBetween(
       document.querySelector<HTMLImageElement>('.ink-lightbox .yarl__slide_image'),
       () => {
-        setNegativeOpening(false);
+        setOpeningSlideSrc(null);
         setOpen(false);
       },
       () => gridImageAt(index),
@@ -184,6 +184,7 @@ export default function GalleryLightbox({ items }: Props) {
             className={`gallery-entry gallery-entry--${item.orientation}`}
             key={item.id}
             data-ink-avoid
+            style={{ '--reveal-order': itemIndex } as CSSProperties}
           >
             <span className="gallery-entry__number" aria-hidden="true">
               {String(itemIndex + 1).padStart(2, '0')}
@@ -226,7 +227,7 @@ export default function GalleryLightbox({ items }: Props) {
       </section>
 
       <Lightbox
-        className={`ink-lightbox${negativeOpening ? ' ink-lightbox--negative-enter' : ''}`}
+        className="ink-lightbox"
         open={open}
         close={closeLightbox}
         index={index}
@@ -249,7 +250,10 @@ export default function GalleryLightbox({ items }: Props) {
           iconNext: () => <ChevronRight aria-hidden="true" strokeWidth={1.5} />,
           iconClose: () => <X aria-hidden="true" strokeWidth={1.5} />,
           slideContainer: ({ slide, children }) => (
-            <div className="ink-lightbox__negative" style={negativeFrameStyle(slide)}>
+            <div
+              className={`ink-lightbox__negative${slide.src === openingSlideSrc ? ' ink-lightbox__negative--enter' : ''}`}
+              style={negativeFrameStyle(slide)}
+            >
               {children}
             </div>
           ),
