@@ -73,7 +73,7 @@ const glyphArtwork = artwork
       {glyph}
     </span>
 
-    <div class="page-intro__copy" data-ink-avoid>
+    <div class="page-intro__copy" data-page-intro-copy data-ink-avoid>
       <p class="folio-label">{note}</p>
       <div class="page-intro__title-mask">
         <h1 id={id} data-page-intro-title>{title}</h1>
@@ -112,9 +112,9 @@ const glyphArtwork = artwork
   .page-intro {
     position: relative;
     isolation: isolate;
-    min-height: clamp(30rem, 52svh, 40rem);
+    min-height: 50svh;
     overflow: clip;
-    padding-block: clamp(2.25rem, 4vw, 3.5rem) clamp(2rem, 3.5vw, 3rem);
+    padding-block: clamp(1.25rem, 2.2svh, 1.75rem);
   }
 
   .page-intro__paper {
@@ -146,7 +146,7 @@ const glyphArtwork = artwork
     z-index: 5;
     display: flex;
     justify-content: space-between;
-    margin-bottom: clamp(1.25rem, 2.5vw, 2rem);
+    margin-bottom: clamp(0.9rem, 1.8svh, 1.25rem);
     font-family: var(--font-noto-sans);
     font-size: 0.62rem;
     letter-spacing: 0.26em;
@@ -159,7 +159,7 @@ const glyphArtwork = artwork
     grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: clamp(1.25rem, 3vw, 2.5rem);
     align-items: center;
-    min-height: clamp(18rem, 32vw, 24rem);
+    min-height: clamp(16rem, 34svh, 21.5rem);
   }
 
   .page-intro__glyph {
@@ -275,13 +275,13 @@ const glyphArtwork = artwork
     display: block;
     width: min(100%, 64rem);
     height: 1px;
-    margin-top: clamp(1.5rem, 3vw, 2.5rem);
+    margin-top: clamp(1rem, 2svh, 1.5rem);
     background: linear-gradient(90deg, var(--ink), var(--line) 72%, transparent);
   }
 
   .page-intro--compact {
-    min-height: clamp(24rem, 40svh, 30rem);
-    padding-bottom: 2rem;
+    min-height: 45svh;
+    padding-bottom: 1.5rem;
   }
 
   .page-intro--compact .page-intro__folio {
@@ -289,7 +289,7 @@ const glyphArtwork = artwork
   }
 
   .page-intro--compact .page-intro__scene {
-    min-height: clamp(15rem, 24vw, 19rem);
+    min-height: clamp(14rem, 28svh, 18rem);
   }
 
   .page-intro--compact h1 {
@@ -314,7 +314,7 @@ const glyphArtwork = artwork
     grid-column: 9 / -1;
     grid-row: 1;
     align-self: start;
-    height: clamp(15rem, 24vw, 22rem);
+    height: clamp(13rem, 26svh, 19rem);
     margin-top: clamp(-1rem, -2vw, -0.25rem);
     transform: rotate(1.7deg);
   }
@@ -333,11 +333,11 @@ const glyphArtwork = artwork
 
   /* 器作：画幅占据舞台，标题贴在装裱边缘，巨字同时成为图像窗口。 */
   .page-intro--scene-exhibition {
-    min-height: clamp(30rem, 54svh, 38rem);
+    min-height: 52svh;
   }
 
   .page-intro--scene-exhibition .page-intro__scene {
-    min-height: clamp(21rem, 34vw, 28rem);
+    min-height: clamp(15rem, 32svh, 21.5rem);
   }
 
   .page-intro--scene-exhibition .page-intro__glyph {
@@ -352,8 +352,8 @@ const glyphArtwork = artwork
     grid-column: 1 / span 7;
     grid-row: 1;
     align-self: end;
-    margin-bottom: clamp(0.75rem, 2vw, 1.5rem);
-    padding: clamp(1.25rem, 2vw, 1.75rem) clamp(1.25rem, 2.5vw, 2rem) 1.25rem 0;
+    margin-bottom: 0.5rem;
+    padding: clamp(1rem, 2svh, 1.4rem) clamp(1.25rem, 2.5vw, 2rem) 1rem 0;
     background: color-mix(in oklab, var(--paper) 91%, transparent);
   }
 
@@ -366,7 +366,7 @@ const glyphArtwork = artwork
     grid-column: 5 / -1;
     grid-row: 1;
     width: calc(100% + clamp(1rem, 3vw, 3rem));
-    height: clamp(20rem, 30vw, 28rem);
+    height: clamp(15rem, 30svh, 23rem);
     transform: translateX(clamp(0.25rem, 1vw, 1rem)) rotate(-0.8deg);
   }
 
@@ -381,11 +381,11 @@ const glyphArtwork = artwork
 
   /* 暗室：主影像悬在视口中部，巨字由影像显影，题跋压在画面下缘。 */
   .page-intro--scene-darkroom {
-    min-height: clamp(30rem, 54svh, 38rem);
+    min-height: 52svh;
   }
 
   .page-intro--scene-darkroom .page-intro__scene {
-    min-height: clamp(21rem, 34vw, 28rem);
+    min-height: clamp(16rem, 34svh, 21.5rem);
   }
 
   .page-intro--scene-darkroom .page-intro__glyph {
@@ -421,7 +421,7 @@ const glyphArtwork = artwork
     grid-row: 1;
     align-self: start;
     width: calc(100% + clamp(1rem, 3vw, 3rem));
-    height: clamp(18rem, 29vw, 25rem);
+    height: clamp(16rem, 30svh, 23rem);
     margin-top: clamp(-1rem, -2vw, -0.25rem);
     filter: contrast(1.08) saturate(0.7);
   }
@@ -483,7 +483,7 @@ const glyphArtwork = artwork
     grid-row: 1;
     align-self: center;
     width: calc(100% + clamp(1rem, 3vw, 2.5rem));
-    height: clamp(18rem, 28vw, 24rem);
+    height: clamp(16rem, 29svh, 22rem);
     transform: translateX(clamp(0.5rem, 2vw, 2rem)) rotate(2.4deg);
   }
 
@@ -646,3 +646,55 @@ const glyphArtwork = artwork
     }
   }
 </style>
+
+<script>
+  import { gsap, onDesktopViewport } from '../scripts/scroll';
+
+  const intro = document.querySelector<HTMLElement>('[data-page-intro]');
+  if (intro) {
+    onDesktopViewport(() => {
+      const scene = intro.dataset.pageIntroScene;
+      const glyph = intro.querySelector<HTMLElement>('[data-page-intro-glyph]');
+      const copy = intro.querySelector<HTMLElement>('[data-page-intro-copy]');
+      const art = intro.querySelector<HTMLElement>('[data-page-intro-art]');
+      const folio = intro.querySelector<HTMLElement>('[data-page-intro-folio]');
+      const papers = intro.querySelectorAll<HTMLElement>('.page-intro__paper');
+      const handoff = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: intro,
+          start: 'top 5rem',
+          end: 'bottom 5rem',
+          scrub: 0.5,
+        },
+      });
+
+      handoff.to(papers, { xPercent: (index) => (index === 0 ? -10 : 12), opacity: 0.28 }, 0);
+      if (folio) handoff.to(folio, { y: -6, opacity: 0.52 }, 0);
+
+      if (scene === 'reading') {
+        if (glyph) handoff.to(glyph, { xPercent: -18, opacity: 0.24 }, 0);
+        if (art) handoff.to(art, { xPercent: 12, yPercent: -6, rotation: 0, opacity: 0.58 }, 0);
+      } else if (scene === 'exhibition') {
+        if (glyph) handoff.to(glyph, { xPercent: 8, opacity: 0.2 }, 0);
+        if (art) handoff.to(art, { xPercent: 14, yPercent: -2, rotation: 0, opacity: 0.52 }, 0);
+      } else if (scene === 'darkroom') {
+        if (glyph) handoff.to(glyph, { scale: 1.03, opacity: 0.16 }, 0);
+        if (art) handoff.to(art, { scale: 1.035, opacity: 0.32 }, 0);
+        if (copy) handoff.to(copy, { yPercent: -4, opacity: 0.7 }, 0);
+      } else if (scene === 'personal') {
+        if (copy) handoff.to(copy, { yPercent: -12, rotation: 0, opacity: 0.5 }, 0);
+        if (art) handoff.to(art, { yPercent: -8, rotation: 0, opacity: 0.48 }, 0);
+      }
+
+      return () => {
+        handoff.scrollTrigger?.kill();
+        handoff.kill();
+        const targets = [glyph, copy, art, folio, ...papers].filter(
+          (target): target is HTMLElement => Boolean(target),
+        );
+        gsap.set(targets, { clearProps: 'transform,opacity,clipPath' });
+      };
+    });
+  }
+</script>

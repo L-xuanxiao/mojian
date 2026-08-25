@@ -22,6 +22,20 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
     <span class="mist mist--a hero__mist-a" aria-hidden="true"></span>
     <span class="mist mist--b hero__mist-b" aria-hidden="true"></span>
     <span class="hero__under-sheet" data-hero-sheet aria-hidden="true"></span>
+    <svg class="hero__ink-bloom" viewBox="0 0 320 320" aria-hidden="true">
+      <path
+        data-hero-ink-spot
+        d="M151 38c25 4 35 34 56 45 25 13 63 7 74 34 12 29-20 54-23 82-3 31 24 62 4 85-21 24-56 2-84 7-31 6-57 34-82 17-24-16-11-51-22-77-11-27-44-44-38-73 6-30 43-38 64-58 20-18 29-57 57-52Z"
+      ></path>
+      <path
+        data-hero-ink-spot
+        d="M134 67c22-17 49 7 68 20 22 15 56 20 61 47 5 26-25 44-33 68-8 26 2 60-22 74-25 14-50-11-77-15-28-4-63 10-80-13-17-23 8-51 10-79 3-26-14-57 7-75 20-17 48 0 66-17Z"
+      ></path>
+      <path
+        data-hero-ink-spot
+        d="M164 89c20 0 31 25 48 35 18 11 48 11 54 32 6 22-18 39-24 60-7 22 1 51-19 63-21 12-43-10-66-13-24-3-52 11-68-7-15-19 5-43 8-66 3-22-11-49 7-63 18-15 40 1 57-11 16-11 24-37 44-37Z"
+      ></path>
+    </svg>
 
     <div class="hero__folio" aria-hidden="true">
       <span>MOJIAN · 2026</span>
@@ -80,12 +94,62 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
       <div class="hero__copy" data-ink-avoid>
         <p class="folio-label hero__eyebrow">纸上留白 · 墨分五色</p>
         <h1 class="hero__title font-display" aria-label="墨笺" style={heroArtStyle}>
-          <span class="hero-title-mask hero-title-mask--ink"
-            ><span class="hero-title-line hero-title-line--ink">墨</span></span
-          >
-          <span class="hero-title-mask hero-title-mask--paper"
-            ><span class="hero-title-line hero-title-line--paper">笺</span></span
-          >
+          <span class="hero-title-mask hero-title-mask--ink">
+            <span class="hero-title-line hero-title-line--ink">墨</span>
+            <svg
+              class="hero-title-brush hero-title-brush--ink"
+              data-hero-brush="ink"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <defs>
+                <mask id="hero-brush-mask-ink" maskUnits="userSpaceOnUse">
+                  <g class="hero-brush-paths">
+                    <path d="M20 17 80 17"></path>
+                    <path d="M25 18 24 54"></path>
+                    <path d="M76 18 76 54"></path>
+                    <path d="M24 35 76 35"></path>
+                    <path d="M50 18 50 55"></path>
+                    <path d="M23 54 78 54"></path>
+                    <path d="M50 57 50 88"></path>
+                    <path d="M25 70 76 70"></path>
+                    <path d="M19 89 82 89"></path>
+                  </g>
+                </mask>
+              </defs>
+              <text x="50" y="88" text-anchor="middle" mask="url(#hero-brush-mask-ink)"> 墨 </text>
+            </svg>
+          </span>
+          <span class="hero-title-mask hero-title-mask--paper">
+            <span class="hero-title-line hero-title-line--paper">笺</span>
+            <svg
+              class="hero-title-brush hero-title-brush--paper"
+              data-hero-brush="paper"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <defs>
+                <mask id="hero-brush-mask-paper" maskUnits="userSpaceOnUse">
+                  <g class="hero-brush-paths">
+                    <path d="M25 13 14 32"></path>
+                    <path d="M20 22 46 22"></path>
+                    <path d="M52 13 43 33"></path>
+                    <path d="M48 22 80 22"></path>
+                    <path d="M17 42 76 39"></path>
+                    <path d="M24 57 77 52"></path>
+                    <path d="M31 36 39 82"></path>
+                    <path d="M61 34 71 76"></path>
+                    <path d="M22 85 82 78"></path>
+                  </g>
+                </mask>
+              </defs>
+              <text x="50" y="88" text-anchor="middle" mask="url(#hero-brush-mask-paper)">
+                笺
+              </text>
+            </svg>
+          </span>
         </h1>
         <div class="hero__statement">
           <p>写字、造物、看光影。让数字世界也保留纸张的呼吸。</p>
@@ -126,6 +190,24 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
     isolation: isolate;
     min-height: inherit;
     overflow: clip;
+  }
+
+  .hero__ink-bloom {
+    position: absolute;
+    top: 50%;
+    left: 18%;
+    z-index: 4;
+    width: clamp(18rem, 36vw, 36rem);
+    color: color-mix(in oklab, var(--ink) 30%, transparent);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+
+  .hero__ink-bloom path {
+    fill: currentColor;
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
   }
 
   .hero__under-sheet {
@@ -328,8 +410,44 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
     bottom: -4%;
   }
   .hero-title-line {
+    position: relative;
+    z-index: 1;
     display: block;
     line-height: 0.94;
+  }
+
+  .hero-title-brush {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .hero-title-brush text {
+    fill: currentColor;
+    font-family: var(--font-ma-shan-zheng);
+    font-size: 94px;
+    font-weight: 400;
+  }
+
+  .hero-title-brush--ink {
+    color: color-mix(in oklab, var(--ink) 82%, transparent);
+  }
+
+  .hero-title-brush--paper {
+    color: var(--cinnabar);
+  }
+
+  .hero-brush-paths {
+    fill: none;
+    stroke: white;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 17;
   }
   .hero-title-line--ink {
     background-image:
@@ -447,8 +565,11 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    :global(html.js) .hero__seal::after {
-      animation: seal-halo 0.85s var(--ease-ink) 1.55s 1 both;
+    :global(html.js) .hero[data-hero-intro='full']:not(.hero--intro-complete) .hero__seal::after {
+      animation: seal-halo 0.7s var(--ease-ink) 0.84s 1 both;
+    }
+    :global(html.js) .hero[data-hero-intro='light']:not(.hero--intro-complete) .hero__seal::after {
+      animation: seal-halo 0.44s var(--ease-ink) 0.22s 1 both;
     }
     :global(html.js) .hero-title-line,
     :global(html.js) .hero__eyebrow,
@@ -522,6 +643,11 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
       bottom: 3rem;
       left: 31%;
       transform: rotate(-1.2deg);
+    }
+    .hero__ink-bloom {
+      top: 43%;
+      left: 20%;
+      width: min(82vw, 24rem);
     }
     .hero__folio {
       top: 1.25rem;
@@ -632,13 +758,40 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
 
   const hero = document.querySelector<HTMLElement>('[data-hero]');
   if (hero && !prefersReducedMotion) {
+    const sessionKey = 'mojian:hero-intro:v1';
+    let isFirstSession = false;
+    try {
+      isFirstSession = sessionStorage.getItem(sessionKey) !== '1';
+      if (isFirstSession) sessionStorage.setItem(sessionKey, '1');
+    } catch {
+      // 隐私模式或存储被禁用时采用短版，不让一次性开场退化为每次重播。
+      isFirstSession = false;
+    }
+
+    const introMode = isFirstSession
+      ? window.matchMedia('(min-width: 768px)').matches
+        ? 'full'
+        : 'light'
+      : 'short';
+    hero.dataset.heroIntro = introMode;
+
     const titleLines = hero.querySelectorAll<HTMLElement>('.hero-title-line');
     const details = hero.querySelectorAll<HTMLElement>(
       '.hero__eyebrow, .hero__statement, .hero__colophon, .hero__scroll',
     );
+    const inkSpots = hero.querySelectorAll<SVGPathElement>('[data-hero-ink-spot]');
+    const brushSvgs = hero.querySelectorAll<SVGSVGElement>('[data-hero-brush]');
+    const inkStrokes = hero.querySelectorAll<SVGPathElement>(
+      '[data-hero-brush="ink"] .hero-brush-paths path',
+    );
+    const paperStrokes = hero.querySelectorAll<SVGPathElement>(
+      '[data-hero-brush="paper"] .hero-brush-paths path',
+    );
+    const brushStrokes = [...inkStrokes, ...paperStrokes];
     const sheet = hero.querySelector<HTMLElement>('[data-hero-sheet]');
     const art = hero.querySelector<HTMLElement>('[data-hero-art]');
     const paperTitle = hero.querySelector<HTMLElement>('.hero-title-mask--paper');
+    const seal = hero.querySelector<HTMLElement>('[data-hero-seal]');
     const layers = [
       { element: hero.querySelector<HTMLElement>('[data-hero-layer="far"]'), yPercent: 2 },
       { element: hero.querySelector<HTMLElement>('[data-hero-layer="mid"]'), yPercent: 5 },
@@ -647,43 +800,157 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
       Boolean(layer.element),
     );
 
-    const entrance = gsap.timeline({ defaults: { ease: 'expo.out' } });
-    if (sheet)
-      entrance.fromTo(
-        sheet,
-        { clipPath: 'inset(0 100% 0 0)' },
-        { clipPath: 'inset(0 0% 0 0)', duration: 0.75 },
-        0,
-      );
-    if (art)
-      entrance.fromTo(
-        art,
-        { clipPath: 'inset(0 100% 0 0)', xPercent: 4 },
-        { clipPath: 'inset(0 0% 0 0)', xPercent: 0, duration: 0.9 },
-        0.12,
-      );
-    entrance
-      .fromTo(
-        titleLines,
-        { yPercent: 100 },
-        { yPercent: 0, opacity: 1, duration: 1.05, stagger: 0.14 },
-        0.18,
-      )
-      .fromTo(
-        details,
-        { y: 8, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.65, stagger: 0.07, clearProps: 'transform' },
-        0.58,
-      );
+    brushStrokes.forEach((stroke) => {
+      const length = stroke.getTotalLength();
+      gsap.set(stroke, { strokeDasharray: length, strokeDashoffset: length });
+    });
 
-    const seal = hero.querySelector<HTMLElement>('[data-hero-seal]');
-    if (seal)
-      entrance.fromTo(
-        seal,
-        { scale: 1.4, rotate: -7 },
-        { scale: 1, rotate: 0, duration: 0.5, ease: 'back.out(2.4)' },
-        1.45,
+    let entranceComplete = false;
+    const removeSkipListeners = () => {
+      window.removeEventListener('wheel', skipEntrance);
+      window.removeEventListener('touchstart', skipEntrance);
+      window.removeEventListener('keydown', skipEntrance);
+      window.removeEventListener('pointerdown', skipEntrance);
+      window.removeEventListener('click', skipEntrance);
+    };
+    const finishEntrance = () => {
+      if (entranceComplete) return;
+      entranceComplete = true;
+      removeSkipListeners();
+      hero.classList.add('hero--intro-complete');
+      gsap.set(inkSpots, { opacity: 0 });
+      gsap.set(brushSvgs, { opacity: 0 });
+      gsap.set(titleLines, { opacity: 1, clearProps: 'transform' });
+      gsap.set(details, { opacity: 1, clearProps: 'transform' });
+      if (sheet) gsap.set(sheet, { clipPath: 'inset(0 0% 0 0)', clearProps: 'transform' });
+      if (art) gsap.set(art, { clipPath: 'inset(0 0% 0 0)', clearProps: 'transform' });
+      if (seal) gsap.set(seal, { clearProps: 'transform' });
+    };
+    const entrance = gsap.timeline({ defaults: { ease: 'expo.out' }, onComplete: finishEntrance });
+    function skipEntrance() {
+      entrance.progress(1, false);
+      finishEntrance();
+    }
+
+    if (introMode === 'full' || introMode === 'light') {
+      const full = introMode === 'full';
+      gsap.set(brushSvgs, { opacity: 1 });
+      gsap.set(titleLines, { yPercent: 0, opacity: 0 });
+      inkSpots.forEach((spot, index) =>
+        entrance.fromTo(
+          spot,
+          { scale: 0.08, opacity: 0 },
+          { scale: 1, opacity: full ? 0.28 : 0.2, duration: full ? 0.33 : 0.2 },
+          index * (full ? 0.06 : 0.035),
+        ),
       );
+      entrance.to(
+        inkSpots,
+        { opacity: 0, duration: full ? 0.18 : 0.12, stagger: 0.02 },
+        full ? 0.4 : 0.23,
+      );
+      if (sheet)
+        entrance.fromTo(
+          sheet,
+          { clipPath: 'inset(0 100% 0 0)' },
+          { clipPath: 'inset(0 0% 0 0)', duration: full ? 0.72 : 0.42 },
+          0,
+        );
+      if (art)
+        entrance.fromTo(
+          art,
+          { clipPath: 'inset(0 100% 0 0)', xPercent: 4 },
+          { clipPath: 'inset(0 0% 0 0)', xPercent: 0, duration: full ? 0.82 : 0.52 },
+          full ? 0.1 : 0.04,
+        );
+      entrance
+        .to(
+          inkStrokes,
+          {
+            strokeDashoffset: 0,
+            duration: full ? 0.28 : 0.12,
+            stagger: full ? 0.07 : 0.035,
+            ease: 'power2.out',
+          },
+          full ? 0.28 : 0.12,
+        )
+        .to(
+          paperStrokes,
+          {
+            strokeDashoffset: 0,
+            duration: full ? 0.26 : 0.12,
+            stagger: full ? 0.07 : 0.035,
+            ease: 'power2.out',
+          },
+          full ? 0.52 : 0.2,
+        )
+        .to(titleLines, { opacity: 1, duration: full ? 0.12 : 0.1 }, full ? 1.22 : 0.57)
+        .to(brushSvgs, { opacity: 0, duration: full ? 0.12 : 0.1 }, full ? 1.22 : 0.57)
+        .fromTo(
+          details,
+          { y: 8, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: full ? 0.52 : 0.3,
+            stagger: full ? 0.06 : 0.04,
+          },
+          full ? 0.56 : 0.25,
+        );
+      if (seal)
+        entrance.fromTo(
+          seal,
+          { scale: 1.36, rotate: -7 },
+          {
+            scale: 1,
+            rotate: 0,
+            duration: full ? 0.38 : 0.26,
+            ease: 'back.out(2.4)',
+          },
+          full ? 1.16 : 0.42,
+        );
+    } else {
+      if (sheet)
+        entrance.fromTo(
+          sheet,
+          { clipPath: 'inset(0 42% 0 0)' },
+          { clipPath: 'inset(0 0% 0 0)', duration: 0.32 },
+          0,
+        );
+      if (art)
+        entrance.fromTo(
+          art,
+          { clipPath: 'inset(0 36% 0 0)', xPercent: 2 },
+          { clipPath: 'inset(0 0% 0 0)', xPercent: 0, duration: 0.4 },
+          0.03,
+        );
+      entrance
+        .fromTo(
+          titleLines,
+          { yPercent: 18, opacity: 0 },
+          { yPercent: 0, opacity: 1, duration: 0.36, stagger: 0.04 },
+          0.05,
+        )
+        .fromTo(
+          details,
+          { y: 8, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.24, stagger: 0.025 },
+          0.14,
+        );
+      if (seal)
+        entrance.fromTo(
+          seal,
+          { scale: 1.18, rotate: -4 },
+          { scale: 1, rotate: 0, duration: 0.2, ease: 'back.out(2)' },
+          0.24,
+        );
+    }
+
+    window.addEventListener('wheel', skipEntrance, { passive: true });
+    window.addEventListener('touchstart', skipEntrance, { passive: true });
+    window.addEventListener('keydown', skipEntrance);
+    window.addEventListener('pointerdown', skipEntrance, { passive: true });
+    window.addEventListener('click', skipEntrance);
 
     // 桌面滚动视差跟随 768 断点重建或清理：避免旋转屏后残留位移或转桌面后缺少视差
     onDesktopViewport(() => {

@@ -150,7 +150,7 @@ components:
 
 ### 夺卷入画
 
-全站入口共享“主字 → 图像 → 纸层”的接棒关系，但不共享同一网格模板。主字允许以接近视口的尺度被裁切；真实图片既是可访问内容，也可在 `aria-hidden` 视觉副本中通过 `background-clip: text` 进入字形。装饰主字必须绝对定位在裁切容器内，不得参与网格轨道或父级高度计算。纸层必须与下一段内容建立空间方向，不能只是背景矩形。首页页眉以卷尺墨线显示当前章号与滚动进度；内页卷首桌面控制在约 45–55svh、compact 约 35–42svh，首屏底部必须露出列表或正文入口。
+全站入口共享“主字 → 图像 → 纸层”的接棒关系，但不共享同一网格模板。主字允许以接近视口的尺度被裁切；真实图片既是可访问内容，也可在 `aria-hidden` 视觉副本中通过 `background-clip: text` 进入字形。装饰主字必须绝对定位在裁切容器内，不得参与网格轨道或父级高度计算。纸层必须与下一段内容建立空间方向，不能只是背景矩形。首页页眉以卷尺墨线显示当前章号与滚动进度；内页卷首与 compact 档桌面统一控制在约 45–55svh，首屏底部必须露出列表或正文入口。
 
 ### 四类卷首
 
@@ -158,6 +158,15 @@ components:
 - **Exhibition：** “器”字与横向装裱画幅相互侵入，题名和展签覆盖在画面左下，不再把文图拆成上下两行。
 - **Darkroom：** “影”字从横向接触印样中显出，主影像压成暗室画带，不使用高耸竖图制造停顿。
 - **Personal：** “间／留”作为裁切手记主字，短手札压住局部图像，保持同屏而非上下堆叠。
+
+### 高潮预算与两阶段动效契约
+
+展览级动效采用“集中式高潮”：同一页面只允许一个主记忆场景，其他导航、主题和高频反馈仍遵守 150/160/250ms。第一阶段由首页开卷与内页卷首交棒承担；器作画框回正、暗室翻底片属于第二阶段，必须在第一阶段桌面与移动方向确认后才启用，不能把未确认的峰值同时堆进页面。
+
+- **会话级开场：** 首页完整开场每个标签会话只播放一次，以 `sessionStorage['mojian:hero-intro:v1']` 记录；回访采用约 450ms 短版，存储不可用时同样走短版。完整时间线不超过 1.6s，不锁滚动；滚轮、触摸、按键或点击会立即推进终态并移除临时监听。
+- **手工笔路：** “墨”“笺”使用 inline SVG 的手工分段遮罩按笔顺写出，三层不规则墨斑只动画 `transform + opacity`；SVG 只承担过渡，结束后交回真实 HTML 题字，确保无 JS、字体延迟与异常分支仍可读。
+- **卷首交棒：** 桌面四类 `PageIntro` 为 45–55svh、无 pin、`scrub: 0.5`，从卷首顶部抵达页眉到卷首底部离开页眉完成主字、纸本、画框或手记交棒；滚动帧只写 `transform`、`opacity`、`clip-path`。
+- **移动轻量版：** 移动端首页首次开场不超过 750ms，内页不创建 ScrollTrigger 交棒；`prefers-reduced-motion` 不播放完整开场和空间叙事，只保留完整静态内容与至多 160ms 的颜色/透明度反馈。
 
 `SectionHeading` 分为 `chapter` 与 `quiet`：chapter 是首页紧凑章标，高度约 7–9rem（移动端 5.5–7rem），以裁切巨号、跨栏题字、方印与卷边展签形成尺度冲突；quiet 服务正文小节。首页六段各有节拍，但仅桌面长卷承担长时间线；移动端、无 JS 与低动态始终呈现完整静态终态。
 
@@ -237,7 +246,7 @@ components:
 
 ### Reveal 契约
 
-`data-reveal-variant` 只是一份内部 DOM / CSS 动效契约，不是公开组件 API。可用值为 `intro-reading`、`intro-exhibition`、`intro-darkroom`、`intro-personal`、`folio`、`folio-turn`、`spread`、`exhibit`、`contact-sheet` 与 `stagger`：分别表达主字入画、纸层揭开、章节墨线、册页自上缘翻起（接缝处首个纸层，需在组件内声明初态以压过 scoped transform）、跨页错峰、展签错峰、暗室显影与普通列表揭示。`data-home-chapter` 只供页眉读取首页章号与进度；`PageIntro` 的 `glyph` / `artTreatment` 和 `SectionHeading` 的 `mode` 也只属于内部展示契约。CSS 负责普通揭示、静止终态、hover、按压、遮罩与细线；GSAP 只承担 Hero、桌面长卷、暗室和有限视差。所有普通前置隐藏仅在 `:where(html.js.reveal-ready)`、非低动态条件下成立；`:where()` 刻意把门控权重归零，使后置 `.is-revealed` 终态始终可以覆盖初态。无 JS、低动态、不支持观察器或初始化异常时直接显示完整内容。
+`data-reveal-variant` 只是一份内部 DOM / CSS 动效契约，不是公开组件 API。可用值为 `intro-reading`、`intro-exhibition`、`intro-darkroom`、`intro-personal`、`folio`、`folio-turn`、`spread`、`exhibit`、`contact-sheet` 与 `stagger`：分别表达主字入画、纸层揭开、章节墨线、册页自上缘翻起（接缝处首个纸层，需在组件内声明初态以压过 scoped transform）、跨页错峰、展签错峰、暗室显影与普通列表揭示。`data-home-chapter` 只供页眉读取首页章号与进度；Hero 的 `data-hero-intro` 只标记 `full / light / short` 内部会话态；`PageIntro` 的 `glyph` / `artTreatment` 和 `SectionHeading` 的 `mode` 也只属于内部展示契约。CSS 负责普通揭示、静止终态、hover、按压、遮罩与细线；GSAP 只承担 Hero、桌面长卷、暗室和有限视差。所有普通前置隐藏仅在 `:where(html.js.reveal-ready)`、非低动态条件下成立；`:where()` 刻意把门控权重归零，使后置 `.is-revealed` 终态始终可以覆盖初态。无 JS、低动态、不支持观察器或初始化异常时直接显示完整内容。
 
 ## Do's and Don'ts
 

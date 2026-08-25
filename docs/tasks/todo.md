@@ -1,3 +1,47 @@
+# 当前任务：展览级数字长卷动效升级（Phase 1）
+
+目标：按已确认的“集中式高潮”方向完成首页会话级墨滴开卷、题名运笔与四类内页卷首交棒；本阶段不改内容、导航、路由或数据，不实施器作画框与暗室底片，不提交、不推送。
+
+- [x] 核对既有动效入口、共享工具、设计契约与历史教训
+- [x] 确认 Phase 1 的最小实现范围与可验证终态
+- [x] 实现首页完整/短版开场、手工 SVG 笔路与主动跳过
+- [x] 收敛桌面卷首高度并实现四类无 pin 滚动交棒
+- [x] 同步 `DESIGN.md`、`.impeccable/design.json` 与 `docs/progress.md`
+- [x] 完成格式、类型、构建、差异与生产浏览器验收
+- [x] 补充结果审查并停在 Phase 1 等待视觉方向确认
+
+## 计划确认
+
+- 阶段边界：本轮只做 Phase 1；Phase 2 的器作装裱回正与暗室翻底片保持原样，待桌面和移动实测结果由用户确认后再实施。
+- 首页开场：以 `sessionStorage['mojian:hero-intro:v1']` 区分每标签会话首次完整开场与约 450ms 短版；存储不可用、reduced-motion 或无 JS 时直接采用短版/静态终态。
+- 视觉结构：在现有 Hero 内加入三层不规则墨斑和“墨”“笺”手工分段 SVG 遮罩；完整时间线不超过 1.6s，不锁滚动，滚轮、触摸、按键或点击可立即推进终态并清理监听。
+- 卷首交棒：桌面 `PageIntro` 收敛至 45–55svh，四类场景复用 `onDesktopViewport()` 创建无 pin、`scrub: 0.5` 的 ScrollTrigger；滚动帧只写 `transform`、`opacity`、`clip-path`，不读取布局。
+- 移动与无障碍：移动端不运行卷首滚动时间线，入口动画控制在 750ms 内；reduced-motion 关闭完整开场和空间叙事，内容默认完整可见。
+- 验证覆盖：完整静态四项，生产预览覆盖 `1707×735 @ DPR1.5`、`390×844`、明暗主题、会话状态、主动跳过、reduced-motion、无 JS、控制台与横向溢出；结束后停止预览并确认端口拒连。
+
+## 结果审查
+
+### 实施结果
+
+- 首页加入三层不规则 SVG 墨斑与“墨 / 笺”各九段手工笔路遮罩；`data-hero-intro` 仅记录 `full / light / short` 内部态。桌面首次完整开场总长 1.54s，移动首次轻量版约 0.68s，回访短版约 0.46s。
+- `sessionStorage['mojian:hero-intro:v1']` 在首次进入时写入；刷新/返回走短版，存储读写异常也回落短版。wheel、touchstart、keydown、pointerdown、click 均可推进终态，并统一移除临时监听、隐藏过渡 SVG、恢复真实题字和清理行内 transform。
+- `PageIntro` 桌面实测收敛为 50.1–53.5svh；四类场景复用 `onDesktopViewport()` 建立无 pin、`scrub: 0.5` 的 ScrollTrigger，只更新纸层、题字、图像、手记的 transform / opacity。移动端不创建交棒时间线。
+- 展览卷首针对 735px 短视口收紧题文纸边，首件展品在首屏真实露出 231px 且完成显影；未改项目列表或共享 reveal 阈值。Phase 2 的器作画框和暗室底片保持原样。
+
+### 验证证据
+
+- 静态：`pnpm format:check` 全绿；`pnpm check` 为 52 files、0 errors / 0 warnings / 0 hints；`pnpm build` 成功生成 24 页、99 个优化图像与 3 页 Pagefind 索引；`git diff --check` 与本地 sidecar JSON 解析通过。
+- 桌面（Playwright，`1707×735 @ DPR1.5`）：首次 200ms 实测 `mode=full`、会话标记为 `1`、三层墨斑 opacity 约 0.266–0.280、笔路 SVG 可见；1.65s 后内容隐藏数 0、笔路/墨斑归零、题字与细节无残留行内 transform。刷新进入 `short` 并在约 460ms 收口；200ms 内滚轮可在 60ms 内完成终态；存储异常分支同样为 `short`。
+- 卷首与首屏：reading / exhibition / darkroom / personal 分别为 50.1 / 52.0 / 52.0 / 53.5svh；真实后续内容分别露出 286 / 231 / 272 / 261px，opacity 均为 1。滚动前后根容器 width / height / margin / padding 不变，四场景目标 transform / opacity 按方向更新，pin-spacer 为 0、横向溢出为 0。
+- 移动（Playwright，`390×844 @ DPR1.5`，触摸 / 无 hover）：首次为 `light` 且笔路可见，约 0.68s 后内容隐藏数 0、无横向溢出、无新增长任务；四类卷首滚动前后 transform 完全一致、pin-spacer 为 0。
+- reduced-motion：Hero 不建立会话开场，笔路 opacity 为 0、页面动画数 0；器作卷首滚动前后图像与巨字矩阵一致，内容隐藏数 0。无 JS 下首页与四类内页题名、图像均静态可见，五页无溢出。
+- 清洁控制台会话依次访问首页与四类内页为 0 errors / 0 warnings；动画观测未出现 >50ms 长任务。四个主验收会话与补充折叠测量会话均已关闭，preview PID 28020 / 2032 已停止，4321 / 4322 均确认拒连。
+
+### 边界
+
+- `.impeccable/design.json` 已同步高潮预算、会话开场与卷首交棒契约，但仍按 `.gitignore` 仅保留本地；跟踪文件只有 Hero、PageIntro 与三份阶段/设计文档。
+- 未新增依赖、公开 API、组件属性、路由、内容或全局状态；未实施 Phase 2；未提交、未推送、未部署，等待用户确认视觉方向。
+
 # 当前任务：动效专项九项修复
 
 目标：落实已确认的动效专项修复方案，使键盘交互即时、高频反馈不超过 250ms、滚动只更新合成属性、图片不动画 `filter`，并将 reduced-motion 从全局清零改为逐项温和降级；不新增依赖、公开接口或共享抽象，不提交、不推送。
