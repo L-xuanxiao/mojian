@@ -103,6 +103,18 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
     gap: 1.5rem clamp(1.5rem, 4vw, 3.5rem);
   }
 
+  .project-index__item--counter {
+    --mount-angle: 0.7deg;
+  }
+
+  .project-index__item--lead {
+    --mount-angle: -0.8deg;
+  }
+
+  .project-index__item--panorama {
+    --mount-angle: -0.35deg;
+  }
+
   .project-index__number {
     position: absolute;
     top: -0.38em;
@@ -121,6 +133,8 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
     overflow: hidden;
     background: var(--paper-deep);
     box-shadow: var(--shadow-lg);
+    transform: rotate(var(--mount-angle, -0.8deg));
+    transform-origin: center;
     transition:
       transform 250ms var(--ease-ink),
       box-shadow 250ms var(--ease-ink);
@@ -140,21 +154,32 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
     }
 
     /* 景深：整件展品浮起，编号落朱砂，展签朱砂复笔自左写出 */
-    .project-index__item:hover .project-index__media,
-    .project-index__item:focus-within .project-index__media {
-      transform: translateY(-4px);
+    .project-index__item:hover .project-index__media {
+      transform: translateY(-6px) rotate(0deg);
       box-shadow: 0 28px 64px var(--shadow-color);
     }
 
-    .project-index__item:hover .project-index__number,
-    .project-index__item:focus-within .project-index__number {
+    .project-index__item:hover .project-index__number {
       color: color-mix(in oklab, var(--cinnabar) 62%, transparent);
     }
 
-    .project-index__item:hover .project-index__label::after,
-    .project-index__item:focus-within .project-index__label::after {
+    .project-index__item:hover .project-index__label::after {
       transform: scaleX(1);
     }
+  }
+
+  /* 键盘焦点与桌面 hover 获得同等回正；触摸点击不会触发位移类反馈。 */
+  .project-index__item:has(:focus-visible) .project-index__media {
+    transform: translateY(-6px) rotate(0deg);
+    box-shadow: 0 28px 64px var(--shadow-color);
+  }
+
+  .project-index__item:has(:focus-visible) .project-index__number {
+    color: color-mix(in oklab, var(--cinnabar) 62%, transparent);
+  }
+
+  .project-index__item:has(:focus-visible) .project-index__label::after {
+    transform: scaleX(1);
   }
 
   .project-index__copy {
@@ -288,7 +313,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
   @media (prefers-reduced-motion: reduce) {
     .project-index__media,
     .project-index__item:hover .project-index__media,
-    .project-index__item:focus-within .project-index__media,
+    .project-index__item:has(:focus-visible) .project-index__media,
     .project-index__media:hover :global(img) {
       transform: none;
       transition:
@@ -301,6 +326,10 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
       transition: none;
     }
 
+    .project-index__number {
+      transition-duration: 150ms;
+    }
+
     .project-index__label::after {
       opacity: 0;
       transform: scaleX(1);
@@ -308,7 +337,7 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
     }
 
     .project-index__item:hover .project-index__label::after,
-    .project-index__item:focus-within .project-index__label::after {
+    .project-index__item:has(:focus-visible) .project-index__label::after {
       opacity: 1;
       transform: scaleX(1);
     }

@@ -236,8 +236,92 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-.ink-lightbox .yarl__slide_image {
+.ink-lightbox__negative {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  max-width: 100%;
+  max-height: 100%;
+  place-items: center;
+  transform-origin: center;
+}
+
+/* 底片齿孔与暗边只由包装层伪元素绘制，真实图像始终保持清晰。 */
+.ink-lightbox__negative::before,
+.ink-lightbox__negative::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.ink-lightbox__negative::before {
+  inset: -0.7rem -1rem;
+  z-index: 0;
+  border: 1px solid rgb(238 233 222 / 0.2);
+  background:
+    repeating-linear-gradient(
+        90deg,
+        transparent 0 0.34rem,
+        rgb(238 233 222 / 0.52) 0.34rem 0.62rem,
+        transparent 0.62rem 0.9rem
+      )
+      top 0.18rem left / auto 0.2rem repeat-x,
+    repeating-linear-gradient(
+        90deg,
+        transparent 0 0.34rem,
+        rgb(238 233 222 / 0.52) 0.34rem 0.62rem,
+        transparent 0.62rem 0.9rem
+      )
+      bottom 0.18rem left / auto 0.2rem repeat-x,
+    #0d0e0c;
+  box-shadow: 0 18px 48px rgb(0 0 0 / 0.42);
+}
+
+.ink-lightbox__negative::after {
+  inset: 0;
+  z-index: 2;
+  background: #f4efe3;
+  opacity: 0;
+}
+
+.ink-lightbox .ink-lightbox__negative .yarl__slide_image {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
   border-radius: 2px;
+  filter: none;
+  object-fit: contain;
+}
+
+.ink-lightbox--negative-enter .yarl__slide_current .ink-lightbox__negative {
+  animation: negative-turn 520ms var(--ease-ink) both;
+}
+
+.ink-lightbox--negative-enter .yarl__slide_current .ink-lightbox__negative::after {
+  animation: negative-exposure 360ms var(--ease-ink) both;
+}
+
+@keyframes negative-turn {
+  from {
+    opacity: 0.82;
+    transform: rotate(-1.2deg) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes negative-exposure {
+  0% {
+    opacity: 0.18;
+  }
+
+  100% {
+    opacity: 0;
+  }
 }
 
 /* 灯箱与所点照片共享同一快照：图像原位扩张，背景仍由灯箱自身显影。 */
@@ -381,5 +465,18 @@
 
   ::view-transition-group(gallery-photo) {
     animation: none;
+  }
+
+  .ink-lightbox--negative-enter .yarl__slide_current .ink-lightbox__negative,
+  .ink-lightbox--negative-enter .yarl__slide_current .ink-lightbox__negative::after {
+    animation: none;
+  }
+
+  .ink-lightbox__negative {
+    transform: none;
+  }
+
+  .ink-lightbox__negative::after {
+    opacity: 0;
   }
 }

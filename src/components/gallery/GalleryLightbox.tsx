@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
 import { flushSync } from 'react-dom';
-import Lightbox from 'yet-another-react-lightbox';
+import Lightbox, { type Slide } from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import './gallery-lightbox.css';
 
@@ -25,12 +25,29 @@ interface Props {
   items: GalleryItem[];
 }
 
+const negativeFrameStyle = (slide: Slide): CSSProperties => {
+  if (
+    !('width' in slide) ||
+    !('height' in slide) ||
+    typeof slide.width !== 'number' ||
+    typeof slide.height !== 'number'
+  ) {
+    return {};
+  }
+
+  const ratio = slide.width / slide.height;
+  return ratio >= 1
+    ? { width: `min(84vw, ${ratio * 78}vh)`, aspectRatio: `${slide.width} / ${slide.height}` }
+    : { height: `min(78vh, ${78 / ratio}vw)`, aspectRatio: `${slide.width} / ${slide.height}` };
+};
+
 export default function GalleryLightbox({ items }: Props) {
   const reducedMotion = useReducedMotion();
   const supportsViewTransition =
     typeof document !== 'undefined' && typeof document.startViewTransition === 'function';
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
+  const [negativeOpening, setNegativeOpening] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const gridRef = useRef<HTMLElement | null>(null);
   const transitionTargetRef = useRef<HTMLImageElement | null>(null);
@@ -43,6 +60,12 @@ export default function GalleryLightbox({ items }: Props) {
   useEffect(() => {
     if (!open) triggerRef.current?.focus({ preventScroll: true });
   }, [open]);
+
+  useEffect(() => {
+    if (!negativeOpening) return;
+    const cleanupTimer = window.setTimeout(() => setNegativeOpening(false), 560);
+    return () => window.clearTimeout(cleanupTimer);
+  }, [negativeOpening]);
 
   // 显影：入视口的画面渐次加 .is-developed（暗态预置在 gallery-lightbox.css，仅 html.js + no-preference 生效）
   useEffect(() => {
@@ -129,6 +152,7 @@ export default function GalleryLightbox({ items }: Props) {
       gridImageAt(nextIndex),
       () => {
         setIndex(nextIndex);
+        setNegativeOpening(!reducedMotion);
         setOpen(true);
       },
       () => document.querySelector<HTMLImageElement>('.ink-lightbox .yarl__slide_image'),
@@ -138,7 +162,10 @@ export default function GalleryLightbox({ items }: Props) {
   const closeLightbox = () => {
     transitionBetween(
       document.querySelector<HTMLImageElement>('.ink-lightbox .yarl__slide_image'),
-      () => setOpen(false),
+      () => {
+        setNegativeOpening(false);
+        setOpen(false);
+      },
       () => gridImageAt(index),
     );
   };
@@ -199,7 +226,7 @@ export default function GalleryLightbox({ items }: Props) {
       </section>
 
       <Lightbox
-        className="ink-lightbox"
+        className={`ink-lightbox${negativeOpening ? ' ink-lightbox--negative-enter' : ''}`}
         open={open}
         close={closeLightbox}
         index={index}
@@ -213,7 +240,7 @@ export default function GalleryLightbox({ items }: Props) {
             ? { fade: 0, swipe: 0, navigation: 0 }
             : {
                 fade: supportsViewTransition ? 0 : 250,
-                swipe: 400,
+                swipe: 250,
                 navigation: 250,
               }
         }
@@ -221,6 +248,11 @@ export default function GalleryLightbox({ items }: Props) {
           iconPrev: () => <ChevronLeft aria-hidden="true" strokeWidth={1.5} />,
           iconNext: () => <ChevronRight aria-hidden="true" strokeWidth={1.5} />,
           iconClose: () => <X aria-hidden="true" strokeWidth={1.5} />,
+          slideContainer: ({ slide, children }) => (
+            <div className="ink-lightbox__negative" style={negativeFrameStyle(slide)}>
+              {children}
+            </div>
+          ),
           slideFooter: ({ slide }) => {
             const current = items.find((item) => item.src === slide.src);
             if (!current) return null;

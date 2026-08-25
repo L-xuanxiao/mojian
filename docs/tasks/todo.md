@@ -1,3 +1,41 @@
+# 当前任务：展览级数字长卷动效升级（Phase 2）
+
+目标：在已确认的 Phase 1 视觉方向上完成器作装裱回正与暗室翻底片；保持内容、路由、组件接口和既有共享图像接棒不变，不新增依赖、动效管理器或全局状态，不提交、不推送。
+
+- [x] 核对器作索引、灯箱切换与清理链的现有实现
+- [x] 确认 Phase 2 的最小实现范围与可验证终态
+- [x] 实现器作三档装裱角、hover / focus 回正与 reduced-motion 降级
+- [x] 实现灯箱 520ms 翻底片、360ms 曝光层与 250ms 相邻切换
+- [x] 同步 `DESIGN.md`、`.impeccable/design.json` 与 `docs/progress.md`
+- [x] 完成格式、类型、构建、差异与生产浏览器验收
+- [x] 补充结果审查并清理预览进程
+
+## 计划确认
+
+- 阶段边界：只修改 `/projects/` 器作索引和 `/gallery/` 共享灯箱；不改首页器作、项目详情、内容数据、导航或 Phase 1 时间线。
+- 器作画框：三类展品分别采用约 `-0.8deg / +0.7deg / -0.35deg` 的静态装裱角；仅桌面细指针 hover 与 `focus-within` 在 250ms 内回正并上移 6px，移动端不挂载 hover，低动态只保留颜色、墨线与阴影反馈。
+- 暗室底片：复用 YARL 的 `slideContainer` 增加必要包装层；齿孔框与最高 0.18 的纸白曝光层只由伪元素绘制，首次打开以 `rotate(-1.2deg) scale(.96)` 在 520ms 内回正，图片全程 `filter: none`。
+- 切换与清理：共享图像打开/关闭仍为 250ms；上一幅、下一幅的 swipe / navigation 统一为 250ms，切换不重复曝光；快速开关通过现有 promise、异常分支、超时和局部状态清理 View Transition 名称与临时入场态。
+- 验证覆盖：完整静态四项；生产预览覆盖 `1707×735 @ DPR1.5`、`390×844`、明暗主题、键盘焦点、触摸门控、连续开关/切换、reduced-motion、无 JS、控制台、横向溢出与长任务；结束后停止预览并确认端口拒连。
+
+## 结果审查
+
+### 实施结果
+
+- `/projects/` 三类展品直接复用现有媒体节点，以 `-0.8deg / +0.7deg / -0.35deg` 静置；细指针 hover 与键盘 `focus-visible` 在 250ms 内回正并上移 6px，继续使用既有环境阴影、编号落砂和展签复笔，不新增包装层或脚本。
+- 灯箱复用 YARL `slideContainer` 增加一个内部底片包装层；齿孔框和纸白曝光层只由伪元素绘制，打开时以 520ms 从 `rotate(-1.2deg) scale(.96)` 回正，曝光最高 0.18 并在 360ms 消退。图片全程 `filter: none`，包装层与图片尺寸实测差为 0。
+- `negativeOpening` 仅在打开时短暂存在并以 560ms 超时兜底清理；关闭会立即撤销，相邻切换不重新设置。YARL swipe / navigation 统一为 250ms，既有共享图像 View Transition、异常分支、promise 与 280ms 名称清理保持不变。
+- `DESIGN.md`、本地 `.impeccable/design.json` 与 `docs/progress.md` 已同步；sidecar 同时校正古铜 `#7d6549` 与缺失的 `folio-turn` 记录，仍按忽略规则仅保留本地。
+
+### 验证证据
+
+- 静态：`pnpm format:check` 全绿；`pnpm check` 为 52 files、0 errors / 0 warnings / 0 hints；`pnpm build` 成功生成 24 页、99 个优化图像与 3 页 Pagefind 索引；`git diff --check` 与 sidecar JSON 解析通过。
+- 器作（Playwright，`1707×735 @ DPR1.5`）：三件展品角度实测为 `-0.8 / +0.7 / -0.35deg`；hover 与键盘焦点均回到 0deg、上移 6px并切换卷首影。`390×844 @ DPR1.5` 粗指针下 `hover: hover` 为 false，真实 tap 前后保持 `-0.8deg / 0px`，两端均无横向溢出；明暗主题结果一致。
+- 暗室（同两视口）：打开 40ms 时底片动画名、520ms 时长、约 `-1.2deg / .96` 矩阵、曝光动画 360ms 与 opacity 0.18 均命中；570ms 后临时类、transform 与曝光归零。下一幅和键盘 ArrowRight 均不重复曝光，图片 `filter: none`，明暗主题均无溢出。
+- 连续三次 80ms 快速开关后灯箱节点、入场类、View Transition 名称全部为 0，焦点回到原触发按钮；剩余运行动画仅为既有 `mist-drift-a` 与 `bamboo-sway`。桌面与移动控制台均为 0 errors / 0 warnings。
+- reduced-motion：器作 transform 为 `none`，颜色 / 阴影反馈为 150ms；灯箱不建立翻底片入场，曝光为 0、图片清晰、View Transition 名称为 0。无 JS 下 3 件器作与 6 幅画廊图全部可见；打开、切换、关闭期间未记录到 >50ms Long Task。
+- Impeccable 机械检查只报告既有字号 / 色值 advisory；本轮新出现的暗室阴影色已立即收敛回现有 `rgb(0 0 0 / 0.42)` 契约。三个 Playwright 会话均已关闭，临时脚本 / 配置 / 截图已删除，preview PID 13904 已停止，4321 确认拒连。
+
 # 当前任务：展览级数字长卷动效升级（Phase 1）
 
 目标：按已确认的“集中式高潮”方向完成首页会话级墨滴开卷、题名运笔与四类内页卷首交棒；本阶段不改内容、导航、路由或数据，不实施器作画框与暗室底片，不提交、不推送。
