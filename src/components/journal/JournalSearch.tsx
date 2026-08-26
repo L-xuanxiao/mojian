@@ -1,7 +1,7 @@
 // 笺录检索：全站首个 React Island。
 // 数据层为 Pagefind 纯 JS API（构建期生成 /pagefind/ 索引，dev 下不存在 → 优雅降级）；
 // React 只管检索状态；键盘输入属于高频操作，结果返回后立即更新，不附加入退场等待。
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { withBase } from '../../site.config';
 
@@ -29,7 +29,7 @@ export default function JournalSearch() {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [results, setResults] = useState<ResultItem[]>([]);
-  const pagefindRef = useRef<PagefindModule | null>(null);
+  const [pagefind, setPagefind] = useState<PagefindModule | null>(null);
 
   // 组件进入视口即后台加载索引模块；失败则进入降级态
   useEffect(() => {
@@ -40,7 +40,7 @@ export default function JournalSearch() {
         const pagefindPath = withBase('/pagefind/pagefind.js');
         const mod = (await import(/* @vite-ignore */ pagefindPath)) as PagefindModule;
         await mod.init();
-        if (!cancelled) pagefindRef.current = mod;
+        if (!cancelled) setPagefind(mod);
       } catch {
         if (!cancelled) setStatus('unavailable');
       }
@@ -58,29 +58,38 @@ export default function JournalSearch() {
       setStatus((prev) => (prev === 'unavailable' ? prev : 'idle'));
       return;
     }
-    const pagefind = pagefindRef.current;
     if (!pagefind) return;
 
     setStatus('loading');
-    const timer = setTimeout(async () => {
-      const search = await pagefind.search(q);
-      const items = await Promise.all(
-        search.results.slice(0, 10).map(async (result) => {
-          const data = await result.data();
-          return {
-            // Pagefind 结果 URL 取自页面 canonical（已含部署 base）；无 canonical 的旧索引才补 base
-            url: data.url.startsWith(import.meta.env.BASE_URL) ? data.url : withBase(data.url),
-            // 页面 <title> 带站点后缀「 · 墨笺」，检索结果只留文章题名
-            title: (data.meta['title'] ?? data.url).replace(/ · 墨笺$/, ''),
-            excerpt: data.excerpt,
-          };
-        }),
-      );
-      setResults(items);
-      setStatus('done');
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      try {
+        const search = await pagefind.search(q);
+        const items = await Promise.all(
+          search.results.slice(0, 10).map(async (result) => {
+            const data = await result.data();
+            return {
+              // Pagefind 结果 URL 取自页面 canonical（已含部署 base）；无 canonical 的旧索引才补 base
+              url: data.url.startsWith(import.meta.env.BASE_URL) ? data.url : withBase(data.url),
+              // 页面 <title> 带站点后缀「 · 墨笺」，检索结果只留文章题名
+              title: (data.meta['title'] ?? data.url).replace(/ · 墨笺$/, ''),
+              excerpt: data.excerpt,
+            };
+          }),
+        );
+        if (cancelled) return;
+        setResults(items);
+        setStatus('done');
+      } catch {
+        if (!cancelled) setStatus('unavailable');
+      }
     }, 200);
-    return () => clearTimeout(timer);
-  }, [query]);
+    return () => {
+      // 清除定时器只能阻止尚未发出的请求；该标记还会拦截已经在途的旧响应。
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [pagefind, query]);
 
   const clear = () => {
     setQuery('');

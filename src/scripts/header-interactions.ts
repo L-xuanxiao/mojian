@@ -1,88 +1,103 @@
-export function initHeaderInteractions(header: HTMLElement) {
+function initMobileNav(header: HTMLElement) {
   const mobileNav = header.querySelector<HTMLDetailsElement>('[data-mobile-nav]');
-  if (mobileNav) {
-    const summary = mobileNav.querySelector<HTMLElement>('summary');
-    const panel = mobileNav.querySelector<HTMLElement>('.mobile-nav__panel');
-    const desktopViewport = window.matchMedia('(min-width: 640px)');
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let restoreFocusOnClose = false;
+  if (!mobileNav) return;
 
-    const cancelClose = () => {
-      restoreFocusOnClose = false;
-      mobileNav.removeAttribute('data-closing');
-    };
+  const summary = mobileNav.querySelector<HTMLElement>('summary');
+  const panel = mobileNav.querySelector<HTMLElement>('.mobile-nav__panel');
+  const desktopViewport = window.matchMedia('(min-width: 640px)');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let restoreFocusOnClose = false;
 
-    const finishClose = () => {
-      const restoreFocus = restoreFocusOnClose;
-      restoreFocusOnClose = false;
-      mobileNav.removeAttribute('data-closing');
-      mobileNav.open = false;
-      if (restoreFocus) summary?.focus();
-    };
+  const cancelClose = () => {
+    restoreFocusOnClose = false;
+    mobileNav.removeAttribute('data-closing');
+  };
 
-    const closeMenu = (restoreFocus = false, instant = reducedMotion.matches) => {
-      if (!mobileNav.open) return;
-      if (instant || !panel) {
-        restoreFocusOnClose = restoreFocus;
-        finishClose();
-        return;
-      }
-      if (mobileNav.hasAttribute('data-closing')) return;
+  const finishClose = () => {
+    const restoreFocus = restoreFocusOnClose;
+    restoreFocusOnClose = false;
+    mobileNav.removeAttribute('data-closing');
+    mobileNav.open = false;
+    if (restoreFocus) summary?.focus();
+  };
 
+  const closeMenu = (restoreFocus = false, instant = reducedMotion.matches) => {
+    if (!mobileNav.open) return;
+    if (instant || !panel) {
       restoreFocusOnClose = restoreFocus;
-      // 同帧重新展开再关闭时，先取消旧动画，确保 CSS 关闭动画拥有新的时间线。
-      panel.getAnimations().forEach((animation) => animation.cancel());
-      mobileNav.setAttribute('data-closing', '');
-    };
+      finishClose();
+      return;
+    }
+    if (mobileNav.hasAttribute('data-closing')) return;
 
-    summary?.addEventListener('click', (event) => {
-      if (!mobileNav.open) return;
-      event.preventDefault();
-      if (mobileNav.hasAttribute('data-closing')) {
-        // 收卷途中再次点击视为撤销关闭，避免快速操作留下半透明面板。
-        cancelClose();
-        return;
-      }
+    restoreFocusOnClose = restoreFocus;
+    // 同帧重新展开再关闭时，先取消旧动画，确保 CSS 关闭动画拥有新的时间线。
+    panel.getAnimations().forEach((animation) => animation.cancel());
+    mobileNav.setAttribute('data-closing', '');
+  };
+
+  summary?.addEventListener('click', (event) => {
+    if (!mobileNav.open) return;
+    event.preventDefault();
+    if (mobileNav.hasAttribute('data-closing')) {
+      // 收卷途中再次点击视为撤销关闭，避免快速操作留下半透明面板。
+      cancelClose();
+      return;
+    }
+    closeMenu();
+  });
+
+  const finishAnimatedClose = (event: AnimationEvent) => {
+    if (
+      event.target === panel &&
+      event.animationName === 'mobile-nav-close' &&
+      mobileNav.hasAttribute('data-closing')
+    ) {
+      finishClose();
+    }
+  };
+  panel?.addEventListener('animationend', finishAnimatedClose);
+  panel?.addEventListener('animationcancel', finishAnimatedClose);
+
+  document.addEventListener('pointerdown', (event) => {
+    if (mobileNav.open && event.target instanceof Node && !mobileNav.contains(event.target)) {
       closeMenu();
-    });
+    }
+  });
 
-    const finishAnimatedClose = (event: AnimationEvent) => {
-      if (
-        event.target === panel &&
-        event.animationName === 'mobile-nav-close' &&
-        mobileNav.hasAttribute('data-closing')
-      ) {
-        finishClose();
-      }
-    };
-    panel?.addEventListener('animationend', finishAnimatedClose);
-    panel?.addEventListener('animationcancel', finishAnimatedClose);
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || !mobileNav.open) return;
+    event.preventDefault();
+    closeMenu(true);
+  });
 
-    document.addEventListener('pointerdown', (event) => {
-      if (mobileNav.open && event.target instanceof Node && !mobileNav.contains(event.target)) {
-        closeMenu();
-      }
-    });
+  desktopViewport.addEventListener('change', (event) => {
+    if (event.matches) closeMenu(false, true);
+  });
+}
 
-    document.addEventListener('keydown', (event) => {
-      if (event.key !== 'Escape' || !mobileNav.open) return;
-      event.preventDefault();
-      closeMenu(true);
-    });
+function initScrolledHeader(header: HTMLElement) {
+  let frame = 0;
+  const sync = () => {
+    frame = 0;
+    header.classList.toggle('is-scrolled', window.scrollY > 24);
+  };
+  const requestSync = () => {
+    if (frame) return;
+    frame = window.requestAnimationFrame(sync);
+  };
 
-    desktopViewport.addEventListener('change', (event) => {
-      if (event.matches) closeMenu(false, true);
-    });
-  }
+  window.addEventListener('scroll', requestSync, { passive: true });
+  sync();
+}
+
+function initHomeChapterRail(header: HTMLElement) {
+  if (!header.hasAttribute('data-home')) return;
 
   const track = header.querySelector<HTMLElement>('.nav-rail__track');
   const marker = header.querySelector<HTMLElement>('[data-chapter-marker]');
   const indexLabel = header.querySelector<HTMLElement>('[data-chapter-index]');
   const titleLabel = header.querySelector<HTMLElement>('[data-chapter-title]');
-  let frame = 0;
-  let layoutFrame = 0;
-  let chapterAnchors: number[] = [];
-  let trackWidth = 0;
   const fallbackTitles: Record<string, string> = {
     卷: '卷首',
     壹: '此间近况',
@@ -109,12 +124,15 @@ export function initHeaderInteractions(header: HTMLElement) {
       };
     },
   );
+  if (!marker || chapters.length === 0) return;
 
-  const syncHeader = () => {
+  let frame = 0;
+  let layoutFrame = 0;
+  let chapterAnchors: number[] = [];
+  let trackWidth = 0;
+
+  const sync = () => {
     frame = 0;
-    header.classList.toggle('is-scrolled', window.scrollY > 24);
-    if (!marker || chapterAnchors.length === 0) return;
-
     const readingLine = window.scrollY + Math.min(window.innerHeight * 0.36, 320);
     const lastIndex = chapters.length - 1;
     let active = -1;
@@ -143,7 +161,7 @@ export function initHeaderInteractions(header: HTMLElement) {
 
   const requestSync = () => {
     if (frame) return;
-    frame = window.requestAnimationFrame(syncHeader);
+    frame = window.requestAnimationFrame(sync);
   };
 
   // 章节坐标只在版式发生变化时测量；滚动帧只消费缓存，避免连续强制布局。
@@ -173,4 +191,11 @@ export function initHeaderInteractions(header: HTMLElement) {
   }
 
   measureLayout();
+}
+
+export function initHeaderInteractions(header: HTMLElement) {
+  // 三类交互生命周期不同，保持就地控制器，避免首页逻辑泄漏到所有内页。
+  initMobileNav(header);
+  initScrolledHeader(header);
+  initHomeChapterRail(header);
 }

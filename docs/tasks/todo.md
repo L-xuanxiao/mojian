@@ -1,3 +1,31 @@
+# 当前任务：热核审查问题修复
+
+目标：修复 Pagefind 检索生命周期竞态，收敛 Header 与 Hero 的职责/模式结构；保持视觉、文案、路由和公开组件接口不变，不新增依赖，不提交、不推送。
+
+- [x] 以浏览器公共界面复现并锁定 Pagefind 初始化期间输入丢失
+- [x] 修复 Pagefind 就绪状态，确保初始化完成后自动执行当前查询
+- [x] 以浏览器公共界面复现并锁定旧搜索结果覆盖新查询
+- [x] 为搜索请求增加过期响应屏蔽与异常降级
+- [x] 拆分移动卷目、页眉滚动态与首页章节轨道控制器
+- [x] 将 Hero full / light 数值集中为 typed profile，并保持 short 独立
+- [x] 完成格式、类型、构建、E2E、差异与真实浏览器回归
+- [x] 补充结果审查并确认工作区只含本轮改动
+
+## 计划确认
+
+- 测试缝：只从用户可见的笺录搜索框/结果列表、移动卷目、首页章节读数与 Hero `data-hero-intro` 观察行为；Pagefind 作为构建产物边界以浏览器路由替身控制时序，不测试 React 私有状态。
+- TDD：先分别写“初始化完成前输入仍会搜索”和“较慢旧请求不得覆盖新结果”两个失败用例，每次只实现足够通过当前用例的生命周期修复。
+- Header：仍由 `initHeaderInteractions()` 作为唯一公开入口；内部拆成三个就地函数，非首页不创建章节坐标、字体等待或 `ResizeObserver`。
+- Hero：不重写时间线，不改变任何数值；只把 full / light 的参数集中到模块级只读 profile，由现有时间线消费，short 路径保持原样。
+- 验证：运行目标 E2E 红/绿循环，再执行 `pnpm format:check`、`pnpm check`、`pnpm build`、`pnpm test`、`git diff --check`；生产浏览器复核搜索两种时序、移动卷目和 Hero full / light / short / reduced-motion。
+
+## 结果审查
+
+- Pagefind 以两条浏览器级红/绿用例锁定初始化等待与过期响应竞态；就绪模块改用 React 状态触发当前查询，每次 effect 清理同时拦截定时器与在途旧响应，异常保持原降级语义。
+- Header 只做原逻辑的就地分拆；非首页在首页章节轨控制器入口立即返回，不再创建章节坐标、字体等待与 `ResizeObserver`。Hero full / light 原数值集中为模块级只读 profile，short 路径未改。
+- 验证通过：`pnpm format:check`，`pnpm check` 57 文件 0 问题，`pnpm build` 24 页且 Pagefind 索引 3 页，`pnpm test` 在生产 preview 中 6/6 通过，`git diff --check` 通过。代码图覆盖未记录缺口，但本轮文件为 `metadata_changed`，已以源码差异与浏览器结果核验。
+- 工作区只含本轮 5 个预期文件；未改视觉、文案、路由、公开接口或依赖，无需同步设计/进度契约，未提交、未推送。
+
 # 当前任务：全项目代码质量五项修复
 
 目标：以内部脚本模块化收敛 Header / Hero 职责，修复灯箱快速切换与 Storage 异常，并以 Playwright 回归测试作为 GitHub Pages 部署门禁；不改变视觉、内容、路由或公开接口，不提交、不推送。

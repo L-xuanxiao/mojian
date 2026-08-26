@@ -1,5 +1,28 @@
 import { gsap, prefersReducedMotion, onDesktopViewport, attachSealMagnet } from './scroll';
 
+const paintedIntroProfiles = {
+  full: {
+    spot: { opacity: 0.28, duration: 0.33, interval: 0.06, fadeDuration: 0.18, fadeAt: 0.4 },
+    sheetDuration: 0.72,
+    art: { duration: 0.82, at: 0.1 },
+    ink: { duration: 0.28, stagger: 0.07, at: 0.28 },
+    paper: { duration: 0.26, stagger: 0.07, at: 0.52 },
+    title: { duration: 0.12, at: 1.22 },
+    details: { duration: 0.52, stagger: 0.06, at: 0.56 },
+    seal: { duration: 0.38, at: 1.16 },
+  },
+  light: {
+    spot: { opacity: 0.2, duration: 0.2, interval: 0.035, fadeDuration: 0.12, fadeAt: 0.23 },
+    sheetDuration: 0.42,
+    art: { duration: 0.52, at: 0.04 },
+    ink: { duration: 0.12, stagger: 0.035, at: 0.12 },
+    paper: { duration: 0.12, stagger: 0.035, at: 0.2 },
+    title: { duration: 0.1, at: 0.57 },
+    details: { duration: 0.3, stagger: 0.04, at: 0.25 },
+    seal: { duration: 0.26, at: 0.42 },
+  },
+} as const;
+
 export function initHeroMotion(hero: HTMLElement) {
   if (prefersReducedMotion) return;
 
@@ -76,69 +99,69 @@ export function initHeroMotion(hero: HTMLElement) {
   }
 
   if (introMode === 'full' || introMode === 'light') {
-    const full = introMode === 'full';
+    const profile = paintedIntroProfiles[introMode];
     gsap.set(brushSvgs, { opacity: 1 });
     gsap.set(titleLines, { yPercent: 0, opacity: 0 });
     inkSpots.forEach((spot, index) =>
       entrance.fromTo(
         spot,
         { scale: 0.08, opacity: 0 },
-        { scale: 1, opacity: full ? 0.28 : 0.2, duration: full ? 0.33 : 0.2 },
-        index * (full ? 0.06 : 0.035),
+        { scale: 1, opacity: profile.spot.opacity, duration: profile.spot.duration },
+        index * profile.spot.interval,
       ),
     );
     entrance.to(
       inkSpots,
-      { opacity: 0, duration: full ? 0.18 : 0.12, stagger: 0.02 },
-      full ? 0.4 : 0.23,
+      { opacity: 0, duration: profile.spot.fadeDuration, stagger: 0.02 },
+      profile.spot.fadeAt,
     );
     if (sheet)
       entrance.fromTo(
         sheet,
         { clipPath: 'inset(0 100% 0 0)' },
-        { clipPath: 'inset(0 0% 0 0)', duration: full ? 0.72 : 0.42 },
+        { clipPath: 'inset(0 0% 0 0)', duration: profile.sheetDuration },
         0,
       );
     if (art)
       entrance.fromTo(
         art,
         { clipPath: 'inset(0 100% 0 0)', xPercent: 4 },
-        { clipPath: 'inset(0 0% 0 0)', xPercent: 0, duration: full ? 0.82 : 0.52 },
-        full ? 0.1 : 0.04,
+        { clipPath: 'inset(0 0% 0 0)', xPercent: 0, duration: profile.art.duration },
+        profile.art.at,
       );
     entrance
       .to(
         inkStrokes,
         {
           strokeDashoffset: 0,
-          duration: full ? 0.28 : 0.12,
-          stagger: full ? 0.07 : 0.035,
+          duration: profile.ink.duration,
+          stagger: profile.ink.stagger,
           ease: 'power2.out',
         },
-        full ? 0.28 : 0.12,
+        profile.ink.at,
       )
       .to(
         paperStrokes,
         {
           strokeDashoffset: 0,
-          duration: full ? 0.26 : 0.12,
-          stagger: full ? 0.07 : 0.035,
+          duration: profile.paper.duration,
+          stagger: profile.paper.stagger,
           ease: 'power2.out',
         },
-        full ? 0.52 : 0.2,
+        profile.paper.at,
       )
-      .to(titleLines, { opacity: 1, duration: full ? 0.12 : 0.1 }, full ? 1.22 : 0.57)
-      .to(brushSvgs, { opacity: 0, duration: full ? 0.12 : 0.1 }, full ? 1.22 : 0.57)
+      .to(titleLines, { opacity: 1, duration: profile.title.duration }, profile.title.at)
+      .to(brushSvgs, { opacity: 0, duration: profile.title.duration }, profile.title.at)
       .fromTo(
         details,
         { y: 8, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          duration: full ? 0.52 : 0.3,
-          stagger: full ? 0.06 : 0.04,
+          duration: profile.details.duration,
+          stagger: profile.details.stagger,
         },
-        full ? 0.56 : 0.25,
+        profile.details.at,
       );
     if (seal)
       entrance.fromTo(
@@ -147,10 +170,10 @@ export function initHeroMotion(hero: HTMLElement) {
         {
           scale: 1,
           rotate: 0,
-          duration: full ? 0.38 : 0.26,
+          duration: profile.seal.duration,
           ease: 'back.out(2.4)',
         },
-        full ? 1.16 : 0.42,
+        profile.seal.at,
       );
   } else {
     if (sheet)
