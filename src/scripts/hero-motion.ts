@@ -19,6 +19,24 @@ type TurnState = {
   progress: number;
 };
 
+type TurnAnimation =
+  | {
+      kind: 'spring';
+      target: 0 | 1;
+      velocity: number;
+      stiffness: number;
+      damping: number;
+      done: () => void;
+    }
+  | {
+      kind: 'tween';
+      from: number;
+      target: 1;
+      duration: number;
+      elapsed: number;
+      done: () => void;
+    };
+
 type DragState = {
   pointerId: number;
   direction: Direction;
@@ -120,7 +138,11 @@ export function initHeroMotion(hero: HTMLElement) {
   let strips: HTMLElement[] = [];
   let turnShadows: HTMLElement[] = [];
   let lastMotionTime = 0;
+  let turnAnimation: TurnAnimation | null = null;
+  let turnFrame = 0;
   let introRunning = false;
+  let riffleDurations: number[] = [];
+  let riffleIndex = 0;
   let tapTimer = 0;
 
   let scale = 1;
@@ -168,8 +190,10 @@ export function initHeroMotion(hero: HTMLElement) {
 
   const setInteractionState = () => {
     const busy = Boolean(turn) || introRunning;
-    prevButton.disabled = busy;
-    nextButton.disabled = busy;
+    // 与上游箭头一致：开场可被显式接管，普通翻页期间仍防止重复点击。
+    const navigationBusy = Boolean(turn) && !introRunning;
+    prevButton.disabled = navigationBusy;
+    nextButton.disabled = navigationBusy;
     zoomOut.disabled = introRunning;
     zoomReset.disabled = introRunning;
     zoomIn.disabled = introRunning;
@@ -294,18 +318,22 @@ export function initHeroMotion(hero: HTMLElement) {
     copy.style.opacity = `${turn.progress < 0.5 ? clamp(1 - turn.progress / 0.32) : clamp((turn.progress - 0.68) / 0.32)}`;
   };
 
-  const beginTurn = (direction: Direction) => {
-    if (turn || (introRunning && !hero.dataset.heroIntro)) return false;
+  // 对齐上游 startTurn：新翻页取得唯一动画所有权，并先结算仍在途的旧页。
+  const startTurn = (direction: Direction, progress = 0) => {
+    turnAnimation = null;
+    if (turn) {
+      current = turn.to;
+      turn = null;
+    }
     const step = direction === 'next' ? 1 : -1;
     turn = {
       direction,
       from: current,
       to: (current + step + pages.length) % pages.length,
-      progress: 0,
+      progress,
     };
     renderTurn();
-    applyTurn(0);
-    return true;
+    applyTurn(progress);
   };
 
   const finishTurn = (target: 0 | 1) => {
@@ -314,6 +342,50 @@ export function initHeroMotion(hero: HTMLElement) {
     turn = null;
     drag = null;
     renderStable();
+  };
+
+  const tickTurn = (now: number) => {
+    turnFrame = 0;
+    const deltaTime = Math.min(0.032, (now - lastMotionTime) / 1000 || 0.016);
+    lastMotionTime = now;
+    const animation = turnAnimation;
+
+    if (animation && turn) {
+      if (animation.kind === 'tween') {
+        animation.elapsed += deltaTime;
+        const raw = clamp(animation.elapsed / animation.duration);
+        // 保留本站已批准的开场缓动，仅迁移上游的单一调度所有权。
+        const eased = raw * raw * (3 - 2 * raw);
+        applyTurn(animation.from + (animation.target - animation.from) * eased);
+        if (raw >= 1) {
+          turnAnimation = null;
+          animation.done();
+        }
+      } else {
+        const displacement = turn.progress - animation.target;
+        animation.velocity +=
+          (-animation.stiffness * displacement - animation.damping * animation.velocity) *
+          deltaTime;
+        applyTurn(turn.progress + animation.velocity * deltaTime);
+        if (
+          Math.abs(turn.progress - animation.target) < 0.002 &&
+          Math.abs(animation.velocity) < 0.02
+        ) {
+          applyTurn(animation.target);
+          turnAnimation = null;
+          animation.done();
+        }
+      }
+    }
+
+    // 完成回调可能已经排入下一帧，避免为同一动画重复调度。
+    if (turnAnimation && turn && !turnFrame) turnFrame = requestAnimationFrame(tickTurn);
+  };
+
+  const kickTurn = () => {
+    if (turnFrame) return;
+    lastMotionTime = performance.now();
+    turnFrame = requestAnimationFrame(tickTurn);
   };
 
   const animateTo = (target: 0 | 1, initialVelocity = 0) => {
@@ -325,23 +397,41 @@ export function initHeroMotion(hero: HTMLElement) {
     }
 
     const spring = target === 1 ? COMMIT_SPRING : CANCEL_SPRING;
-    let velocity = initialVelocity;
-    lastMotionTime = performance.now();
-
-    const tick = (now: number) => {
-      if (!turn) return;
-      const deltaTime = Math.min(0.032, (now - lastMotionTime) / 1000 || 0.016);
-      lastMotionTime = now;
-      const displacement = turn.progress - target;
-      velocity += (-spring.stiffness * displacement - spring.damping * velocity) * deltaTime;
-      applyTurn(turn.progress + velocity * deltaTime);
-      if (Math.abs(turn.progress - target) < 0.002 && Math.abs(velocity) < 0.02) {
-        finishTurn(target);
-        return;
-      }
-      requestAnimationFrame(tick);
+    turnAnimation = {
+      kind: 'spring',
+      target,
+      velocity: initialVelocity,
+      stiffness: spring.stiffness,
+      damping: spring.damping,
+      done: () => finishTurn(target),
     };
-    requestAnimationFrame(tick);
+    kickTurn();
+  };
+
+  const tweenTo = (duration: number, done: () => void) => {
+    if (!turn) return;
+    turnAnimation = {
+      kind: 'tween',
+      from: turn.progress,
+      target: 1,
+      duration: duration / 1000,
+      elapsed: 0,
+      done,
+    };
+    kickTurn();
+  };
+
+  const endIntro = () => {
+    introRunning = false;
+    delete hero.dataset.heroIntro;
+    hero.classList.add('hero--intro-complete');
+  };
+
+  // 对齐上游 step：用户输入先终止开场，再结算旧页并提交新的翻页。
+  const step = (direction: Direction) => {
+    if (introRunning) endIntro();
+    startTurn(direction);
+    animateTo(1);
   };
 
   const requestTurn = (direction: Direction) => {
@@ -349,7 +439,7 @@ export function initHeroMotion(hero: HTMLElement) {
       window.clearTimeout(tapTimer);
       tapTimer = 0;
     }
-    if (beginTurn(direction)) animateTo(1);
+    step(direction);
   };
 
   const finishDrag = (cancel = false) => {
@@ -358,6 +448,7 @@ export function initHeroMotion(hero: HTMLElement) {
     drag = null;
     if (!turn) {
       if (!cancel && released.distance < 6) {
+        if (tapTimer) window.clearTimeout(tapTimer);
         tapTimer = window.setTimeout(() => requestTurn(released.direction), 300);
       }
       return;
@@ -397,7 +488,7 @@ export function initHeroMotion(hero: HTMLElement) {
     if (!drag || drag.pointerId !== event.pointerId) return;
     const deltaX = event.clientX - drag.startX;
     drag.distance = Math.max(drag.distance, Math.abs(deltaX));
-    if (!turn && drag.distance >= 3) beginTurn(drag.direction);
+    if (!turn && drag.distance >= 3) startTurn(drag.direction);
     if (!turn) return;
     const raw = (drag.direction === 'next' ? -deltaX : deltaX) / (drag.width * 0.62);
     const progress = clamp(raw);
@@ -491,27 +582,6 @@ export function initHeroMotion(hero: HTMLElement) {
     });
   }
 
-  const fixedTurn = (duration: number) =>
-    new Promise<void>((resolve) => {
-      if (!beginTurn('next')) {
-        resolve();
-        return;
-      }
-      const started = performance.now();
-      const tick = (now: number) => {
-        const raw = clamp((now - started) / duration);
-        const eased = raw * raw * (3 - 2 * raw);
-        applyTurn(eased);
-        if (raw < 1) {
-          requestAnimationFrame(tick);
-          return;
-        }
-        finishTurn(1);
-        resolve();
-      };
-      requestAnimationFrame(tick);
-    });
-
   const preloadPages = () =>
     Promise.all(
       pages.map(
@@ -525,16 +595,35 @@ export function initHeroMotion(hero: HTMLElement) {
       ),
     );
 
+  const riffleStep = () => {
+    if (!introRunning || riffleIndex >= riffleDurations.length) {
+      endIntro();
+      renderStable();
+      return;
+    }
+
+    startTurn('next');
+    tweenTo(riffleDurations[riffleIndex], () => {
+      finishTurn(1);
+      riffleIndex += 1;
+      if (introRunning && riffleIndex < riffleDurations.length) riffleStep();
+      else {
+        endIntro();
+        renderStable();
+      }
+    });
+  };
+
   const runIntro = async () => {
     await preloadPages();
-    for (let index = 0; index < pages.length; index += 1) {
+    // 上游在预载后才打开 introOn；本站提前标记以允许用户在等待期间取消。
+    if (!introRunning) return;
+    riffleDurations = pages.map((_, index) => {
       const bell = Math.sin(Math.PI * ((index + 0.5) / pages.length));
-      await fixedTurn((0.26 - 0.19 * bell) * 1000);
-    }
-    introRunning = false;
-    delete hero.dataset.heroIntro;
-    hero.classList.add('hero--intro-complete');
-    renderStable();
+      return (0.26 - 0.19 * bell) * 1000;
+    });
+    riffleIndex = 0;
+    riffleStep();
   };
 
   renderStable();
@@ -558,7 +647,12 @@ export function initHeroMotion(hero: HTMLElement) {
   }
 
   window.addEventListener('resize', () => {
-    if (turn) finishTurn(turn.progress > 0.5 ? 1 : 0);
-    else renderStable();
+    if (!turn) {
+      renderStable();
+      return;
+    }
+    const progress = turn.progress;
+    renderTurn();
+    applyTurn(progress);
   });
 }

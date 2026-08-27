@@ -31,6 +31,15 @@ const servePagefind = (page: Page, { initDelay = 0, searchDelays = {} }: Pagefin
     }),
   );
 
+const delaySketchbookPages = (page: Page, delay = 2500) =>
+  page.route(
+    /\/mojian\/_astro\/(?:cover|journal|projects|gallery|about|guestbook)\..+\.webp$/,
+    async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      await route.continue();
+    },
+  );
+
 test('灯箱快速切换不会让新幻灯片重复曝光', async ({ page }) => {
   const consoleErrors: string[] = [];
   page.on('console', (message) => {
@@ -260,6 +269,53 @@ test('Hero 开场每会话一次，并在移动端与低动态下保持完整终
   await expect(next).toBeEnabled();
   await page.waitForTimeout(800);
   await expect(current).toContainText('卷首');
+});
+
+test('Hero 预载期间的方向键会终止开场并只执行用户翻页', async ({ page }) => {
+  await delaySketchbookPages(page);
+
+  await page.goto('.', { waitUntil: 'domcontentloaded' });
+  const current = page.getByRole('status', { name: '当前卷' });
+  const next = page.getByRole('button', { name: '下一卷' });
+
+  await page.keyboard.press('ArrowLeft');
+  await expect(current).toContainText('留墨');
+  await expect(next).toBeEnabled({ timeout: 1800 });
+
+  const settledPage = await current.textContent();
+  await page.waitForTimeout(3200);
+  await expect(current).toHaveText(settledPage ?? '');
+});
+
+test('Hero 预载期间的外侧箭头可以接管并终止开场', async ({ page }) => {
+  await delaySketchbookPages(page);
+
+  await page.goto('.', { waitUntil: 'domcontentloaded' });
+  const current = page.getByRole('status', { name: '当前卷' });
+  const previous = page.getByRole('button', { name: '上一卷' });
+
+  await expect(previous).toBeEnabled({ timeout: 800 });
+  await previous.click();
+  await expect(current).toContainText('留墨');
+  await expect(previous).toBeEnabled();
+
+  const settledPage = await current.textContent();
+  await page.waitForTimeout(3200);
+  await expect(current).toHaveText(settledPage ?? '');
+});
+
+test('Hero 翻动开场中的方向键会结算当前页且不再续播', async ({ page }) => {
+  await page.goto('.');
+  const current = page.getByRole('status', { name: '当前卷' });
+  const next = page.getByRole('button', { name: '下一卷' });
+
+  await expect.poll(() => current.textContent(), { timeout: 3000 }).not.toContain('卷首');
+  await page.keyboard.press('ArrowRight');
+  await expect(next).toBeEnabled({ timeout: 2000 });
+
+  const settledPage = await current.textContent();
+  await page.waitForTimeout(2200);
+  await expect(current).toHaveText(settledPage ?? '');
 });
 
 test('无 JavaScript 时卷首册页和六个路由入口仍可访问', async ({ browser }) => {
