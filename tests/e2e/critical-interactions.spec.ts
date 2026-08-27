@@ -119,6 +119,8 @@ test('Storage 被禁用时首屏与主题切换仍可用', async ({ page }) => {
   await page.goto('.');
   await expect(page.locator('html')).toHaveClass(/\bjs\b/);
   await expect(page.locator('main')).toBeVisible();
+  await expect(page.getByRole('status', { name: '当前卷' })).toContainText('卷首');
+  await expect(page.getByRole('button', { name: '下一卷' })).toBeEnabled();
   const toggle = page.getByRole('button', { name: '切换昼夜主题' });
   const pressed = await toggle.getAttribute('aria-pressed');
   await toggle.focus();
@@ -172,27 +174,109 @@ test('移动卷目支持键盘、外点关闭与跨断点清理', async ({ page 
   expect(hasHorizontalOverflow).toBe(false);
 });
 
-test('Hero 首访、主动跳过、回访与低动态终态保持一致', async ({ page }) => {
+test('可翻页 Hero 支持拖拽、回弹、循环、键盘、缩放与稳定后导航', async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('mojian:hero-intro:v1', '1'));
   await page.goto('.');
-  await page.evaluate(() => sessionStorage.removeItem('mojian:hero-intro:v1'));
-  await page.reload();
 
-  const hero = page.locator('[data-hero]');
-  await expect(hero).toHaveAttribute('data-hero-intro', 'full');
-  await page.mouse.wheel(0, 16);
-  await expect(hero).toHaveClass(/hero--intro-complete/);
-  await expect(hero.locator('.hero-title-line').first()).toBeVisible();
+  const book = page.getByRole('group', { name: '可翻页素描本' });
+  const current = page.getByRole('status', { name: '当前卷' });
+  const seal = book.getByRole('link');
+  const bounds = await book.boundingBox();
+  expect(bounds).not.toBeNull();
+  if (!bounds) return;
+
+  await page.mouse.move(bounds.x + bounds.width * 0.82, bounds.y + bounds.height * 0.62);
+  await page.mouse.down();
+  await page.mouse.move(bounds.x + bounds.width * 0.24, bounds.y + bounds.height * 0.62, {
+    steps: 8,
+  });
+  await expect(seal).toHaveAttribute('aria-disabled', 'true');
+  await page.mouse.up();
+  await expect(current).toContainText('笺录');
+
+  await page.mouse.move(bounds.x + bounds.width * 0.82, bounds.y + bounds.height * 0.62);
+  await page.mouse.down();
+  await page.mouse.move(bounds.x + bounds.width * 0.69, bounds.y + bounds.height * 0.62, {
+    steps: 4,
+  });
+  await page.waitForTimeout(120);
+  await page.mouse.move(bounds.x + bounds.width * 0.69, bounds.y + bounds.height * 0.62);
+  await page.mouse.up();
+  await expect(current).toContainText('笺录');
+  await expect(book.getByRole('link')).not.toHaveAttribute('aria-disabled', 'true');
+
+  await page.mouse.move(bounds.x + bounds.width * 0.18, bounds.y + bounds.height * 0.62);
+  await page.mouse.down();
+  await page.mouse.move(bounds.x + bounds.width * 0.78, bounds.y + bounds.height * 0.62, {
+    steps: 8,
+  });
+  await page.mouse.up();
+  await expect(current).toContainText('卷首');
+
+  await page.keyboard.press('ArrowLeft');
+  await expect(current).toContainText('留墨');
+  await page.keyboard.press('ArrowRight');
+  await expect(current).toContainText('卷首');
+
+  await page.getByRole('button', { name: '放大素描本' }).click();
+  await expect(page.getByRole('status', { name: '素描本缩放' })).toContainText('110%');
+  await book.dblclick();
+  await expect(page.getByRole('status', { name: '素描本缩放' })).toContainText('100%');
+
+  await page.getByRole('button', { name: '下一卷' }).click();
+  await expect(current).toContainText('笺录');
+  const journalSeal = page.getByRole('link', { name: '进入笺录' });
+  await expect(journalSeal).not.toHaveAttribute('aria-disabled', 'true');
+  await expect(journalSeal).toHaveAttribute('href', '/mojian/journal/');
+  await journalSeal.click();
+  await expect(page).toHaveURL(/\/mojian\/journal\/$/);
+});
+
+test('Hero 开场每会话一次，并在移动端与低动态下保持完整终态', async ({ page }) => {
+  await page.goto('.');
+  const current = page.getByRole('status', { name: '当前卷' });
+  const next = page.getByRole('button', { name: '下一卷' });
+
+  await expect.poll(() => current.textContent(), { timeout: 3000 }).not.toContain('卷首');
+  await expect(current).toContainText('卷首', { timeout: 6000 });
+  await expect(next).toBeEnabled();
 
   await page.reload();
-  await expect(hero).toHaveAttribute('data-hero-intro', 'short');
+  await expect(current).toContainText('卷首');
+  await page.waitForTimeout(800);
+  await expect(current).toContainText('卷首');
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.evaluate(() => sessionStorage.removeItem('mojian:hero-intro:v1'));
   await page.reload();
-  await expect(hero).toHaveAttribute('data-hero-intro', 'light');
+  await expect.poll(() => current.textContent(), { timeout: 3000 }).not.toContain('卷首');
+  await expect(current).toContainText('卷首', { timeout: 6000 });
+  await expect(next).toBeEnabled();
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.evaluate(() => sessionStorage.removeItem('mojian:hero-intro:v1'));
   await page.reload();
-  await expect(hero).not.toHaveAttribute('data-hero-intro');
-  await expect(hero.locator('.hero-title-line').first()).toBeVisible();
+  await expect(current).toContainText('卷首');
+  await expect(next).toBeEnabled();
+  await page.waitForTimeout(800);
+  await expect(current).toContainText('卷首');
+});
+
+test('无 JavaScript 时卷首册页和六个路由入口仍可访问', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto('http://127.0.0.1:4322/mojian/');
+
+  await expect(
+    page
+      .getByRole('group', { name: '可翻页素描本' })
+      .getByRole('heading', { name: '墨笺', exact: true }),
+  ).toBeVisible();
+  const routes = page.getByRole('navigation', { name: '六卷入口' });
+  await expect(routes.getByRole('link')).toHaveCount(6);
+  await expect(routes.getByRole('link', { name: '笺录' })).toHaveAttribute(
+    'href',
+    '/mojian/journal/',
+  );
+  await context.close();
 });

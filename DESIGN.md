@@ -127,7 +127,7 @@ components:
 
 ### Hierarchy
 
-- **Hero 题字**（400）：主字 `clamp(8rem,30vw,18rem)`，副字 `clamp(4rem,13vw,8rem)`；这是唯一允许超过 5rem 的真实页面标题。
+- **Hero 册页题字**（400）：卷名 `clamp(1.65rem,3.15vw,2.85rem)`，章名 `clamp(1.2rem,1.8vw,1.65rem)`；文字作为真实 DOM 覆盖在册页上，不烘焙进图像。
 - **装饰主字**（400，`aria-hidden`）：页面卷首 `clamp(10rem,22vw,20rem)`，强调场景最高 `clamp(10rem,24vw,22rem)`，首页章号 `clamp(6rem,11vw,10rem)`；移动端分别收敛到约 8–12rem 与 5–7rem。装饰字可以裁切，但不得挤压真实内容。
 - **页面题名**（400）：普通与文章题名 `clamp(2.75rem,4.75vw,5rem)`，强调场景同样以 5rem 封顶；移动端普通题名最高 3.25rem、强调题名最高 3.5rem。
 - **章节题名**（400）：chapter `clamp(2.5rem,4.25vw,4rem)`，普通 section `clamp(2.25rem,3.25vw,2.75rem)`，条目题名最高 `clamp(1.75rem,2.75vw,2.5rem)`；移动端依次封顶 2.5rem / 2.5rem / 2.25rem。
@@ -163,10 +163,10 @@ components:
 
 展览级动效采用“集中式高潮”：同一页面只允许一个主记忆场景，其他导航、主题和高频反馈仍遵守 150/160/250ms。第一阶段由首页开卷与内页卷首交棒承担；方向确认后，第二阶段仅在器作索引加入装裱回正、在暗室灯箱加入翻底片，不能把这两种峰值扩散到普通列表或相邻切换。
 
-- **会话级开场：** 首页完整开场每个标签会话只播放一次，以 `sessionStorage['mojian:hero-intro:v1']` 记录；回访采用约 450ms 短版，存储不可用时同样走短版。完整时间线不超过 1.6s，不锁滚动；滚轮、触摸、按键或点击会立即推进终态并移除临时监听。
-- **手工笔路：** “墨”“笺”使用 inline SVG 的手工分段遮罩按笔顺写出，三层不规则墨斑只动画 `transform + opacity`；SVG 只承担过渡，结束后交回真实 HTML 题字，确保无 JS、字体延迟与异常分支仍可读。
+- **会话级开场：** 首页六卷完整翻过一轮后回到卷首，每个标签会话只播放一次，以 `sessionStorage['mojian:hero-intro:v1']` 记录；存储不可用或低动态时直接显示稳定卷首，开场不锁滚动。
+- **可翻页册页：** 六张图像都是无外框、无硬封底的约 2.2:1 全幅宣纸页，统一采用细钢笔式水墨山水、暖赭灰墨、可见纸纤维、左侧叠页与中央书脊；圆角、外部阴影、动态明暗和 18 段曲面由 CSS / 原生脚本生成。章节名、摘要、统计与入口印章保持真实 DOM，翻页前后交叉淡入。
 - **卷首交棒：** 桌面四类 `PageIntro` 为 45–55svh、无 pin、`scrub: 0.5`，从卷首顶部抵达页眉到卷首底部离开页眉完成主字、纸本、画框或手记交棒；滚动帧只写 `transform`、`opacity`、`clip-path`。
-- **移动轻量版：** 移动端首页首次开场不超过 750ms，内页不创建 ScrollTrigger 交棒；`prefers-reduced-motion` 不播放完整开场和空间叙事，只保留完整静态内容与至多 160ms 的颜色/透明度反馈。
+- **移动同构版：** 移动端沿用同一 18 段曲面、弹簧、阴影与首次开场，只关闭指针视差；内页不创建 ScrollTrigger 交棒。`prefers-reduced-motion` 跳过开场与视差，拖拽仍跟手，松手立即结算。
 - **器作装裱：** 器作索引的三类展品以约 `-0.8deg / +0.7deg / -0.35deg` 静置；桌面细指针 hover 与键盘 `focus-visible` 在 250ms 内回正并上移 6px。触摸不挂载位移反馈，低动态取消角度与位移，只保留 150ms 的编号颜色、展签墨线和阴影变化。
 - **暗室底片：** 灯箱每次打开只播放一次 520ms 翻底片，底片框从 `rotate(-1.2deg) scale(.96)` 回正；纸白曝光层最高 0.18、360ms 消退。入场身份绑定首次打开图片的 `src`，不得依赖会随切换移动的“当前页”类；齿孔与曝光只由必要包装层的伪元素绘制，图片始终 `filter: none`。相邻切换统一 250ms 且不重复曝光，关闭沿用 250ms 共享图像回卷。
 
@@ -248,7 +248,7 @@ components:
 
 ### Reveal 契约
 
-`data-reveal-variant` 只是一份内部 DOM / CSS 动效契约，不是公开组件 API。可用值为 `intro-reading`、`intro-exhibition`、`intro-darkroom`、`intro-personal`、`folio`、`folio-turn`、`spread`、`exhibit`、`contact-sheet` 与 `stagger`：分别表达主字入画、纸层揭开、章节墨线、册页自上缘翻起（接缝处首个纸层，需在组件内声明初态以压过 scoped transform）、跨页错峰、展签错峰、暗室显影与普通列表揭示。`data-home-chapter` 只供页眉读取首页章号与进度；Hero 的 `data-hero-intro` 只标记 `full / light / short` 内部会话态；`PageIntro` 的 `glyph` / `artTreatment` 和 `SectionHeading` 的 `mode` 也只属于内部展示契约。CSS 负责普通揭示、静止终态、hover、按压、遮罩与细线；GSAP 只承担 Hero、桌面长卷、暗室和有限视差。所有普通前置隐藏仅在 `:where(html.js.reveal-ready)`、非低动态条件下成立；`:where()` 刻意把门控权重归零，使后置 `.is-revealed` 终态始终可以覆盖初态。无 JS、低动态、不支持观察器或初始化异常时直接显示完整内容。
+`data-reveal-variant` 只是一份内部 DOM / CSS 动效契约，不是公开组件 API。可用值为 `intro-reading`、`intro-exhibition`、`intro-darkroom`、`intro-personal`、`folio`、`folio-turn`、`spread`、`exhibit`、`contact-sheet` 与 `stagger`：分别表达主字入画、纸层揭开、章节墨线、册页自上缘翻起（接缝处首个纸层，需在组件内声明初态以压过 scoped transform）、跨页错峰、展签错峰、暗室显影与普通列表揭示。`data-home-chapter` 只供页眉读取首页章号与进度；Hero 的 `data-hero-intro="riffle"` 只标记会话首次开场；`PageIntro` 的 `glyph` / `artTreatment` 和 `SectionHeading` 的 `mode` 也只属于内部展示契约。CSS 负责普通揭示、静止终态、hover、按压、遮罩与细线；Hero 使用原生 `requestAnimationFrame`，GSAP 只承担桌面长卷、暗室和有限视差。所有普通前置隐藏仅在 `:where(html.js.reveal-ready)`、非低动态条件下成立；`:where()` 刻意把门控权重归零，使后置 `.is-revealed` 终态始终可以覆盖初态。无 JS、低动态、不支持观察器或初始化异常时直接显示完整内容。
 
 ## Do's and Don'ts
 

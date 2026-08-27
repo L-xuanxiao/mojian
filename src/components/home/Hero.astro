@@ -1,13 +1,119 @@
 ---
-import { Image } from 'astro:assets';
-import InscriptionTip from '../InscriptionTip';
+import { getImage } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import coverArtwork from '../../assets/art/sketchbook/cover.png';
+import journalArtwork from '../../assets/art/sketchbook/journal.png';
+import projectsArtwork from '../../assets/art/sketchbook/projects.png';
+import galleryArtwork from '../../assets/art/sketchbook/gallery.png';
+import aboutArtwork from '../../assets/art/sketchbook/about.png';
+import guestbookArtwork from '../../assets/art/sketchbook/guestbook.png';
 import heroArtwork from '../../assets/art/hero-paper-mountains.webp';
-import heroFar from '../../assets/art/layers/hero-mountain-far.webp';
-import heroMid from '../../assets/art/layers/hero-mountain-mid.webp';
-import heroNear from '../../assets/art/layers/hero-mountain-near.webp';
-import { withBase } from '../../site.config';
+import { site, withBase } from '../../site.config';
+import { formatYearMonth } from '../../utils/date';
+import { getJournalPosts } from '../../utils/journal';
 
-const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
+const [journalEntries, projectEntries, galleryEntries, optimizedArtwork] = await Promise.all([
+  getJournalPosts(),
+  getCollection('projects', ({ data }) => !data.draft),
+  getCollection('gallery', ({ data }) => !data.draft),
+  Promise.all(
+    [
+      coverArtwork,
+      journalArtwork,
+      projectsArtwork,
+      galleryArtwork,
+      aboutArtwork,
+      guestbookArtwork,
+    ].map((src) => getImage({ src, width: 1536, format: 'webp', quality: 84 })),
+  ),
+]);
+
+const featuredFirst = <T extends { data: { featured: boolean; order: number } }>(entries: T[]) =>
+  [...entries].sort(
+    (a, b) => Number(b.data.featured) - Number(a.data.featured) || a.data.order - b.data.order,
+  )[0];
+
+const latestPost = journalEntries[0];
+const featuredProject = featuredFirst(projectEntries);
+const featuredGallery = featuredFirst(galleryEntries);
+const contentCounts = `${journalEntries.length} 篇笺录 · ${projectEntries.length} 件器作 · ${galleryEntries.length} 帧光影`;
+const profileDetails = [site.profile.role, ...site.profile.focus].filter(Boolean).join(' · ');
+const guestbookReady = Boolean(
+  site.giscus.repo && site.giscus.repoId && site.giscus.category && site.giscus.categoryId,
+);
+
+const pages = [
+  {
+    chapter: '卷首',
+    kicker: 'MOJIAN · DIGITAL FOLIO',
+    title: '墨笺',
+    summary: '写字、造物、看光影。让数字世界也保留纸张的呼吸。',
+    meta: contentCounts,
+    href: withBase('/'),
+    seal: '启卷',
+    image: optimizedArtwork[0].src,
+    alt: '宣纸册页上绘有远山、松林与一枝淡墨竹叶',
+  },
+  {
+    chapter: '笺录',
+    kicker: latestPost ? `最近装订 · ${formatYearMonth(latestPost.data.pubDate)}` : '文字册页',
+    title: latestPost?.data.title ?? '尚待装订',
+    summary: latestPost?.data.description ?? '新的文字尚在案头，待落墨后收入笺录。',
+    meta: `${journalEntries.length} 篇公开笺录`,
+    href: withBase('/journal/'),
+    seal: '阅笺',
+    image: optimizedArtwork[1].src,
+    alt: '宣纸册页上绘有毛笔、砚台与空白纸笺',
+  },
+  {
+    chapter: '器作',
+    kicker: featuredProject?.data.featured ? '案上精选' : '器物册页',
+    title: featuredProject?.data.title ?? '尚待装订',
+    summary: featuredProject?.data.summary ?? '新的器物仍在制作，完成后会在此收录。',
+    meta: `${projectEntries.length} 件公开器作`,
+    href: withBase('/projects/'),
+    seal: '观器',
+    image: optimizedArtwork[2].src,
+    alt: '宣纸册页上绘有木作榫卯、纸模型与黄铜圆规',
+  },
+  {
+    chapter: '光影',
+    kicker: featuredGallery?.data.featured ? '光影精选' : '影像册页',
+    title: featuredGallery?.data.title ?? '尚待装订',
+    summary: featuredGallery?.data.description ?? '新的光影仍在显影，待整理后收入此卷。',
+    meta: `${galleryEntries.length} 帧公开光影`,
+    href: withBase('/gallery/'),
+    seal: '看影',
+    image: optimizedArtwork[3].src,
+    alt: '宣纸册页上绘有月影、空白相纸与窗格投影',
+  },
+  {
+    chapter: '此间',
+    kicker: '作者与此间',
+    title: site.profile.displayName || '此间有迹',
+    summary: profileDetails || '署名与身份尚待主人自题，先以站内公开内容作记。',
+    meta: site.profile.focus.length ? site.profile.focus.join(' · ') : contentCounts,
+    href: withBase('/about/'),
+    seal: '到访',
+    image: optimizedArtwork[4].src,
+    alt: '宣纸册页上绘有茶盏、枝叶、无字折图与远处低山',
+  },
+  {
+    chapter: '留墨',
+    kicker: '公开题写 · 经 GitHub 账号',
+    title: guestbookReady ? '请君留墨' : '尚待开卷',
+    summary: guestbookReady
+      ? '路过此间，不妨题字一行；题写公开可见。'
+      : '留言墙待仓库接入 giscus 后启用，题写规则与入口已经备妥。',
+    meta: '不留私人信息 · 公开可见',
+    href: withBase('/guestbook/'),
+    seal: '留墨',
+    image: optimizedArtwork[5].src,
+    alt: '宣纸册页上绘有砚台、毛笔、空白留言笺与无字印石',
+  },
+] as const;
+
+const heroStyle = `--hero-paper: url("${heroArtwork.src}")`;
 ---
 
 <section
@@ -17,240 +123,145 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
   data-home-chapter="卷"
   data-home-chapter-title="卷首"
   data-ink-scene="hero"
+  style={heroStyle}
 >
-  <div class="hero__hold">
-    <span class="mist mist--a hero__mist-a" aria-hidden="true"></span>
-    <span class="mist mist--b hero__mist-b" aria-hidden="true"></span>
-    <span class="hero__under-sheet" data-hero-sheet aria-hidden="true"></span>
-    <svg class="hero__ink-bloom" viewBox="0 0 320 320" aria-hidden="true">
-      <path
-        data-hero-ink-spot
-        d="M151 38c25 4 35 34 56 45 25 13 63 7 74 34 12 29-20 54-23 82-3 31 24 62 4 85-21 24-56 2-84 7-31 6-57 34-82 17-24-16-11-51-22-77-11-27-44-44-38-73 6-30 43-38 64-58 20-18 29-57 57-52Z"
-      ></path>
-      <path
-        data-hero-ink-spot
-        d="M134 67c22-17 49 7 68 20 22 15 56 20 61 47 5 26-25 44-33 68-8 26 2 60-22 74-25 14-50-11-77-15-28-4-63 10-80-13-17-23 8-51 10-79 3-26-14-57 7-75 20-17 48 0 66-17Z"
-      ></path>
-      <path
-        data-hero-ink-spot
-        d="M164 89c20 0 31 25 48 35 18 11 48 11 54 32 6 22-18 39-24 60-7 22 1 51-19 63-21 12-43-10-66-13-24-3-52 11-68-7-15-19 5-43 8-66 3-22-11-49 7-63 18-15 40 1 57-11 16-11 24-37 44-37Z"
-      ></path>
-    </svg>
+  <div class="hero__folio" aria-hidden="true">
+    <span>MOJIAN · 2026</span>
+    <span>六卷素描本</span>
+    <span>拖页 · 阅卷</span>
+  </div>
 
-    <div class="hero__folio" aria-hidden="true">
-      <span>MOJIAN · 2026</span>
-      <span>个人数字书卷</span>
-      <span>卷一 · 夺卷入画</span>
+  <div class="hero__inner mx-auto max-w-stage px-5 md:px-8 lg:px-10">
+    <header class="hero__heading">
+      <p class="folio-label">纸上留白 · 墨分五色</p>
+      <p>六卷公开内容，装订成一册可以亲手翻阅的数字素描本。</p>
+    </header>
+
+    <div class="sketchbook" data-sketchbook>
+      <button class="sketchbook__arrow" type="button" aria-label="上一卷">
+        <span aria-hidden="true">‹</span>
+      </button>
+
+      <div class="sketchbook__frame" data-sketchbook-frame>
+        <span class="sketchbook__desk-shadow" aria-hidden="true"></span>
+        <div class="sketchbook__book-wrap" data-sketchbook-book-wrap>
+          <div
+            class="sketchbook__book"
+            data-sketchbook-book
+            role="group"
+            aria-label="可翻页素描本"
+            aria-describedby="sketchbook-instructions"
+            tabindex="0"
+          >
+            <div class="sketchbook__surface" data-sketchbook-surface aria-hidden="true">
+              <div class="sketchbook__spread" style={`background-image: url("${pages[0].image}")`}>
+              </div>
+            </div>
+
+            <div class="sketchbook__copy" data-sketchbook-copy>
+              <div class="sketchbook__copy-left">
+                <p class="sketchbook__kicker" data-sketchbook-kicker>{pages[0].kicker}</p>
+                <h1 class="sketchbook__title" data-sketchbook-title>{pages[0].title}</h1>
+                <p class="sketchbook__meta" data-sketchbook-meta>{pages[0].meta}</p>
+              </div>
+              <div class="sketchbook__copy-right">
+                <p class="sketchbook__chapter" data-sketchbook-chapter>{pages[0].chapter}</p>
+                <p class="sketchbook__summary" data-sketchbook-summary>{pages[0].summary}</p>
+                <a
+                  class="sketchbook__seal"
+                  data-sketchbook-seal
+                  href={pages[0].href}
+                  aria-label={`进入${pages[0].chapter}`}
+                >
+                  <span data-sketchbook-seal-text>{pages[0].seal}</span>
+                </a>
+              </div>
+            </div>
+            <p class="sr-only" data-sketchbook-alt>{pages[0].alt}</p>
+          </div>
+        </div>
+      </div>
+
+      <button class="sketchbook__arrow" type="button" aria-label="下一卷">
+        <span aria-hidden="true">›</span>
+      </button>
     </div>
 
-    <div class="hero__stage mx-auto max-w-stage px-5 md:px-8 lg:px-10">
-      <figure class="hero__art" data-hero-art>
-        <img
-          class="hero__fallback"
-          src={heroArtwork.src}
-          alt="层叠宣纸与墨色构成的抽象山形"
-          width={heroArtwork.width}
-          height={heroArtwork.height}
-          loading="eager"
-          decoding="async"
-          fetchpriority="high"
-        />
-        <div class="hero__layers" aria-hidden="true">
-          <div class="hero__layer hero__layer--far" data-hero-layer="far">
-            <Image
-              src={heroFar}
-              alt=""
-              widths={[720, 1080, 1536]}
-              sizes="(min-width: 1024px) 72vw, 100vw"
-              quality={86}
-              loading="eager"
-            />
-          </div>
-          <span class="hero__layer-mist" aria-hidden="true"></span>
-          <div class="hero__layer hero__layer--mid" data-hero-layer="mid">
-            <Image
-              src={heroMid}
-              alt=""
-              widths={[720, 1080, 1536]}
-              sizes="(min-width: 1024px) 72vw, 100vw"
-              quality={86}
-              loading="eager"
-            />
-          </div>
-          <div class="hero__layer hero__layer--near" data-hero-layer="near">
-            <Image
-              src={heroNear}
-              alt=""
-              widths={[720, 1080, 1536]}
-              sizes="(min-width: 1024px) 72vw, 100vw"
-              quality={88}
-              loading="eager"
-            />
-          </div>
-        </div>
-        <figcaption aria-hidden="true">纸山 · 卷首</figcaption>
-      </figure>
-
-      <div class="hero__copy" data-ink-avoid>
-        <p class="folio-label hero__eyebrow">纸上留白 · 墨分五色</p>
-        <h1 class="hero__title font-display" aria-label="墨笺" style={heroArtStyle}>
-          <span class="hero-title-mask hero-title-mask--ink">
-            <span class="hero-title-line hero-title-line--ink">墨</span>
-            <svg
-              class="hero-title-brush hero-title-brush--ink"
-              data-hero-brush="ink"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <defs>
-                <mask id="hero-brush-mask-ink" maskUnits="userSpaceOnUse">
-                  <g class="hero-brush-paths">
-                    <path d="M20 17 80 17"></path>
-                    <path d="M25 18 24 54"></path>
-                    <path d="M76 18 76 54"></path>
-                    <path d="M24 35 76 35"></path>
-                    <path d="M50 18 50 55"></path>
-                    <path d="M23 54 78 54"></path>
-                    <path d="M50 57 50 88"></path>
-                    <path d="M25 70 76 70"></path>
-                    <path d="M19 89 82 89"></path>
-                  </g>
-                </mask>
-              </defs>
-              <text x="50" y="88" text-anchor="middle" mask="url(#hero-brush-mask-ink)"> 墨 </text>
-            </svg>
-          </span>
-          <span class="hero-title-mask hero-title-mask--paper">
-            <span class="hero-title-line hero-title-line--paper">笺</span>
-            <svg
-              class="hero-title-brush hero-title-brush--paper"
-              data-hero-brush="paper"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <defs>
-                <mask id="hero-brush-mask-paper" maskUnits="userSpaceOnUse">
-                  <g class="hero-brush-paths">
-                    <path d="M25 13 14 32"></path>
-                    <path d="M20 22 46 22"></path>
-                    <path d="M52 13 43 33"></path>
-                    <path d="M48 22 80 22"></path>
-                    <path d="M17 42 76 39"></path>
-                    <path d="M24 57 77 52"></path>
-                    <path d="M31 36 39 82"></path>
-                    <path d="M61 34 71 76"></path>
-                    <path d="M22 85 82 78"></path>
-                  </g>
-                </mask>
-              </defs>
-              <text x="50" y="88" text-anchor="middle" mask="url(#hero-brush-mask-paper)">
-                笺
-              </text>
-            </svg>
-          </span>
-        </h1>
-        <div class="hero__statement">
-          <p>写字、造物、看光影。让数字世界也保留纸张的呼吸。</p>
-          <nav class="hero__links" aria-label="卷首入口">
-            <a class="ink-link" href={withBase('/journal/')}>读笺录</a>
-            <a class="ink-link" href={withBase('/projects/')}>看器作</a>
-          </nav>
-          {/* 移动端卷首钤印：竖排 colophon 被收起后，落款仪式移入 statement 卡角 */}
-          <span class="seal-block hero__seal hero__seal--inset" aria-hidden="true">墨</span>
-        </div>
-      </div>
-
-      <div class="hero__colophon">
-        <span aria-hidden="true">入画</span>
-        <InscriptionTip text="卷首钤印 · 墨" client:idle>
-          <span class="seal-block hero__seal" data-hero-seal aria-hidden="true">墨</span>
-        </InscriptionTip>
-        <span aria-hidden="true">展卷</span>
-      </div>
-
-      <p class="hero__scroll" aria-hidden="true">
-        <span>向下夺卷</span>
-        <span class="hero__scroll-line"></span>
+    <div class="sketchbook__footer">
+      <p class="sketchbook__current" role="status" aria-label="当前卷" aria-live="polite">
+        <span data-sketchbook-current>{pages[0].chapter}</span>
+        <span data-sketchbook-count>01 / 06</span>
       </p>
+      <p id="sketchbook-instructions" class="sketchbook__instructions">
+        拖动页角、点击左右半页，或使用方向键翻卷
+      </p>
+      <div class="sketchbook__zoom" aria-label="素描本缩放控制">
+        <button type="button" aria-label="缩小素描本" data-sketchbook-zoom-out>−</button>
+        <button type="button" aria-label="恢复原始尺寸" data-sketchbook-zoom-reset>复位</button>
+        <span role="status" aria-label="素描本缩放" data-sketchbook-zoom-status>100%</span>
+        <button type="button" aria-label="放大素描本" data-sketchbook-zoom-in>＋</button>
+      </div>
     </div>
   </div>
+
+  {
+    pages.map((page) => (
+      <template
+        data-sketchbook-page
+        data-chapter={page.chapter}
+        data-kicker={page.kicker}
+        data-title={page.title}
+        data-summary={page.summary}
+        data-meta={page.meta}
+        data-href={page.href}
+        data-seal={page.seal}
+        data-image={page.image}
+        data-alt={page.alt}
+      />
+    ))
+  }
+
+  <noscript>
+    <nav class="sketchbook__noscript" aria-label="六卷入口">
+      {pages.map((page) => <a href={page.href}>{page.chapter}</a>)}
+    </nav>
+  </noscript>
 </section>
 
-<style>
+<style is:global>
   .hero {
     position: relative;
-    /* 桌面卷首约七成半屏：首屏底部露出近况章头，与全站编辑流密度一致；移动端保持近满屏 */
-    min-height: min(75svh, 46rem);
+    min-height: min(74svh, 47rem);
     overflow: clip;
-  }
-  .hero__hold {
-    position: relative;
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in oklab, var(--paper) 89%, transparent),
+        transparent 32% 68%,
+        color-mix(in oklab, var(--paper) 89%, transparent)
+      ),
+      var(--hero-paper) center 43% / cover;
     isolation: isolate;
-    min-height: inherit;
-    overflow: clip;
   }
-
-  .hero__ink-bloom {
-    position: absolute;
-    top: 50%;
-    left: 18%;
-    z-index: 4;
-    width: clamp(18rem, 36vw, 36rem);
-    color: color-mix(in oklab, var(--ink) 30%, transparent);
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-  }
-
-  .hero__ink-bloom path {
-    fill: currentColor;
-    opacity: 0;
-    transform-box: fill-box;
-    transform-origin: center;
-  }
-
-  .hero__under-sheet {
-    position: absolute;
-    z-index: -1;
-    top: clamp(4rem, 10vh, 7rem);
-    right: -8vw;
-    bottom: clamp(2rem, 7vh, 5rem);
-    left: clamp(12vw, 18vw, 22rem);
-    border-block: 1px solid var(--line);
-    background: color-mix(in oklab, var(--paper) 94%, var(--paper-deep));
-    box-shadow: -1.5rem 1.5rem 4rem var(--shadow-color);
-    transform: rotate(-0.8deg);
-    transform-origin: left center;
-  }
-  .hero__under-sheet::before,
-  .hero__under-sheet::after {
+  .hero::before {
     content: '';
     position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: linear-gradient(transparent, var(--line) 16% 84%, transparent);
+    inset: 0;
+    z-index: -1;
+    background: color-mix(in oklab, var(--paper) 76%, transparent);
+    pointer-events: none;
   }
-  .hero__under-sheet::before {
-    left: clamp(1.5rem, 4vw, 4rem);
-  }
-  .hero__under-sheet::after {
-    right: clamp(1.5rem, 4vw, 4rem);
-  }
-
   .hero__folio {
     position: absolute;
-    top: clamp(1.1rem, 3vw, 2.25rem);
+    top: 1rem;
     right: clamp(1.25rem, 4vw, 3.5rem);
     left: clamp(1.25rem, 4vw, 3.5rem);
-    z-index: 7;
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     color: var(--bronze);
     font-family: var(--font-noto-sans);
     font-size: 0.62rem;
-    letter-spacing: 0.25em;
+    letter-spacing: 0.22em;
   }
   .hero__folio span:nth-child(2) {
     justify-self: center;
@@ -258,499 +269,479 @@ const heroArtStyle = `--hero-art: url("${heroArtwork.src}")`;
   .hero__folio span:last-child {
     justify-self: end;
   }
-
-  .hero__stage {
-    position: relative;
+  .hero__inner {
     display: grid;
     min-height: inherit;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    grid-template-rows: 1fr;
+    align-content: center;
+    gap: clamp(0.7rem, 1.5vw, 1.1rem);
+    padding-block: 3.5rem 2.2rem;
+  }
+  .hero__heading {
+    display: flex;
+    width: min(58vw, 46rem);
+    margin-inline: auto;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 2rem;
+  }
+  .hero__heading p {
+    margin: 0;
+  }
+  .hero__heading > p:last-child {
+    max-width: 23rem;
+    color: var(--ink-soft);
+    font-size: 0.72rem;
+    text-align: right;
+  }
+  .sketchbook {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, auto) 2.75rem;
     align-items: center;
-    padding-block: clamp(3.75rem, 7vh, 5.5rem) clamp(2.75rem, 5vh, 4rem);
+    justify-content: center;
+    gap: clamp(0.35rem, 1vw, 0.9rem);
   }
-  .hero__art {
+  .sketchbook__frame {
     position: relative;
-    isolation: isolate;
-    z-index: 2;
-    grid-row: 1;
-    grid-column: 4 / -1;
-    width: calc(100% + clamp(4rem, 10vw, 10rem));
-    margin-right: clamp(-10rem, -10vw, -4rem);
-    border-block: 1px solid color-mix(in oklab, var(--ink) 24%, transparent);
-    background: var(--paper-deep);
-    box-shadow: var(--shadow-lg);
-    transform: rotate(0.65deg);
+    width: min(58vw, 46rem);
+    aspect-ratio: 2.2;
+    perspective: 1750px;
+    perspective-origin: 50% 46%;
   }
-  .hero__art::before {
-    content: '';
+  .sketchbook__desk-shadow {
     position: absolute;
-    z-index: 7;
-    inset: 0;
-    background: linear-gradient(
-      90deg,
-      color-mix(in oklab, var(--paper) 86%, transparent),
-      transparent 22% 82%,
-      color-mix(in oklab, var(--paper-deep) 54%, transparent)
-    );
-    pointer-events: none;
-  }
-  .hero__art :global(img) {
-    display: block;
-    width: 100%;
-    /* 固定高而非 min-height：宽视口下自然比例（3:2）会把图撑过 75svh 上限 */
-    height: min(48vh, 36rem);
-    object-fit: cover;
-  }
-  .hero__fallback {
-    position: relative;
-    z-index: 0;
-  }
-  .hero__layers {
-    display: none;
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    overflow: hidden;
-  }
-  :global(html.js) .hero__layers {
-    display: block;
-  }
-  :global(html.js) .hero__fallback {
-    opacity: 0;
-  }
-  .hero__layer {
-    position: absolute;
-    inset: 0;
-    will-change: transform;
-  }
-  .hero__layer :global(img) {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    object-fit: cover;
-    will-change: transform;
-  }
-  .hero__layer--far {
-    z-index: 1;
-    opacity: 0.82;
-  }
-  .hero__layer-mist {
-    position: absolute;
-    z-index: 2;
-    right: 4%;
-    bottom: 12%;
-    width: 70%;
-    height: 52%;
+    inset: 72% 7% -3%;
     background: radial-gradient(
       ellipse,
-      color-mix(in oklab, var(--paper) 70%, transparent),
+      color-mix(in oklab, var(--ink) 28%, transparent),
       transparent 72%
     );
-    opacity: 0.44;
-  }
-  .hero__layer--mid {
-    z-index: 3;
-  }
-  .hero__layer--near {
-    z-index: 4;
-  }
-  .hero__art figcaption {
-    position: absolute;
-    right: 1rem;
-    bottom: 0.8rem;
-    z-index: 9;
-    padding: 0.2rem 0.5rem;
-    background: color-mix(in oklab, var(--paper) 82%, transparent);
-    color: var(--ink-soft);
-    font-family: var(--font-noto-sans);
-    font-size: 0.62rem;
-    letter-spacing: 0.18em;
-  }
-
-  .hero__copy {
-    position: relative;
-    z-index: 5;
-    grid-row: 1;
-    grid-column: 1 / -1;
-    min-height: min(48vh, 36rem);
+    filter: blur(1.1rem);
+    opacity: calc(0.34 + var(--turn-lift, 0) * 0.18);
     pointer-events: none;
   }
-  .hero__eyebrow {
+  .sketchbook__book-wrap {
     position: absolute;
-    top: 8%;
+    inset: 0;
+    transform: scale(var(--book-scale, 1)) rotateX(var(--book-tilt-x, 0deg))
+      rotateY(var(--book-tilt-y, 0deg));
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+  .sketchbook__book {
+    position: absolute;
+    inset: 0;
+    color: #252622;
+    cursor: grab;
+    outline: none;
+    touch-action: pan-y;
+    transform-style: preserve-3d;
+    user-select: none;
+  }
+  .sketchbook__book:active {
+    cursor: grabbing;
+  }
+  .sketchbook__book:focus-visible {
+    outline: 2px solid var(--cinnabar);
+    outline-offset: 0.45rem;
+  }
+  .sketchbook__surface,
+  .sketchbook__spread,
+  .sketchbook__half,
+  .sketchbook__curl,
+  .sketchbook__strip,
+  .sketchbook__face {
+    position: absolute;
+    inset-block: 0;
+    transform-style: preserve-3d;
+  }
+  .sketchbook__surface,
+  .sketchbook__spread {
+    inset-inline: 0;
+  }
+  .sketchbook__spread {
+    overflow: hidden;
+    border-radius: clamp(0.7rem, 1.6vw, 1.3rem);
+    box-shadow: 0 0.9rem 2rem rgb(47 38 26 / 0.2);
+  }
+  .sketchbook__spread,
+  .sketchbook__half,
+  .sketchbook__face {
+    background-position-y: center;
+    background-repeat: no-repeat;
+  }
+  .sketchbook__half {
+    width: 50%;
+    overflow: hidden;
+  }
+  .sketchbook__half--left {
     left: 0;
-    margin: 0;
-    writing-mode: vertical-rl;
+    border-radius: clamp(0.7rem, 1.6vw, 1.3rem) 0 0 clamp(0.7rem, 1.6vw, 1.3rem);
   }
-  .hero__title {
+  .sketchbook__half--right {
+    left: 50%;
+    border-radius: 0 clamp(0.7rem, 1.6vw, 1.3rem) clamp(0.7rem, 1.6vw, 1.3rem) 0;
+  }
+  .sketchbook__gutter {
     position: absolute;
-    inset: 0;
-    margin: 0;
-    font-weight: 400;
-    line-height: 0.7;
-    letter-spacing: -0.04em;
+    inset-block: 7%;
+    left: 50%;
+    z-index: 4;
+    width: 6%;
+    background: radial-gradient(
+      ellipse,
+      rgb(49 39 25 / calc(0.19 + var(--turn-lift, 0) * 0.24)),
+      transparent 69%
+    );
+    filter: blur(0.45rem);
+    transform: translateX(-50%);
     pointer-events: none;
   }
-  .hero-title-mask {
-    position: absolute;
-    display: block;
-    overflow: visible;
-    padding: 0.12em 0.05em 0.2em;
-    margin: -0.12em -0.05em -0.2em;
+  .sketchbook__curl {
+    z-index: 5;
+    width: 44.9%;
   }
-  .hero-title-mask--ink {
-    top: 50%;
-    left: -6%;
-    transform: translateY(-52%);
+  .sketchbook__curl--next {
+    left: 50%;
+    transform-origin: left center;
   }
-  .hero-title-mask--paper {
-    right: -2%;
-    bottom: -4%;
+  .sketchbook__curl--prev {
+    right: 50%;
+    transform-origin: right center;
   }
-  .hero-title-line {
-    position: relative;
-    z-index: 1;
-    display: block;
-    line-height: 0.94;
-  }
-
-  .hero-title-brush {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    width: 100%;
+  .sketchbook__strip {
+    top: 0;
+    width: calc(100% / 18);
     height: 100%;
-    overflow: visible;
-    opacity: 0;
-    pointer-events: none;
   }
-
-  .hero-title-brush text {
-    fill: currentColor;
-    font-family: var(--font-ma-shan-zheng);
-    font-size: 94px;
-    font-weight: 400;
+  .sketchbook__curl--next .sketchbook__strip {
+    left: 0;
+    transform-origin: left center;
   }
-
-  .hero-title-brush--ink {
-    color: color-mix(in oklab, var(--ink) 82%, transparent);
+  .sketchbook__curl--prev .sketchbook__strip {
+    right: 0;
+    transform-origin: right center;
   }
-
-  .hero-title-brush--paper {
-    color: var(--cinnabar);
+  .sketchbook__curl--next .sketchbook__strip .sketchbook__strip {
+    left: 100%;
   }
-
-  .hero-brush-paths {
-    fill: none;
-    stroke: white;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 17;
+  .sketchbook__curl--prev .sketchbook__strip .sketchbook__strip {
+    right: 100%;
   }
-  .hero-title-line--ink {
-    background-image:
-      linear-gradient(
-        color-mix(in oklab, var(--ink) 82%, transparent),
-        color-mix(in oklab, var(--ink) 52%, transparent)
-      ),
-      var(--hero-art);
-    background-blend-mode: multiply;
-    background-position: 52% center;
-    background-size: cover;
-    color: transparent;
-    font-size: var(--type-hero-primary);
-    -webkit-background-clip: text;
-    background-clip: text;
-    filter: contrast(1.12) saturate(0.66);
-    -webkit-text-stroke: 1px color-mix(in oklab, var(--ink) 34%, transparent);
-    text-shadow: 0 0 1px color-mix(in oklab, var(--ink) 42%, transparent);
+  .sketchbook__face {
+    inset: 0 -1px 0 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
-  .hero-title-line--paper {
-    color: var(--cinnabar);
-    font-size: var(--type-hero-secondary);
-    text-shadow:
-      0.045em 0.055em 0 var(--paper),
-      0.055em 0.065em 0 var(--line);
+  .sketchbook__face--back {
+    transform: rotateY(180deg);
   }
-
-  .hero__statement {
-    position: absolute;
-    bottom: 2%;
-    left: clamp(1.5rem, 8vw, 7rem);
-    display: grid;
-    width: min(38rem, 64vw);
-    grid-template-columns: minmax(15rem, 29rem) auto;
-    gap: clamp(2rem, 5vw, 5rem);
-    align-items: end;
-    padding: 1.1rem 1.25rem;
-    border-top: 1px solid var(--ink);
-    /* 纸底已 88% 不透明，可承托文字；全站玻璃拟态仅页眉一处，此处不再 blur */
-    background: color-mix(in oklab, var(--paper) 88%, transparent);
-    pointer-events: auto;
-  }
-  .hero__statement > p {
-    margin: 0;
-    color: var(--ink);
-    font-size: clamp(1rem, 1.45vw, 1.18rem);
-    line-height: 1.9;
-  }
-  .hero__links {
-    display: flex;
-    gap: 1.5rem;
-    margin: 0;
-    white-space: nowrap;
-    font-family: var(--font-noto-sans);
-    font-size: 0.82rem;
-  }
-  .hero__links a {
-    color: var(--ink);
-    /* 常驻淡墨下划线：首屏入口不依赖 hover 即可被识别为链接 */
-    text-decoration: underline;
-    text-decoration-color: color-mix(in oklab, var(--ink) 38%, transparent);
-    text-underline-offset: 0.4em;
-    transition: text-decoration-color 150ms var(--ease-ink);
-  }
-
-  .hero__links a:hover {
-    text-decoration-color: var(--ink);
-  }
-
-  .hero__colophon {
-    position: absolute;
-    top: 50%;
-    right: 0.75rem;
-    z-index: 8;
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
-    writing-mode: vertical-rl;
-    transform: translateY(-50%);
-    color: var(--ink);
-    font-size: 0.72rem;
-    letter-spacing: 0.35em;
-  }
-  .hero__seal {
-    position: relative;
-    width: 2.6rem;
-    height: 2.6rem;
-    box-shadow:
-      0 0 0 0.3rem var(--paper),
-      0 0 0 calc(0.3rem + 1px) var(--cinnabar);
-    font-size: 1.5rem;
-    letter-spacing: 0;
-  }
-  .hero__seal::after {
+  .sketchbook__face::after {
     content: '';
     position: absolute;
-    inset: -0.55rem;
-    border: 1.5px solid var(--cinnabar);
-    border-radius: 50%;
-    opacity: 0;
-    transform: scale(0.6);
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgb(54 39 21 / var(--shade-a, 0)), rgb(54 39 21 / var(--shade-b, 0))),
+      linear-gradient(100deg, transparent 30%, rgb(255 252 237 / var(--glint, 0)) 72%, transparent);
     pointer-events: none;
   }
-  .hero__mist-a {
-    top: 4%;
-    right: -2%;
-    width: 38rem;
-    height: 30rem;
-  }
-  .hero__mist-b {
-    bottom: 0;
-    left: -10%;
-    width: 34rem;
-    height: 26rem;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    :global(html.js) .hero[data-hero-intro='full']:not(.hero--intro-complete) .hero__seal::after {
-      animation: seal-halo 0.7s var(--ease-ink) 0.84s 1 both;
-    }
-    :global(html.js) .hero[data-hero-intro='light']:not(.hero--intro-complete) .hero__seal::after {
-      animation: seal-halo 0.44s var(--ease-ink) 0.22s 1 both;
-    }
-    :global(html.js) .hero-title-line,
-    :global(html.js) .hero__eyebrow,
-    :global(html.js) .hero__statement,
-    :global(html.js) .hero__colophon,
-    :global(html.js) .hero__scroll {
-      opacity: 0;
-    }
-  }
-  @keyframes seal-halo {
-    from {
-      opacity: 0.55;
-      transform: scale(0.6);
-    }
-    to {
-      opacity: 0;
-      transform: scale(1.6);
-    }
-  }
-
-  .hero__scroll {
+  .sketchbook__turn-shadow {
     position: absolute;
-    bottom: 0;
-    left: 2.5rem;
+    top: 7%;
+    bottom: 6%;
+    left: 50%;
+    z-index: 3;
+    width: 38%;
+    background: linear-gradient(90deg, rgb(42 31 20 / 0.3), transparent 72%);
+    filter: blur(0.55rem);
+    opacity: 0;
+    transform-origin: left center;
+    pointer-events: none;
+  }
+  .sketchbook__copy {
+    position: absolute;
+    inset: 0;
     z-index: 8;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    pointer-events: none;
+  }
+  .sketchbook__copy-left,
+  .sketchbook__copy-right {
+    position: relative;
+    min-width: 0;
+    padding: 14% 11% 10%;
+  }
+  .sketchbook__kicker,
+  .sketchbook__meta,
+  .sketchbook__chapter,
+  .sketchbook__summary {
     margin: 0;
+  }
+  .sketchbook__kicker,
+  .sketchbook__meta {
+    color: #65635c;
+    font-family: var(--font-noto-sans);
+    font-size: clamp(0.54rem, 0.65vw, 0.65rem);
+    letter-spacing: 0.13em;
+  }
+  .sketchbook__title {
+    max-width: 14rem;
+    margin: clamp(0.45rem, 1vw, 0.8rem) 0 0;
+    font-family: var(--font-ma-shan-zheng);
+    font-size: clamp(1.65rem, 3.15vw, 2.85rem);
+    font-weight: 400;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+  .sketchbook__meta {
+    position: absolute;
+    bottom: 13%;
+    left: 11%;
+  }
+  .sketchbook__chapter {
+    color: #9c3029;
+    font-family: var(--font-ma-shan-zheng);
+    font-size: clamp(1.2rem, 1.8vw, 1.65rem);
+    letter-spacing: 0.12em;
+  }
+  .sketchbook__summary {
+    max-width: 15rem;
+    margin-top: clamp(0.65rem, 1.5vw, 1.2rem);
+    color: #4f5049;
+    font-size: clamp(0.68rem, 0.88vw, 0.84rem);
+    line-height: 1.8;
+  }
+  .sketchbook__seal {
+    position: absolute;
+    right: 12%;
+    bottom: 13%;
+    display: grid;
+    width: clamp(2.35rem, 4vw, 3.1rem);
+    aspect-ratio: 1;
+    place-items: center;
+    border: 2px solid #a33b31;
+    color: #a33b31;
+    font-family: var(--font-ma-shan-zheng);
+    font-size: clamp(0.9rem, 1.4vw, 1.15rem);
+    line-height: 1;
+    pointer-events: auto;
+    text-decoration: none;
+    transform: rotate(-2deg);
+  }
+  .sketchbook__seal::before {
+    content: '';
+    position: absolute;
+    inset: 0.2rem;
+    border: 1px solid currentColor;
+    opacity: 0.55;
+  }
+  .sketchbook__seal[aria-disabled='true'] {
+    opacity: 0.28;
+    pointer-events: none;
+  }
+  .sketchbook__arrow,
+  .sketchbook__zoom button {
+    border: 0;
+    background: transparent;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .sketchbook__arrow {
+    display: grid;
+    width: 2.75rem;
+    min-height: 4rem;
+    place-items: center;
+    font-family: serif;
+    font-size: 2.5rem;
+    transition:
+      color 150ms var(--ease-ink),
+      transform 150ms var(--ease-ink);
+  }
+  .sketchbook__arrow:hover:not(:disabled) {
+    color: var(--ink);
+    transform: scale(1.08);
+  }
+  .sketchbook__arrow:disabled,
+  .sketchbook__zoom button:disabled {
+    cursor: default;
+    opacity: 0.25;
+  }
+  .sketchbook__footer {
+    display: grid;
+    width: min(58vw, 46rem);
+    margin-inline: auto;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 1rem;
     color: var(--ink-soft);
     font-family: var(--font-noto-sans);
     font-size: 0.68rem;
-    letter-spacing: 0.2em;
-    writing-mode: vertical-rl;
   }
-  .hero__scroll-line {
-    width: 1px;
-    height: 3.5rem;
-    background: var(--line);
-    transform-origin: top center;
-    animation: scroll-breath 2.4s ease-in-out infinite;
+  .sketchbook__current,
+  .sketchbook__instructions {
+    margin: 0;
   }
-  @keyframes scroll-breath {
-    0%,
-    100% {
-      transform: scaleY(0.45);
-      opacity: 0.45;
-    }
-    50% {
-      transform: scaleY(1);
-      opacity: 1;
-    }
+  .sketchbook__current {
+    display: flex;
+    gap: 0.7rem;
+    color: var(--ink);
+    letter-spacing: 0.16em;
   }
-
-  .hero__seal--inset {
-    display: none;
+  .sketchbook__instructions {
+    text-align: center;
+  }
+  .sketchbook__zoom {
+    display: flex;
+    justify-self: end;
+    align-items: center;
+    gap: 0.35rem;
+    border-block: 1px solid var(--line);
+  }
+  .sketchbook__zoom button,
+  .sketchbook__zoom span {
+    min-width: 2rem;
+    min-height: 2rem;
+    padding: 0.35rem;
+    font-size: 0.68rem;
+    text-align: center;
+  }
+  .sketchbook__noscript {
+    display: flex;
+    width: min(58vw, 46rem);
+    margin: 0.5rem auto 1.5rem;
+    justify-content: center;
+    gap: 1.2rem;
+    font-size: 0.78rem;
+  }
+  .sketchbook__noscript a {
+    color: var(--ink);
+    text-underline-offset: 0.3em;
   }
 
   @media (max-width: 767px) {
     .hero {
       min-height: calc(100svh - 5rem);
     }
-    .hero__hold {
-      position: relative;
-      top: auto;
-      min-height: inherit;
-    }
-    .hero__under-sheet {
-      top: 4.75rem;
-      right: -6rem;
-      bottom: 3rem;
-      left: 31%;
-      transform: rotate(-1.2deg);
-    }
-    .hero__ink-bloom {
-      top: 43%;
-      left: 20%;
-      width: min(82vw, 24rem);
-    }
     .hero__folio {
-      top: 1.25rem;
       grid-template-columns: 1fr auto;
     }
     .hero__folio span:nth-child(2) {
       display: none;
     }
-    .hero__stage {
-      display: grid;
-      min-height: inherit;
-      grid-template-columns: 1fr;
-      grid-template-rows: 1fr;
-      padding-block: 4.5rem 3.5rem;
+    .hero__inner {
+      padding-block: 4rem 2rem;
     }
-    .hero__copy {
-      grid-row: 1;
-      grid-column: 1;
-      min-height: min(66svh, 32rem);
+    .hero__heading,
+    .sketchbook__frame,
+    .sketchbook__footer,
+    .sketchbook__noscript {
+      width: calc(100vw - 3rem);
     }
-    .hero__eyebrow {
-      top: 2.5rem;
-      left: 0;
-    }
-    .hero-title-mask--ink {
-      top: 42%;
-      left: -16%;
-    }
-    .hero-title-mask--paper {
-      right: -3%;
-      bottom: 1rem;
-    }
-    .hero-title-line--ink {
-      font-size: var(--type-hero-primary);
-    }
-    .hero-title-line--paper {
-      font-size: var(--type-hero-secondary);
-    }
-    .hero__statement {
-      bottom: 0;
-      left: 0;
-      display: block;
-      width: min(92%, 24rem);
-      padding: 0.9rem 0;
-      background: color-mix(in oklab, var(--paper) 92%, transparent);
-      backdrop-filter: none;
-    }
-
-    /* 落款仪式入卡角：小印浮于 statement 上缘右侧，恢复移动端朱砂钤印 */
-    .hero__seal--inset {
-      position: absolute;
-      top: -1.15rem;
-      right: 0.8rem;
-      width: 2.2rem;
-      height: 2.2rem;
-      font-size: 1.15rem;
-      box-shadow: 0 0 0 0.22rem var(--paper);
-    }
-    .hero__links {
-      margin-top: 1rem;
-    }
-    .hero__links a {
-      display: inline-flex;
-      min-width: 2.75rem;
-      min-height: 2.75rem;
-      align-items: center;
-      padding-inline: 0.25rem;
-    }
-    .hero__art {
-      grid-row: 1;
-      grid-column: 1;
-      align-self: center;
-      width: calc(100% + 3rem);
-      margin: 0 -3rem 0 16%;
-      transform: rotate(0.8deg);
-    }
-    .hero__art :global(img) {
-      height: min(52svh, 27rem);
-      min-height: 0;
-      aspect-ratio: auto;
-    }
-    .hero__layer--mid,
-    .hero__colophon {
+    .hero__heading > p:last-child {
       display: none;
     }
-    .hero__scroll {
-      right: 1.25rem;
-      bottom: 0;
-      left: auto;
+    .sketchbook {
+      position: relative;
+      display: block;
+      margin-inline: 0;
+    }
+    .sketchbook__frame {
+      margin-inline: auto;
+    }
+    .sketchbook__arrow {
+      position: absolute;
+      top: 50%;
+      z-index: 10;
+      width: 2.75rem;
+      min-height: 2.75rem;
+      font-size: 1.8rem;
+      transform: translateY(-50%);
+    }
+    .sketchbook__arrow:first-child {
+      left: calc(50% - (100vw - 3rem) / 2);
+    }
+    .sketchbook__arrow:last-child {
+      right: calc(50% - (100vw - 3rem) / 2);
+    }
+    .sketchbook__arrow:hover:not(:disabled) {
+      transform: translateY(-50%);
+    }
+    .sketchbook__copy-left,
+    .sketchbook__copy-right {
+      padding: 12% 10% 8%;
+    }
+    .sketchbook__kicker,
+    .sketchbook__meta {
+      font-size: 0.46rem;
+      letter-spacing: 0.07em;
+    }
+    .sketchbook__title {
+      max-width: 8.5rem;
+      margin-top: 0.25rem;
+      font-size: clamp(1.1rem, 6vw, 1.5rem);
+    }
+    .sketchbook__chapter {
+      font-size: 1rem;
+    }
+    .sketchbook__summary {
+      display: -webkit-box;
+      max-width: 8rem;
+      margin-top: 0.35rem;
+      overflow: hidden;
+      font-size: 0.54rem;
+      line-height: 1.55;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+    }
+    .sketchbook__meta {
+      bottom: 10%;
+      left: 10%;
+    }
+    .sketchbook__seal {
+      right: 10%;
+      bottom: 8%;
+      width: 2.75rem;
+      font-size: 0.78rem;
+    }
+    .sketchbook__footer {
+      grid-template-columns: 1fr auto;
+    }
+    .sketchbook__instructions {
+      grid-row: 2;
+      grid-column: 1 / -1;
+      font-size: 0.62rem;
+    }
+    .sketchbook__zoom button,
+    .sketchbook__zoom span {
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+      padding: 0.35rem;
+    }
+    .sketchbook__zoom button[data-sketchbook-zoom-reset] {
+      display: none;
+    }
+    .sketchbook__noscript {
+      flex-wrap: wrap;
     }
   }
-
+  @media (max-width: 340px) {
+    .sketchbook__meta {
+      display: none;
+    }
+    .sketchbook__summary {
+      -webkit-line-clamp: 2;
+    }
+  }
   @media (prefers-reduced-motion: reduce) {
-    .hero__scroll-line,
-    .hero__seal::after {
-      animation: none;
+    .sketchbook__arrow,
+    .sketchbook__book-wrap {
+      transition: none;
     }
   }
 </style>
 
 <script>
   import { initHeroMotion } from '../../scripts/hero-motion';
-
   const hero = document.querySelector<HTMLElement>('[data-hero]');
   if (hero) initHeroMotion(hero);
 </script>

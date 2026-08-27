@@ -1,249 +1,564 @@
-import { gsap, prefersReducedMotion, onDesktopViewport, attachSealMagnet } from './scroll';
+type Direction = 'next' | 'prev';
 
-const paintedIntroProfiles = {
-  full: {
-    spot: { opacity: 0.28, duration: 0.33, interval: 0.06, fadeDuration: 0.18, fadeAt: 0.4 },
-    sheetDuration: 0.72,
-    art: { duration: 0.82, at: 0.1 },
-    ink: { duration: 0.28, stagger: 0.07, at: 0.28 },
-    paper: { duration: 0.26, stagger: 0.07, at: 0.52 },
-    title: { duration: 0.12, at: 1.22 },
-    details: { duration: 0.52, stagger: 0.06, at: 0.56 },
-    seal: { duration: 0.38, at: 1.16 },
-  },
-  light: {
-    spot: { opacity: 0.2, duration: 0.2, interval: 0.035, fadeDuration: 0.12, fadeAt: 0.23 },
-    sheetDuration: 0.42,
-    art: { duration: 0.52, at: 0.04 },
-    ink: { duration: 0.12, stagger: 0.035, at: 0.12 },
-    paper: { duration: 0.12, stagger: 0.035, at: 0.2 },
-    title: { duration: 0.1, at: 0.57 },
-    details: { duration: 0.3, stagger: 0.04, at: 0.25 },
-    seal: { duration: 0.26, at: 0.42 },
-  },
-} as const;
+type SketchbookPage = {
+  chapter: string;
+  kicker: string;
+  title: string;
+  summary: string;
+  meta: string;
+  href: string;
+  seal: string;
+  image: string;
+  alt: string;
+};
+
+type TurnState = {
+  direction: Direction;
+  from: number;
+  to: number;
+  progress: number;
+};
+
+type DragState = {
+  pointerId: number;
+  direction: Direction;
+  startX: number;
+  width: number;
+  distance: number;
+  previousProgress: number;
+  previousTime: number;
+  velocity: number;
+};
+
+// 来源：MengTo/sketchbook index.html @ c1e4778。只机械适配作用域和页面数据；放大镜逻辑未迁入。
+const SEGMENTS = 18;
+const SPAN = 0.449;
+const BETA = 0.6;
+const COMMIT_PROGRESS = 0.42;
+const COMMIT_VELOCITY = 1.1;
+const COMMIT_SPRING = { stiffness: 170, damping: 26 } as const;
+const CANCEL_SPRING = { stiffness: 150, damping: 24 } as const;
+
+// 全幅册页的纸纹从画布边缘开始；保持 1:1 映射才能让书脊在翻页前后不漂移。
+const ARTWORK_SCALE = 1;
+const SESSION_KEY = 'mojian:hero-intro:v1';
+
+const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+
+const makeElement = (className: string) => {
+  const element = document.createElement('div');
+  element.className = className;
+  return element;
+};
 
 export function initHeroMotion(hero: HTMLElement) {
-  if (prefersReducedMotion) return;
+  const book = hero.querySelector<HTMLElement>('[data-sketchbook-book]');
+  const bookWrap = hero.querySelector<HTMLElement>('[data-sketchbook-book-wrap]');
+  const frame = hero.querySelector<HTMLElement>('[data-sketchbook-frame]');
+  const surface = hero.querySelector<HTMLElement>('[data-sketchbook-surface]');
+  const copy = hero.querySelector<HTMLElement>('[data-sketchbook-copy]');
+  const prevButton = hero.querySelector<HTMLButtonElement>('button[aria-label="上一卷"]');
+  const nextButton = hero.querySelector<HTMLButtonElement>('button[aria-label="下一卷"]');
+  const zoomOut = hero.querySelector<HTMLButtonElement>('[data-sketchbook-zoom-out]');
+  const zoomReset = hero.querySelector<HTMLButtonElement>('[data-sketchbook-zoom-reset]');
+  const zoomIn = hero.querySelector<HTMLButtonElement>('[data-sketchbook-zoom-in]');
+  const zoomStatus = hero.querySelector<HTMLElement>('[data-sketchbook-zoom-status]');
+  const seal = hero.querySelector<HTMLAnchorElement>('[data-sketchbook-seal]');
+  const sealText = hero.querySelector<HTMLElement>('[data-sketchbook-seal-text]');
+  const currentChapter = hero.querySelector<HTMLElement>('[data-sketchbook-current]');
+  const currentCount = hero.querySelector<HTMLElement>('[data-sketchbook-count]');
+  const currentAlt = hero.querySelector<HTMLElement>('[data-sketchbook-alt]');
+  const kicker = hero.querySelector<HTMLElement>('[data-sketchbook-kicker]');
+  const title = hero.querySelector<HTMLElement>('[data-sketchbook-title]');
+  const chapter = hero.querySelector<HTMLElement>('[data-sketchbook-chapter]');
+  const summary = hero.querySelector<HTMLElement>('[data-sketchbook-summary]');
+  const meta = hero.querySelector<HTMLElement>('[data-sketchbook-meta]');
 
-  const sessionKey = 'mojian:hero-intro:v1';
-  let isFirstSession = false;
-  try {
-    isFirstSession = sessionStorage.getItem(sessionKey) !== '1';
-    if (isFirstSession) sessionStorage.setItem(sessionKey, '1');
-  } catch {
-    // 隐私模式或存储被禁用时采用短版，不让一次性开场退化为每次重播。
-    isFirstSession = false;
-  }
+  if (
+    !book ||
+    !bookWrap ||
+    !frame ||
+    !surface ||
+    !copy ||
+    !prevButton ||
+    !nextButton ||
+    !zoomOut ||
+    !zoomReset ||
+    !zoomIn ||
+    !zoomStatus ||
+    !seal ||
+    !sealText ||
+    !currentChapter ||
+    !currentCount ||
+    !currentAlt ||
+    !kicker ||
+    !title ||
+    !chapter ||
+    !summary ||
+    !meta
+  )
+    return;
 
-  const introMode = isFirstSession
-    ? window.matchMedia('(min-width: 768px)').matches
-      ? 'full'
-      : 'light'
-    : 'short';
-  hero.dataset.heroIntro = introMode;
+  const pages = [...hero.querySelectorAll<HTMLTemplateElement>('[data-sketchbook-page]')]
+    .map((template): SketchbookPage | null => {
+      const { chapter, kicker, title, summary, meta, href, seal, image, alt } = template.dataset;
+      if (!chapter || !kicker || !title || !summary || !meta || !href || !seal || !image || !alt)
+        return null;
+      return { chapter, kicker, title, summary, meta, href, seal, image, alt };
+    })
+    .filter((page): page is SketchbookPage => Boolean(page));
 
-  const titleLines = hero.querySelectorAll<HTMLElement>('.hero-title-line');
-  const details = hero.querySelectorAll<HTMLElement>(
-    '.hero__eyebrow, .hero__statement, .hero__colophon, .hero__scroll',
-  );
-  const inkSpots = hero.querySelectorAll<SVGPathElement>('[data-hero-ink-spot]');
-  const brushSvgs = hero.querySelectorAll<SVGSVGElement>('[data-hero-brush]');
-  const inkStrokes = hero.querySelectorAll<SVGPathElement>(
-    '[data-hero-brush="ink"] .hero-brush-paths path',
-  );
-  const paperStrokes = hero.querySelectorAll<SVGPathElement>(
-    '[data-hero-brush="paper"] .hero-brush-paths path',
-  );
-  const brushStrokes = [...inkStrokes, ...paperStrokes];
-  const sheet = hero.querySelector<HTMLElement>('[data-hero-sheet]');
-  const art = hero.querySelector<HTMLElement>('[data-hero-art]');
-  const paperTitle = hero.querySelector<HTMLElement>('.hero-title-mask--paper');
-  const seal = hero.querySelector<HTMLElement>('[data-hero-seal]');
-  const layers = [
-    { element: hero.querySelector<HTMLElement>('[data-hero-layer="far"]'), yPercent: 2 },
-    { element: hero.querySelector<HTMLElement>('[data-hero-layer="mid"]'), yPercent: 5 },
-    { element: hero.querySelector<HTMLElement>('[data-hero-layer="near"]'), yPercent: 8 },
-  ].filter((layer): layer is { element: HTMLElement; yPercent: number } => Boolean(layer.element));
+  if (pages.length < 2) return;
 
-  brushStrokes.forEach((stroke) => {
-    const length = stroke.getTotalLength();
-    gsap.set(stroke, { strokeDasharray: length, strokeDashoffset: length });
-  });
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const precisePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  let current = 0;
+  let overlayIndex = 0;
+  let turn: TurnState | null = null;
+  let drag: DragState | null = null;
+  let curl: HTMLElement | null = null;
+  let strips: HTMLElement[] = [];
+  let turnShadows: HTMLElement[] = [];
+  let lastMotionTime = 0;
+  let introRunning = false;
+  let tapTimer = 0;
 
-  let entranceComplete = false;
-  const removeSkipListeners = () => {
-    window.removeEventListener('wheel', skipEntrance);
-    window.removeEventListener('touchstart', skipEntrance);
-    window.removeEventListener('keydown', skipEntrance);
-    window.removeEventListener('pointerdown', skipEntrance);
-    window.removeEventListener('click', skipEntrance);
+  let scale = 1;
+  let targetScale = 1;
+  let tiltX = 0;
+  let tiltY = 0;
+  let targetTiltX = 0;
+  let targetTiltY = 0;
+  let poseFrame = 0;
+
+  const setBackground = (
+    element: HTMLElement,
+    pageIndex: number,
+    positionX: number,
+    imageWidth: number,
+  ) => {
+    element.style.backgroundImage = `url("${pages[pageIndex].image}")`;
+    element.style.backgroundSize = `${imageWidth}px auto`;
+    element.style.backgroundPositionX = `${positionX}px`;
   };
-  const finishEntrance = () => {
-    if (entranceComplete) return;
-    entranceComplete = true;
-    removeSkipListeners();
-    hero.classList.add('hero--intro-complete');
-    gsap.set(inkSpots, { opacity: 0 });
-    gsap.set(brushSvgs, { opacity: 0 });
-    gsap.set(titleLines, { opacity: 1, clearProps: 'transform' });
-    gsap.set(details, { opacity: 1, clearProps: 'transform' });
-    if (sheet) gsap.set(sheet, { clipPath: 'inset(0 0% 0 0)', clearProps: 'transform' });
-    if (art) gsap.set(art, { clipPath: 'inset(0 0% 0 0)', clearProps: 'transform' });
-    if (seal) gsap.set(seal, { clearProps: 'transform' });
+
+  const getArtworkMetrics = () => {
+    const width = book.clientWidth;
+    const imageWidth = width * ARTWORK_SCALE;
+    return { width, imageWidth, cropX: (imageWidth - width) / 2 };
   };
-  const entrance = gsap.timeline({ defaults: { ease: 'expo.out' }, onComplete: finishEntrance });
-  function skipEntrance() {
-    entrance.progress(1, false);
-    finishEntrance();
-  }
 
-  if (introMode === 'full' || introMode === 'light') {
-    const profile = paintedIntroProfiles[introMode];
-    gsap.set(brushSvgs, { opacity: 1 });
-    gsap.set(titleLines, { yPercent: 0, opacity: 0 });
-    inkSpots.forEach((spot, index) =>
-      entrance.fromTo(
-        spot,
-        { scale: 0.08, opacity: 0 },
-        { scale: 1, opacity: profile.spot.opacity, duration: profile.spot.duration },
-        index * profile.spot.interval,
-      ),
-    );
-    entrance.to(
-      inkSpots,
-      { opacity: 0, duration: profile.spot.fadeDuration, stagger: 0.02 },
-      profile.spot.fadeAt,
-    );
-    if (sheet)
-      entrance.fromTo(
-        sheet,
-        { clipPath: 'inset(0 100% 0 0)' },
-        { clipPath: 'inset(0 0% 0 0)', duration: profile.sheetDuration },
-        0,
-      );
-    if (art)
-      entrance.fromTo(
-        art,
-        { clipPath: 'inset(0 100% 0 0)', xPercent: 4 },
-        { clipPath: 'inset(0 0% 0 0)', xPercent: 0, duration: profile.art.duration },
-        profile.art.at,
-      );
-    entrance
-      .to(
-        inkStrokes,
-        {
-          strokeDashoffset: 0,
-          duration: profile.ink.duration,
-          stagger: profile.ink.stagger,
-          ease: 'power2.out',
-        },
-        profile.ink.at,
-      )
-      .to(
-        paperStrokes,
-        {
-          strokeDashoffset: 0,
-          duration: profile.paper.duration,
-          stagger: profile.paper.stagger,
-          ease: 'power2.out',
-        },
-        profile.paper.at,
-      )
-      .to(titleLines, { opacity: 1, duration: profile.title.duration }, profile.title.at)
-      .to(brushSvgs, { opacity: 0, duration: profile.title.duration }, profile.title.at)
-      .fromTo(
-        details,
-        { y: 8, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: profile.details.duration,
-          stagger: profile.details.stagger,
-        },
-        profile.details.at,
-      );
-    if (seal)
-      entrance.fromTo(
-        seal,
-        { scale: 1.36, rotate: -7 },
-        {
-          scale: 1,
-          rotate: 0,
-          duration: profile.seal.duration,
-          ease: 'back.out(2.4)',
-        },
-        profile.seal.at,
-      );
-  } else {
-    if (sheet)
-      entrance.fromTo(
-        sheet,
-        { clipPath: 'inset(0 42% 0 0)' },
-        { clipPath: 'inset(0 0% 0 0)', duration: 0.32 },
-        0,
-      );
-    if (art)
-      entrance.fromTo(
-        art,
-        { clipPath: 'inset(0 36% 0 0)', xPercent: 2 },
-        { clipPath: 'inset(0 0% 0 0)', xPercent: 0, duration: 0.4 },
-        0.03,
-      );
-    entrance
-      .fromTo(
-        titleLines,
-        { yPercent: 18, opacity: 0 },
-        { yPercent: 0, opacity: 1, duration: 0.36, stagger: 0.04 },
-        0.05,
-      )
-      .fromTo(
-        details,
-        { y: 8, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.24, stagger: 0.025 },
-        0.14,
-      );
-    if (seal)
-      entrance.fromTo(
-        seal,
-        { scale: 1.18, rotate: -4 },
-        { scale: 1, rotate: 0, duration: 0.2, ease: 'back.out(2)' },
-        0.24,
-      );
-  }
+  const paintOverlay = (pageIndex: number, announce = false) => {
+    const page = pages[pageIndex];
+    overlayIndex = pageIndex;
+    kicker.textContent = page.kicker;
+    title.textContent = page.title;
+    chapter.textContent = page.chapter;
+    summary.textContent = page.summary;
+    meta.textContent = page.meta;
+    seal.href = page.href;
+    seal.setAttribute('aria-label', `进入${page.chapter}`);
+    sealText.textContent = page.seal;
+    currentAlt.textContent = page.alt;
+    if (announce) {
+      currentChapter.textContent = page.chapter;
+      currentCount.textContent = `${String(pageIndex + 1).padStart(2, '0')} / ${String(pages.length).padStart(2, '0')}`;
+    }
+  };
 
-  window.addEventListener('wheel', skipEntrance, { passive: true });
-  window.addEventListener('touchstart', skipEntrance, { passive: true });
-  window.addEventListener('keydown', skipEntrance);
-  window.addEventListener('pointerdown', skipEntrance, { passive: true });
-  window.addEventListener('click', skipEntrance);
+  const setInteractionState = () => {
+    const busy = Boolean(turn) || introRunning;
+    prevButton.disabled = busy;
+    nextButton.disabled = busy;
+    zoomOut.disabled = introRunning;
+    zoomReset.disabled = introRunning;
+    zoomIn.disabled = introRunning;
+    if (busy) {
+      seal.setAttribute('aria-disabled', 'true');
+      seal.tabIndex = -1;
+    } else {
+      seal.removeAttribute('aria-disabled');
+      seal.removeAttribute('tabindex');
+    }
+  };
 
-  // 桌面滚动视差跟随 768 断点重建或清理：避免旋转屏后残留位移或转桌面后缺少视差
-  onDesktopViewport(() => {
-    const handoff = gsap.timeline({
-      scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
+  const makeHalf = (
+    side: 'left' | 'right',
+    pageIndex: number,
+    width: number,
+    imageWidth: number,
+    cropX: number,
+  ) => {
+    const half = makeElement(`sketchbook__half sketchbook__half--${side}`);
+    setBackground(half, pageIndex, -cropX - (side === 'right' ? width / 2 : 0), imageWidth);
+    return half;
+  };
+
+  const makeCurl = (
+    direction: Direction,
+    from: number,
+    to: number,
+    width: number,
+    imageWidth: number,
+    cropX: number,
+  ) => {
+    strips = [];
+    const root = makeElement(`sketchbook__curl sketchbook__curl--${direction}`);
+    const stripWidth = (width * SPAN) / SEGMENTS;
+    const gutter = width / 2;
+    let host = root;
+
+    for (let index = 0; index < SEGMENTS; index += 1) {
+      const strip = makeElement('sketchbook__strip');
+      // 嵌套叶片必须保持同一绝对宽度；百分比会相对父叶片逐层缩小，令曲面压扁在书脊。
+      strip.style.width = `${stripWidth}px`;
+      const front = makeElement('sketchbook__face sketchbook__face--front');
+      const back = makeElement('sketchbook__face sketchbook__face--back');
+      const frontOffset = -cropX - gutter - index * stripWidth;
+      const backOffset = -cropX + (index + 1) * stripWidth - gutter;
+      setBackground(front, from, direction === 'next' ? frontOffset : backOffset, imageWidth);
+      setBackground(back, to, direction === 'next' ? backOffset : frontOffset, imageWidth);
+      strip.append(front, back);
+      host.append(strip);
+      host = strip;
+      strips.push(strip);
+    }
+    return root;
+  };
+
+  const renderStable = () => {
+    const { width, imageWidth, cropX } = getArtworkMetrics();
+    const spread = makeElement('sketchbook__spread');
+    setBackground(spread, current, -cropX, imageWidth);
+    surface.replaceChildren(spread);
+    surface.style.removeProperty('--turn-lift');
+    frame.style.removeProperty('--turn-lift');
+    curl = null;
+    strips = [];
+    turnShadows = [];
+    copy.style.opacity = '1';
+    paintOverlay(current, true);
+    setInteractionState();
+    void width;
+  };
+
+  const renderTurn = () => {
+    if (!turn) return;
+    const { width, imageWidth, cropX } = getArtworkMetrics();
+    const forward = turn.direction === 'next';
+    const left = makeHalf('left', forward ? turn.from : turn.to, width, imageWidth, cropX);
+    const right = makeHalf('right', forward ? turn.to : turn.from, width, imageWidth, cropX);
+    curl = makeCurl(turn.direction, turn.from, turn.to, width, imageWidth, cropX);
+    const gutter = makeElement('sketchbook__gutter');
+    turnShadows = Array.from({ length: 3 }, (_, index) => {
+      const shadow = makeElement('sketchbook__turn-shadow');
+      shadow.style.filter = `blur(${0.42 + index * 0.2}rem)`;
+      return shadow;
     });
-    if (sheet) handoff.to(sheet, { xPercent: -7, ease: 'none' }, 0);
-    if (art) handoff.to(art, { xPercent: 9, ease: 'none' }, 0);
-    if (paperTitle) handoff.to(paperTitle, { xPercent: 16, ease: 'none' }, 0);
-    layers.forEach((layer) =>
-      handoff.to(layer.element, { yPercent: layer.yPercent, ease: 'none' }, 0),
-    );
+    surface.replaceChildren(left, right, ...turnShadows, gutter, curl);
+    setInteractionState();
+  };
 
-    return () => {
-      handoff.scrollTrigger?.kill();
-      handoff.kill();
-      const parallaxTargets = [sheet, art, paperTitle, ...layers.map((layer) => layer.element)];
-      gsap.set(
-        parallaxTargets.filter((target): target is HTMLElement => Boolean(target)),
-        { clearProps: 'transform' },
-      );
+  const applyTurn = (progress: number) => {
+    if (!turn || !curl) return;
+    const activeTurn = turn;
+    turn.progress = clamp(progress);
+    const theta = Math.PI * turn.progress;
+    const beta = BETA * Math.sin(Math.PI * turn.progress);
+    const total = theta + beta;
+    const delta = (2 * beta) / SEGMENTS;
+    const directionSign = turn.direction === 'next' ? -1 : 1;
+    curl.style.transform = `rotateY(${directionSign * ((total * 180) / Math.PI)}deg)`;
+
+    strips.forEach((strip, index) => {
+      if (index > 0)
+        strip.style.transform = `rotateY(${directionSign * -((delta * 180) / Math.PI)}deg)`;
+      const near = Math.abs(Math.cos(total - index * delta));
+      const far = Math.abs(Math.cos(total - (index + 1) * delta));
+      strip.style.setProperty('--shade-a', ((1 - near) * 0.58).toFixed(3));
+      strip.style.setProperty('--shade-b', ((1 - far) * 0.58).toFixed(3));
+      strip.style.setProperty('--glint', (Math.max(0, 1 - near) * 0.16).toFixed(3));
+    });
+
+    const lift = Math.sin(Math.PI * turn.progress);
+    surface.style.setProperty('--turn-lift', lift.toFixed(3));
+    frame.style.setProperty('--turn-lift', lift.toFixed(3));
+    turnShadows.forEach((shadow, index) => {
+      const offset = (activeTurn.progress - 0.5) * book.clientWidth * 0.24 + index * 5;
+      shadow.style.opacity = `${lift * (0.2 - index * 0.045)}`;
+      shadow.style.transform = `translateX(${directionSign * offset}px) scaleX(${directionSign})`;
+    });
+
+    const nextOverlay = turn.progress < 0.5 ? turn.from : turn.to;
+    if (overlayIndex !== nextOverlay) paintOverlay(nextOverlay);
+    copy.style.opacity = `${turn.progress < 0.5 ? clamp(1 - turn.progress / 0.32) : clamp((turn.progress - 0.68) / 0.32)}`;
+  };
+
+  const beginTurn = (direction: Direction) => {
+    if (turn || (introRunning && !hero.dataset.heroIntro)) return false;
+    const step = direction === 'next' ? 1 : -1;
+    turn = {
+      direction,
+      from: current,
+      to: (current + step + pages.length) % pages.length,
+      progress: 0,
+    };
+    renderTurn();
+    applyTurn(0);
+    return true;
+  };
+
+  const finishTurn = (target: 0 | 1) => {
+    if (!turn) return;
+    current = target === 1 ? turn.to : turn.from;
+    turn = null;
+    drag = null;
+    renderStable();
+  };
+
+  const animateTo = (target: 0 | 1, initialVelocity = 0) => {
+    if (!turn) return;
+    if (reducedMotion) {
+      applyTurn(target);
+      finishTurn(target);
+      return;
+    }
+
+    const spring = target === 1 ? COMMIT_SPRING : CANCEL_SPRING;
+    let velocity = initialVelocity;
+    lastMotionTime = performance.now();
+
+    const tick = (now: number) => {
+      if (!turn) return;
+      const deltaTime = Math.min(0.032, (now - lastMotionTime) / 1000 || 0.016);
+      lastMotionTime = now;
+      const displacement = turn.progress - target;
+      velocity += (-spring.stiffness * displacement - spring.damping * velocity) * deltaTime;
+      applyTurn(turn.progress + velocity * deltaTime);
+      if (Math.abs(turn.progress - target) < 0.002 && Math.abs(velocity) < 0.02) {
+        finishTurn(target);
+        return;
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
+
+  const requestTurn = (direction: Direction) => {
+    if (tapTimer) {
+      window.clearTimeout(tapTimer);
+      tapTimer = 0;
+    }
+    if (beginTurn(direction)) animateTo(1);
+  };
+
+  const finishDrag = (cancel = false) => {
+    if (!drag) return;
+    const released = drag;
+    drag = null;
+    if (!turn) {
+      if (!cancel && released.distance < 6) {
+        tapTimer = window.setTimeout(() => requestTurn(released.direction), 300);
+      }
+      return;
+    }
+    const commit =
+      !cancel &&
+      (released.distance < 6 ||
+        turn.progress > COMMIT_PROGRESS ||
+        released.velocity > COMMIT_VELOCITY);
+    animateTo(commit ? 1 : 0, released.velocity);
+  };
+
+  book.addEventListener('pointerdown', (event) => {
+    if (
+      event.button !== 0 ||
+      turn ||
+      introRunning ||
+      (event.target instanceof Element && event.target.closest('[data-sketchbook-seal]'))
+    )
+      return;
+    const rect = book.getBoundingClientRect();
+    event.preventDefault();
+    book.setPointerCapture(event.pointerId);
+    drag = {
+      pointerId: event.pointerId,
+      direction: event.clientX > rect.left + rect.width / 2 ? 'next' : 'prev',
+      startX: event.clientX,
+      width: rect.width,
+      distance: 0,
+      previousProgress: 0,
+      previousTime: performance.now(),
+      velocity: 0,
     };
   });
 
-  // 印泥磁吸：细指针下卷首钤印被指尖轻带、弹性回位（印泥有黏性）
-  if (seal) {
-    const colophon = hero.querySelector<HTMLElement>('.hero__colophon');
-    if (colophon) attachSealMagnet(seal, colophon);
+  book.addEventListener('pointermove', (event) => {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const deltaX = event.clientX - drag.startX;
+    drag.distance = Math.max(drag.distance, Math.abs(deltaX));
+    if (!turn && drag.distance >= 3) beginTurn(drag.direction);
+    if (!turn) return;
+    const raw = (drag.direction === 'next' ? -deltaX : deltaX) / (drag.width * 0.62);
+    const progress = clamp(raw);
+    const now = performance.now();
+    drag.velocity =
+      (progress - drag.previousProgress) / Math.max(0.001, (now - drag.previousTime) / 1000);
+    drag.previousProgress = progress;
+    drag.previousTime = now;
+    applyTurn(progress);
+  });
+
+  book.addEventListener('pointerup', (event) => {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    if (book.hasPointerCapture(event.pointerId)) book.releasePointerCapture(event.pointerId);
+    finishDrag();
+  });
+  book.addEventListener('pointercancel', () => finishDrag(true));
+
+  const schedulePose = () => {
+    if (poseFrame) return;
+    const tick = () => {
+      poseFrame = 0;
+      const amount = reducedMotion ? 1 : 0.14;
+      scale += (targetScale - scale) * amount;
+      tiltX += (targetTiltX - tiltX) * amount;
+      tiltY += (targetTiltY - tiltY) * amount;
+      bookWrap.style.setProperty('--book-scale', scale.toFixed(4));
+      bookWrap.style.setProperty('--book-tilt-x', `${tiltX.toFixed(3)}deg`);
+      bookWrap.style.setProperty('--book-tilt-y', `${tiltY.toFixed(3)}deg`);
+      if (
+        Math.abs(targetScale - scale) > 0.001 ||
+        Math.abs(targetTiltX - tiltX) > 0.01 ||
+        Math.abs(targetTiltY - tiltY) > 0.01
+      )
+        poseFrame = requestAnimationFrame(tick);
+    };
+    poseFrame = requestAnimationFrame(tick);
+  };
+
+  const setZoom = (value: number) => {
+    targetScale = Math.round(clamp(value, 0.9, 1.5) * 10) / 10;
+    zoomStatus.textContent = `${Math.round(targetScale * 100)}%`;
+    schedulePose();
+  };
+
+  zoomOut.addEventListener('click', () => setZoom(targetScale - 0.1));
+  zoomReset.addEventListener('click', () => setZoom(1));
+  zoomIn.addEventListener('click', () => setZoom(targetScale + 0.1));
+  book.addEventListener('dblclick', (event) => {
+    event.preventDefault();
+    if (tapTimer) {
+      window.clearTimeout(tapTimer);
+      tapTimer = 0;
+    }
+    setZoom(1);
+  });
+
+  prevButton.addEventListener('click', () => requestTurn('prev'));
+  nextButton.addEventListener('click', () => requestTurn('next'));
+  seal.addEventListener('click', (event) => {
+    if (turn || introRunning) event.preventDefault();
+  });
+  window.addEventListener('keydown', (event) => {
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    const target = event.target;
+    if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return;
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      requestTurn('next');
+    }
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      requestTurn('prev');
+    }
+  });
+
+  if (precisePointer && !reducedMotion) {
+    frame.addEventListener('pointermove', (event) => {
+      if (drag || turn) return;
+      const rect = frame.getBoundingClientRect();
+      const x = clamp((event.clientX - rect.left) / rect.width, 0, 1) - 0.5;
+      const y = clamp((event.clientY - rect.top) / rect.height, 0, 1) - 0.5;
+      targetTiltX = -y * 9;
+      targetTiltY = x * 14;
+      schedulePose();
+    });
+    frame.addEventListener('pointerleave', () => {
+      targetTiltX = 0;
+      targetTiltY = 0;
+      schedulePose();
+    });
   }
+
+  const fixedTurn = (duration: number) =>
+    new Promise<void>((resolve) => {
+      if (!beginTurn('next')) {
+        resolve();
+        return;
+      }
+      const started = performance.now();
+      const tick = (now: number) => {
+        const raw = clamp((now - started) / duration);
+        const eased = raw * raw * (3 - 2 * raw);
+        applyTurn(eased);
+        if (raw < 1) {
+          requestAnimationFrame(tick);
+          return;
+        }
+        finishTurn(1);
+        resolve();
+      };
+      requestAnimationFrame(tick);
+    });
+
+  const preloadPages = () =>
+    Promise.all(
+      pages.map(
+        (page) =>
+          new Promise<void>((resolve) => {
+            const image = new Image();
+            image.onload = () => resolve();
+            image.onerror = () => resolve();
+            image.src = page.image;
+          }),
+      ),
+    );
+
+  const runIntro = async () => {
+    await preloadPages();
+    for (let index = 0; index < pages.length; index += 1) {
+      const bell = Math.sin(Math.PI * ((index + 0.5) / pages.length));
+      await fixedTurn((0.26 - 0.19 * bell) * 1000);
+    }
+    introRunning = false;
+    delete hero.dataset.heroIntro;
+    hero.classList.add('hero--intro-complete');
+    renderStable();
+  };
+
+  renderStable();
+
+  let playIntro = false;
+  if (!reducedMotion) {
+    try {
+      playIntro = sessionStorage.getItem(SESSION_KEY) !== '1';
+      if (playIntro) sessionStorage.setItem(SESSION_KEY, '1');
+    } catch {
+      // Storage 异常时直接维持稳定卷首，避免开场在每次访问重复播放。
+      playIntro = false;
+    }
+  }
+
+  if (playIntro) {
+    introRunning = true;
+    hero.dataset.heroIntro = 'riffle';
+    setInteractionState();
+    void runIntro();
+  }
+
+  window.addEventListener('resize', () => {
+    if (turn) finishTurn(turn.progress > 0.5 ? 1 : 0);
+    else renderStable();
+  });
 }
