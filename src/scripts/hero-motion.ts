@@ -588,9 +588,9 @@ export function initHeroMotion(hero: HTMLElement) {
         (page) =>
           new Promise<void>((resolve) => {
             const image = new Image();
-            image.onload = () => resolve();
-            image.onerror = () => resolve();
             image.src = page.image;
+            if (typeof image.decode === 'function') image.decode().then(resolve, resolve);
+            else image.onload = image.onerror = () => resolve();
           }),
       ),
     );

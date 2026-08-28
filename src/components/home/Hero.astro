@@ -1,12 +1,12 @@
 ---
 import { getImage } from 'astro:assets';
 import { getCollection } from 'astro:content';
-import coverArtwork from '../../assets/art/sketchbook/cover.png';
-import journalArtwork from '../../assets/art/sketchbook/journal.png';
-import projectsArtwork from '../../assets/art/sketchbook/projects.png';
-import galleryArtwork from '../../assets/art/sketchbook/gallery.png';
-import aboutArtwork from '../../assets/art/sketchbook/about.png';
-import guestbookArtwork from '../../assets/art/sketchbook/guestbook.png';
+import coverArtwork from '../../assets/art/sketchbook/cover-unified.png';
+import journalArtwork from '../../assets/art/sketchbook/journal-unified.png';
+import projectsArtwork from '../../assets/art/sketchbook/projects-unified.png';
+import galleryArtwork from '../../assets/art/sketchbook/gallery-unified.png';
+import aboutArtwork from '../../assets/art/sketchbook/about-unified.png';
+import guestbookArtwork from '../../assets/art/sketchbook/guestbook-unified.png';
 import heroArtwork from '../../assets/art/hero-paper-mountains.webp';
 import { site, withBase } from '../../site.config';
 import { formatYearMonth } from '../../utils/date';
@@ -85,7 +85,7 @@ const pages = [
     href: withBase('/gallery/'),
     seal: '看影',
     image: optimizedArtwork[3].src,
-    alt: '宣纸册页上绘有月影、空白相纸与窗格投影',
+    alt: '宣纸册页上绘有空白相纸、接触印样、放大镜与窗格投影',
   },
   {
     chapter: '此间',
@@ -96,7 +96,7 @@ const pages = [
     href: withBase('/about/'),
     seal: '到访',
     image: optimizedArtwork[4].src,
-    alt: '宣纸册页上绘有茶盏、枝叶、无字折图与远处低山',
+    alt: '宣纸册页上绘有青瓷茶盏、木托、无字折图与淡彩梅枝',
   },
   {
     chapter: '留墨',
@@ -109,7 +109,7 @@ const pages = [
     href: withBase('/guestbook/'),
     seal: '留墨',
     image: optimizedArtwork[5].src,
-    alt: '宣纸册页上绘有砚台、毛笔、空白留言笺与无字印石',
+    alt: '宣纸册页上绘有花鸟、空白留言笺、毛笔与无字印石',
   },
 ] as const;
 
@@ -303,7 +303,7 @@ const heroStyle = `--hero-paper: url("${heroArtwork.src}")`;
   .sketchbook__frame {
     position: relative;
     width: min(58vw, 46rem);
-    aspect-ratio: 2.2;
+    aspect-ratio: 1760 / 1240;
     perspective: 1750px;
     perspective-origin: 50% 46%;
   }
@@ -359,9 +359,8 @@ const heroStyle = `--hero-paper: url("${heroArtwork.src}")`;
     inset-inline: 0;
   }
   .sketchbook__spread {
-    overflow: hidden;
-    border-radius: clamp(0.7rem, 1.6vw, 1.3rem);
-    box-shadow: 0 0.9rem 2rem rgb(47 38 26 / 0.2);
+    background-position: center;
+    background-size: 100% auto;
   }
   .sketchbook__spread,
   .sketchbook__half,
@@ -383,7 +382,7 @@ const heroStyle = `--hero-paper: url("${heroArtwork.src}")`;
   }
   .sketchbook__gutter {
     position: absolute;
-    inset-block: 7%;
+    inset-block: 21.8%;
     left: 50%;
     z-index: 4;
     width: 6%;
@@ -438,7 +437,7 @@ const heroStyle = `--hero-paper: url("${heroArtwork.src}")`;
   .sketchbook__face::after {
     content: '';
     position: absolute;
-    inset: 0;
+    inset: 21.8% 0;
     background:
       linear-gradient(90deg, rgb(54 39 21 / var(--shade-a, 0)), rgb(54 39 21 / var(--shade-b, 0))),
       linear-gradient(100deg, transparent 30%, rgb(255 252 237 / var(--glint, 0)) 72%, transparent);
@@ -446,8 +445,8 @@ const heroStyle = `--hero-paper: url("${heroArtwork.src}")`;
   }
   .sketchbook__turn-shadow {
     position: absolute;
-    top: 7%;
-    bottom: 6%;
+    top: 21.8%;
+    bottom: 21.8%;
     left: 50%;
     z-index: 3;
     width: 38%;
@@ -459,7 +458,7 @@ const heroStyle = `--hero-paper: url("${heroArtwork.src}")`;
   }
   .sketchbook__copy {
     position: absolute;
-    inset: 0;
+    inset: 21.8% 5%;
     z-index: 8;
     display: grid;
     grid-template-columns: 1fr 1fr;

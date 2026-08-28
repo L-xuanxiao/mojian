@@ -33,7 +33,7 @@ const servePagefind = (page: Page, { initDelay = 0, searchDelays = {} }: Pagefin
 
 const delaySketchbookPages = (page: Page, delay = 2500) =>
   page.route(
-    /\/mojian\/_astro\/(?:cover|journal|projects|gallery|about|guestbook)\..+\.webp$/,
+    /\/mojian\/_astro\/(?:cover|journal|projects|gallery|about|guestbook)(?:-unified)?\..+\.webp$/,
     async (route) => {
       await new Promise((resolve) => setTimeout(resolve, delay));
       await route.continue();
