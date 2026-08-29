@@ -1,3 +1,26 @@
+# 当前任务：扩写项目与组件 README
+
+目标：保留根目录 `README.md` 的现有定位、技术基线、命令和目录概览，在其上补齐可运行的上手流程、内容维护、配置、架构、质量门禁、部署与文档索引；同时新建 `src/components/README.md`，明确组件分层、职责、公开契约、Island 水合边界和新增组件验收流程。
+
+- [x] 核对 README 中涉及的脚本、路由、内容 schema、配置、部署和组件调用均与当前源码一致
+- [x] 在保留现有根 README 骨架的前提下扩写使用与维护说明
+- [x] 新建组件 README，覆盖全部现有组件与数据文件的职责和使用边界
+- [x] 检查两份 README 的本地链接、命令、代码示例、格式和差异
+
+## 计划确认
+
+- 根 README：服务首次进入仓库的维护者，按“定位 → 快速开始 → 信息架构 → 内容与配置 → 渲染边界 → 验证与部署 → 文档索引”组织；不复制 `DESIGN.md` 的具体视觉数值，也不把路线图当作现状。
+- 组件 README：服务修改 `src/components/` 的开发者与 Agent，先给出 Astro / React 选择流程，再按根级、`home / about / journal / projects / gallery / guestbook` 分组清点组件；关键 Props、slot、`client:*` 和降级策略与定义放在同一节。
+- 信息层级：根 README 只保留所有维护分支都需要的事实，组件细节下沉到 `src/components/README.md`；设计、代码、依赖、验证和 Git 规则继续通过明确触发条件指向现有权威文档。
+- 验证：本轮只改 Markdown，回读两份文件，自动核对本地 Markdown 链接，再执行 `pnpm format:check` 与 `git diff --check`；无需构建。
+
+## 结果审查
+
+- 根 README 保留原有标题、项目简介、技术基线、常用命令与目录概览，在这些入口上扩写了快速开始、路由与内容维护、站点配置、渲染边界、质量门禁、部署流程和文档索引。
+- 新建组件 README，逐组覆盖 `src/components/` 当前 26 个组件、数据与样式文件，并明确关键 Props、slot、Island 水合时机、无 JavaScript 降级和新增组件完成标准。
+- 自动检查确认组件 README 未遗漏现有文件，两份 README 的本地 Markdown 链接均可解析；`pnpm format:check` 与 `git diff --check` 通过。
+- 本轮仅修改文档，按验证规则未运行构建或浏览器回归；未提交、未推送。
+
 # 当前任务：清理白边废稿
 
 目标：仅删除用户确认的 7 张 `*-white-edge-backup.png` 瑕疵备份，保留当前在用六图、统一母版、旧题材和山水备用图；仅同步相关任务记录，不修改代码、依赖或 Git 历史。
