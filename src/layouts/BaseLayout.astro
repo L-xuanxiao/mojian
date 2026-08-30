@@ -85,6 +85,39 @@ const {
       import '../scripts/cursor';
       // 单例水墨环境层：按可见章节切换密度，低动态时只绘制静态一帧
       import '../scripts/ambient-ink';
+
+      // 跨页拉卷只增强主指针导航；键盘、历史遍历与程序导航直接进入新页。
+      let pointerNavigationTarget: string | undefined;
+      document.addEventListener('click', (event) => {
+        pointerNavigationTarget = undefined;
+        const link =
+          event.target instanceof Element
+            ? event.target.closest<HTMLAnchorElement>('a[href]')
+            : null;
+        if (
+          event.detail === 0 ||
+          event.button !== 0 ||
+          event.altKey ||
+          event.ctrlKey ||
+          event.metaKey ||
+          event.shiftKey ||
+          !link ||
+          link.hasAttribute('download') ||
+          (link.target && link.target !== '_self')
+        )
+          return;
+
+        const target = new URL(link.href);
+        if (target.origin === location.origin) pointerNavigationTarget = target.href;
+      });
+
+      window.addEventListener('pageswap', (event) => {
+        if (!event.viewTransition) return;
+        if (pointerNavigationTarget !== event.activation?.entry.url) {
+          event.viewTransition.skipTransition();
+        }
+        pointerNavigationTarget = undefined;
+      });
     </script>
   </body>
 </html>

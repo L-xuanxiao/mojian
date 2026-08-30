@@ -428,18 +428,23 @@ export function initHeroMotion(hero: HTMLElement) {
   };
 
   // 对齐上游 step：用户输入先终止开场，再结算旧页并提交新的翻页。
-  const step = (direction: Direction) => {
+  const step = (direction: Direction, instant = false) => {
     if (introRunning) endIntro();
     startTurn(direction);
-    animateTo(1);
+    if (instant) {
+      applyTurn(1);
+      finishTurn(1);
+    } else {
+      animateTo(1);
+    }
   };
 
-  const requestTurn = (direction: Direction) => {
+  const requestTurn = (direction: Direction, instant = false) => {
     if (tapTimer) {
       window.clearTimeout(tapTimer);
       tapTimer = 0;
     }
-    step(direction);
+    step(direction, instant);
   };
 
   const finishDrag = (cancel = false) => {
@@ -528,15 +533,20 @@ export function initHeroMotion(hero: HTMLElement) {
     poseFrame = requestAnimationFrame(tick);
   };
 
-  const setZoom = (value: number) => {
+  const setZoom = (value: number, instant = false) => {
     targetScale = Math.round(clamp(value, 0.9, 1.5) * 10) / 10;
     zoomStatus.textContent = `${Math.round(targetScale * 100)}%`;
+    if (instant || reducedMotion) {
+      scale = targetScale;
+      bookWrap.style.setProperty('--book-scale', scale.toFixed(4));
+      return;
+    }
     schedulePose();
   };
 
-  zoomOut.addEventListener('click', () => setZoom(targetScale - 0.1));
-  zoomReset.addEventListener('click', () => setZoom(1));
-  zoomIn.addEventListener('click', () => setZoom(targetScale + 0.1));
+  zoomOut.addEventListener('click', (event) => setZoom(targetScale - 0.1, event.detail === 0));
+  zoomReset.addEventListener('click', (event) => setZoom(1, event.detail === 0));
+  zoomIn.addEventListener('click', (event) => setZoom(targetScale + 0.1, event.detail === 0));
   book.addEventListener('dblclick', (event) => {
     event.preventDefault();
     if (tapTimer) {
@@ -546,22 +556,21 @@ export function initHeroMotion(hero: HTMLElement) {
     setZoom(1);
   });
 
-  prevButton.addEventListener('click', () => requestTurn('prev'));
-  nextButton.addEventListener('click', () => requestTurn('next'));
+  prevButton.addEventListener('click', (event) => requestTurn('prev', event.detail === 0));
+  nextButton.addEventListener('click', (event) => requestTurn('next', event.detail === 0));
   seal.addEventListener('click', (event) => {
     if (turn || introRunning) event.preventDefault();
   });
-  window.addEventListener('keydown', (event) => {
-    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-    const target = event.target;
-    if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return;
+  book.addEventListener('keydown', (event) => {
+    if (event.target !== book || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
+      return;
     if (event.key === 'ArrowRight') {
       event.preventDefault();
-      requestTurn('next');
+      requestTurn('next', true);
     }
     if (event.key === 'ArrowLeft') {
       event.preventDefault();
-      requestTurn('prev');
+      requestTurn('prev', true);
     }
   });
 

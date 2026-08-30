@@ -168,18 +168,15 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
     }
   }
 
-  /* 键盘焦点与桌面 hover 获得同等回正；触摸点击不会触发位移类反馈。 */
-  .project-index__item:has(:focus-visible) .project-index__media {
-    transform: translateY(-6px) rotate(0deg);
-    box-shadow: 0 28px 64px var(--shadow-color);
-  }
-
+  /* 键盘焦点只保留即时展签反馈，不触发展品抬升。 */
   .project-index__item:has(:focus-visible) .project-index__number {
     color: color-mix(in oklab, var(--cinnabar) 62%, transparent);
+    transition: none;
   }
 
   .project-index__item:has(:focus-visible) .project-index__label::after {
     transform: scaleX(1);
+    transition: none;
   }
 
   .project-index__copy {
@@ -340,6 +337,11 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
     .project-index__item:has(:focus-visible) .project-index__label::after {
       opacity: 1;
       transform: scaleX(1);
+    }
+
+    .project-index__item:has(:focus-visible) .project-index__number,
+    .project-index__item:has(:focus-visible) .project-index__label::after {
+      transition: none;
     }
   }
 </style>

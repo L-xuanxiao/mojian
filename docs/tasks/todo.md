@@ -1,3 +1,85 @@
+# 当前任务：四项动效专项修复
+
+目标：保留指针叙事动效，将键盘、辅助技术与 focus 路径改为即时终态；修复页眉滤镜插值与 Hero 粗指针 hover 门控，不新增依赖或公开 API。
+
+- [x] 以现有 Playwright 关键交互为公开缝隙，逐项完成 red → green
+- [x] 按输入源分流跨页、Hero、灯箱、主题与移动卷目动效
+- [x] 拆分 hover / focus 反馈并补齐 reduced-motion 即时终态
+- [x] 移除 Header 的 backdrop-filter 插值并门控 Hero 箭头缩放
+- [x] 同步设计契约与进度记录
+- [x] 运行 format、check、build、test 与真实浏览器复核
+
+## 计划确认
+
+- 输入口径：主指针保留现有拉卷、弹簧、底片与菜单时长；键盘、辅助技术、历史遍历与 focus 立即进入可操作终态。
+- 测试缝隙：只通过真实 DOM、键盘、指针及浏览器 View Transition 观察公开行为，不测试私有函数或依赖内部实现。
+- 实现边界：复用 `pageswap` / `ViewTransition.skipTransition()`、YARL 现有 animation 配置和当前 `flushSync`；不新增依赖、文件或公开类型。
+- 工作区边界：保留本文件已有未提交审查记录；不提交、不推送、不创建 PR。
+
+## 结果审查
+
+- 输入分流：跨页拉卷只保留匹配目标的主指针点击；Hero 方向键收口至册页焦点域，键盘翻页/箭头/缩放同步结算；灯箱键盘打开、翻幅、Escape 关闭均为零时长，指针翻幅仍保留活动动画；主题字形与移动卷目键盘路径即时完成。
+- focus / hover：器作索引、首页作品、光影、笺录与检索墨线已拆分；位移、缩放、抬升仅存在于细指针 hover，focus 只显示即时颜色、墨线、说明与缩放终态，低动态保持相同可访问结果。
+- 性能：Header 只过渡 150ms 背景色，滚动阈值不再插值 `backdrop-filter`；Hero 箭头缩放仅在 `(hover: hover) and (pointer: fine)` 生效。
+- 文档：`DESIGN.md` 已同步跨页、Hero、器作、灯箱、Header、移动导航与列表契约；`docs/progress.md` 已记录阶段结果。
+- 浏览器：Playwright 23/23 通过，覆盖 1707px / 390px、首页 / 器作 / 光影 / 笺录、深浅主题、低动态、粗指针与无 JS 路径。
+- 门禁：`pnpm format:check`、`pnpm check`（0 errors / 0 warnings / 0 hints）、`pnpm build`（24 页 + Pagefind 3 页索引）、`pnpm test` 全部通过；preview 已自动停止。
+- 图谱：`D-MyBlog-LBlog` generation `2026-08-30T08:26:23Z`；16 个变更/证据路径均无已记录覆盖缺口，freshness 为 `metadata_changed`，已逐文件回读并以构建、类型检查和浏览器回归验证。
+- 修改边界：未新增依赖、文件或公开 API，未提交、未推送。
+
+# 当前任务：全项目 Standards / Spec 与动效专项审查
+
+目标：以当前 `main` 快照为审查对象，只读探索整个项目；分别按项目规范 / 代码异味基线和动效高工艺标准输出可复核发现，不修改业务代码，不提交、不推送。
+
+- [x] 锁定固定点、规范来源、图索引状态与审查边界
+- [x] 使用知识图谱与源码回读完成 Standards 审查
+- [x] 审查全部动效实现，并在真实浏览器核验关键体验
+- [x] 运行最小必要验证，汇总 Standards / Spec / 动效结论
+
+## 计划确认
+
+- 固定点：用户未指定比较基线；按仓库既有约定先检查 `main...HEAD`。当前 `HEAD === main` 且无提交差异，因此审查当前提交 `3efedfc86e2f6f0a690984f9dc5b018b1762d078` 的全仓快照，不虚构 PR diff。
+- Standards：以 `AGENTS.md`、`docs/agents/`、`DESIGN.md` 为仓库标准，并应用 `$code-review` 的代码异味基线；所有候选发现都回读当前源码。
+- Spec：当前没有提交差异、分支规格或可匹配的 originating issue；按 `$code-review` 规则标记为“无可用 Spec”，不虚构需求偏差。
+- 动效：按 `$review-animations` 的十项硬标准与精确时长 / easing / 性能 / 无障碍规则，覆盖 CSS、GSAP、Motion、WAAPI 和交互脚本；关键结论以实际浏览器补证。
+- 交付边界：仅更新本任务记录；保留工作区已有 `docs/tasks/todo.md` 修改，不改业务代码，不提交、不推送。
+
+## 结果审查
+
+- Standards 3 项：① 16 个文件仍有 33 处小字号不属于 `0.62 / 0.68 / 0.72rem` 三档，Hero 移动正文最低为 `0.46 / 0.54rem`；② Hero 箭头的缩放 hover 未置于细指针门控；③ `journal.featured` 仍暴露在 schema 与 README 中，但首页笺录只取最新文章，全仓无消费者。
+- Spec：`main...HEAD` 为空，提交记录无 originating issue，且用户未提供独立规格；按 `$code-review` 规则跳过，不虚构需求缺口或 scope creep。
+- 动效 4 个根因，结论 **Block**：① 跨页、Hero、灯箱、主题字形与移动菜单的键盘路径仍播放动画，且 Hero 在 `window` 级拦截左右方向键；② 多处 `focus-visible / focus-within` 复用 250ms 位移，`JournalSearch` 还缺 reduced-motion 收口；③ sticky 页眉滚动阈值动画 `backdrop-filter`；④ Hero 箭头 hover 位移缺少细指针门控。
+- 图谱：`D-MyBlog-LBlog` generation `2026-08-29T08:48:09Z`，HEAD `3efedfc`，0 parse-partial / 0 skipped、无 CALLS cycle；所有候选源码 freshness 为 `metadata_changed`，已逐文件回读并以全仓 `rg` 验证，已知覆盖缺口仅为图片资产。
+- 浏览器：本地 1280×720 实测 Hero 方向键翻卷在 300ms 时仍未更新状态，随后才落到下一卷；灯箱翻底片计算时长为 520ms。静态源码与 E2E 同时确认键盘路径存在且功能可用。
+- 验证：`pnpm format:check` 通过；`pnpm check` 为 0 errors / 0 warnings / 0 hints；`pnpm test` 完成生产构建 24 页并通过 Playwright 11/11，preview 已自动停止。
+- 修改边界：未修改业务代码、未提交、未推送；仅在既有 `docs/tasks/todo.md` 未提交记录上追加本轮计划与结果。
+
+# 当前任务：Thermo-Nuclear 全仓代码质量审查
+
+目标：在当前 `main` 无分支差异的前提下，对仓库当前快照做一次只读、严苛的可维护性审查，优先识别结构退化、意外复杂度、边界泄漏、巨型文件与可删除的抽象；不擅自修改业务代码。
+
+- [x] 锁定审查范围、规范来源与图索引状态
+- [x] 使用知识图谱定位复杂度热点、调用边界与潜在重复
+- [x] 回读源码与测试，验证每个候选发现并排除低价值误报
+- [x] 运行最小必要的静态验证，记录现有基线
+- [x] 输出按严重度排序、带文件行号和修复方向的审查报告
+
+## 计划确认
+
+- 审查对象：当前提交 `3efedfc86e2f6f0a690984f9dc5b018b1762d078` 的全仓快照；`main...HEAD` 与工作区均无差异，因此不做虚构的 PR diff 审查。
+- 质量标准：项目 `AGENTS.md` / `docs/agents/` / `DESIGN.md` 的明确约束，加上 `thermo-nuclear-code-quality-review` 的结构简化、分支复杂度、边界、类型契约和文件规模标准。
+- 证据要求：图谱只负责发现与调用关系；所有保留发现都回到当前源码逐行核对，并对引用路径执行覆盖检查。
+- 交付边界：只更新本任务记录，不修改业务代码、不提交、不推送。
+
+## 结果审查
+
+- 范围：`main...HEAD`、暂存区与工作区初始均无业务差异；因此按当前提交 `3efedfc86e2f6f0a690984f9dc5b018b1762d078` 审查全仓快照，Spec 轴无变更规格可核对。
+- 高置信发现 3 项：① `initHeroMotion()` 在单个约 587 行闭包中聚合 21 个可变状态、15 个事件监听器以及渲染 / 动画 / 输入 / 开场 / 缩放职责；② `PageIntro` 的 `scene` 与 `artTreatment` 当前八处调用始终一一对应，但类型仍允许无效组合；③ `journal.featured` 同时出现在 schema 与维护文档中，首页笺录却只按发布日期取最新，字段没有任何行为消费者。
+- 排除项：没有文件超过 1,000 行；未发现 `any`、`@ts-ignore`、循环依赖或未解释的跨层调用；没有把单纯文件较长、Astro 样式共置或现有依赖数量作为发现。
+- 图谱：`D-MyBlog-LBlog` generation `2026-08-29T08:48:09Z`，0 parse-partial / 0 skipped；候选源码 freshness 为 `metadata_changed`，已逐文件回读并用全仓 `rg` 验证调用与字段消费，已知 coverage gap 仅为图片资产。
+- 验证：`pnpm format:check` 通过；`pnpm check` 为 0 errors / 0 warnings / 0 hints；`pnpm test` 完成生产构建 24 页并通过 Playwright 11/11，preview 已自动停止。
+- 修改边界：未修改业务代码、未提交、未推送；仅更新本任务记录。
+
 # 当前任务：扩写项目与组件 README
 
 目标：保留根目录 `README.md` 的现有定位、技术基线、命令和目录概览，在其上补齐可运行的上手流程、内容维护、配置、架构、质量门禁、部署与文档索引；同时新建 `src/components/README.md`，明确组件分层、职责、公开契约、Island 水合边界和新增组件验收流程。

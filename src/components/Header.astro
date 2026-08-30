@@ -156,9 +156,7 @@ const currentItem = navigation.find((item) => item.active) ?? { ...navigation[0]
     border-top: 3px solid var(--ink);
     background: color-mix(in oklab, var(--paper-glass) 28%, transparent);
     backdrop-filter: blur(10px);
-    transition:
-      background-color 150ms var(--ease-ink),
-      backdrop-filter 250ms var(--ease-ink);
+    transition: background-color 150ms var(--ease-ink);
   }
 
   /* 卷头副线：顶线之下 2px 的 1px 细线，合成书脊双线 */

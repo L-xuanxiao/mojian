@@ -48,10 +48,12 @@ export default function GalleryLightbox({ items }: Props) {
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
   const [openingSlideSrc, setOpeningSlideSrc] = useState<string | null>(null);
+  const [instantInteraction, setInstantInteraction] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const gridRef = useRef<HTMLElement | null>(null);
   const transitionTargetRef = useRef<HTMLImageElement | null>(null);
   const transitionActiveRef = useRef(false);
+  const instantInteractionRef = useRef(false);
   const slides = useMemo(
     () => items.map(({ src, alt, width, height }) => ({ src, alt, width, height })),
     [items],
@@ -60,6 +62,48 @@ export default function GalleryLightbox({ items }: Props) {
   useEffect(() => {
     if (!open) triggerRef.current?.focus({ preventScroll: true });
   }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const setInputMode = (instant: boolean) => {
+      if (instantInteractionRef.current === instant) return;
+      instantInteractionRef.current = instant;
+      // 在 YARL 的冒泡键盘处理前提交时长，保留指针按钮的原有导航动画。
+      flushSync(() => setInstantInteraction(instant));
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        instantInteractionRef.current = true;
+        flushSync(() => {
+          setInstantInteraction(true);
+          setOpeningSlideSrc(null);
+          setOpen(false);
+        });
+        return;
+      }
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        event.stopPropagation();
+        instantInteractionRef.current = true;
+        const direction = event.key === 'ArrowRight' ? 1 : -1;
+        flushSync(() => {
+          setInstantInteraction(true);
+          setIndex((current) => (current + direction + items.length) % items.length);
+        });
+        return;
+      }
+      setInputMode(true);
+    };
+    const handlePointerDown = () => setInputMode(false);
+    document.addEventListener('keydown', handleKeyDown, true);
+    document.addEventListener('pointerdown', handlePointerDown, true);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+      document.removeEventListener('pointerdown', handlePointerDown, true);
+    };
+  }, [items.length, open]);
 
   useEffect(() => {
     if (!openingSlideSrc) return;
@@ -95,9 +139,14 @@ export default function GalleryLightbox({ items }: Props) {
     from: HTMLImageElement | null,
     update: () => void,
     getTarget: () => HTMLImageElement | null,
+    instant = false,
   ) => {
     const startViewTransition = document.startViewTransition?.bind(document);
-    if (reducedMotion || !startViewTransition || !from || transitionActiveRef.current) {
+    if (instant || reducedMotion) {
+      flushSync(update);
+      return;
+    }
+    if (!startViewTransition || !from || transitionActiveRef.current) {
       update();
       return;
     }
@@ -146,16 +195,19 @@ export default function GalleryLightbox({ items }: Props) {
     }
   };
 
-  const openAt = (nextIndex: number, trigger: HTMLButtonElement) => {
+  const openAt = (nextIndex: number, trigger: HTMLButtonElement, instant = false) => {
     triggerRef.current = trigger;
+    instantInteractionRef.current = instant;
+    setInstantInteraction(instant);
     transitionBetween(
       gridImageAt(nextIndex),
       () => {
         setIndex(nextIndex);
-        setOpeningSlideSrc(reducedMotion ? null : (items[nextIndex]?.src ?? null));
+        setOpeningSlideSrc(instant || reducedMotion ? null : (items[nextIndex]?.src ?? null));
         setOpen(true);
       },
       () => document.querySelector<HTMLImageElement>('.ink-lightbox .yarl__slide_image'),
+      instant,
     );
   };
 
@@ -167,6 +219,7 @@ export default function GalleryLightbox({ items }: Props) {
         setOpen(false);
       },
       () => gridImageAt(index),
+      instantInteractionRef.current,
     );
   };
 
@@ -195,7 +248,7 @@ export default function GalleryLightbox({ items }: Props) {
               aria-label={`放大查看：${item.title}`}
               aria-haspopup="dialog"
               data-gallery-index={itemIndex}
-              onClick={(event) => openAt(itemIndex, event.currentTarget)}
+              onClick={(event) => openAt(itemIndex, event.currentTarget, event.detail === 0)}
             >
               <span className="gallery-entry__develop">
                 <img
@@ -237,7 +290,7 @@ export default function GalleryLightbox({ items }: Props) {
         carousel={{ finite: false, padding: '4%', imageFit: 'contain' }}
         controller={{ closeOnBackdropClick: true }}
         animation={
-          reducedMotion
+          reducedMotion || instantInteraction
             ? { fade: 0, swipe: 0, navigation: 0 }
             : {
                 fade: supportsViewTransition ? 0 : 250,

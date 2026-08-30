@@ -125,8 +125,7 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .gallery-entry:hover,
-  .gallery-entry:focus-within {
+  .gallery-entry:hover {
     transform: translateY(-4px);
   }
 
@@ -167,6 +166,7 @@
 .gallery-entry__image:focus-visible .gallery-entry__zoom {
   opacity: 1;
   transform: translateY(0);
+  transition: none;
 }
 
 .gallery-entry figcaption {
@@ -204,10 +204,15 @@
       transform 250ms var(--ease-ink);
   }
 
-  .darkroom .gallery-entry:hover figcaption > div > p,
+  .darkroom .gallery-entry:hover figcaption > div > p {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
   .darkroom .gallery-entry:focus-within figcaption > div > p {
     opacity: 1;
     transform: translateY(0);
+    transition: none;
   }
 }
 
@@ -461,6 +466,11 @@
   .darkroom .gallery-entry:focus-within figcaption > div > p {
     transform: none;
     transition: opacity 150ms var(--ease-ink);
+  }
+
+  .gallery-entry__image:focus-visible .gallery-entry__zoom,
+  .darkroom .gallery-entry:focus-within figcaption > div > p {
+    transition: none;
   }
 
   ::view-transition-group(gallery-photo) {

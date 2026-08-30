@@ -40,3 +40,4 @@
 - code-review 八项修复：✅ 完成（三档小字定向回归、journal / 日期 / 主题 / 断点 / 磁吸共享、navItems 集中、白文方印原语，`43f34d8`）
 - 全项目代码续审：✅ 完成（Standards 5 项、Spec 4 项；本轮仅报告未修复，详见 `docs/tasks/todo.md`）
 - 动效专项九项修复：✅ 完成（轮播/主题键盘即时响应，页面与主题换纸 ≤250ms，页眉仅写标记 `translate3d`，按钮 160ms 轻落，图片遮罩显影替代 filter，全站 reduced-motion 逐项温和降级；设计契约与本地 sidecar 已同步）
+- 四项动效专项修复：✅ 完成（跨页、Hero、灯箱、主题与移动卷目按输入源分流；列表 focus 即时终态与细指针 hover 拆分；Header 模糊即时切换，Hero 箭头缩放限细指针；Playwright 回归覆盖键盘、指针、粗指针与低动态路径）

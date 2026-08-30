@@ -55,8 +55,9 @@ export function initThemeToggle(button: HTMLElement) {
     const startViewTransition = document.startViewTransition?.bind(document);
 
     if (reducedMotion.matches || instant || !startViewTransition) {
-      clearTransition(id);
+      root.classList.add('is-theme-transitioning');
       applyTheme(next);
+      requestAnimationFrame(() => clearTransition(id));
       return;
     }
 
@@ -86,8 +87,8 @@ export function initThemeToggle(button: HTMLElement) {
         },
       );
     } catch {
-      clearTransition(id);
       applyTheme(next);
+      requestAnimationFrame(() => clearTransition(id));
     }
   };
 

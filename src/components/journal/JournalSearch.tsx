@@ -114,7 +114,7 @@ export default function JournalSearch() {
         />
         {/* 聚焦墨线：自左向右写出 */}
         <span
-          className="bg-ink pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 transition-transform duration-250 ease-ink group-focus-within:scale-x-100"
+          className="bg-ink pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 group-focus-within:scale-x-100"
           aria-hidden
         />
         {query && (

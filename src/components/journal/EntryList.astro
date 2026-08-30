@@ -181,23 +181,35 @@ const { posts, variant = 'catalog', startIndex = 0 } = Astro.props;
     display: none;
   }
 
-  /* 案头翻阅：hover / 键盘聚焦时纸色晕开、编号落朱砂；主稿编号大，朱砂调淡 */
+  /* 案头翻阅：细指针 hover 保留晕开，键盘聚焦即时进入同一可见终态。 */
   @media (hover: hover) and (pointer: fine) {
-    .entry-list > li:hover::before,
-    .entry-list > li:focus-within::before {
+    .entry-list > li:hover::before {
       opacity: 1;
       transform: scaleX(1);
     }
 
-    .entry-list > li:hover .entry-index,
-    .entry-list > li:focus-within .entry-index {
+    .entry-list > li:hover .entry-index {
       color: var(--cinnabar);
     }
 
-    .entry-list--feature > li:hover .entry-index,
-    .entry-list--feature > li:focus-within .entry-index {
+    .entry-list--feature > li:hover .entry-index {
       color: color-mix(in oklab, var(--cinnabar) 55%, transparent);
     }
+  }
+
+  .entry-list > li:focus-within::before {
+    opacity: 1;
+    transform: scaleX(1);
+    transition: none;
+  }
+
+  .entry-list > li:focus-within .entry-index {
+    color: var(--cinnabar);
+    transition: none;
+  }
+
+  .entry-list--feature > li:focus-within .entry-index {
+    color: color-mix(in oklab, var(--cinnabar) 55%, transparent);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -215,6 +227,11 @@ const { posts, variant = 'catalog', startIndex = 0 } = Astro.props;
 
     .entry-index {
       transition: color 150ms var(--ease-ink);
+    }
+
+    .entry-list > li:focus-within::before,
+    .entry-list > li:focus-within .entry-index {
+      transition: none;
     }
   }
 

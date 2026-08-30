@@ -37,14 +37,21 @@ function initMobileNav(header: HTMLElement) {
   };
 
   summary?.addEventListener('click', (event) => {
-    if (!mobileNav.open) return;
+    const instant = event.detail === 0 || reducedMotion.matches;
+    if (!mobileNav.open) {
+      if (!instant) return;
+      event.preventDefault();
+      mobileNav.open = true;
+      panel?.getAnimations().forEach((animation) => animation.cancel());
+      return;
+    }
     event.preventDefault();
     if (mobileNav.hasAttribute('data-closing')) {
       // 收卷途中再次点击视为撤销关闭，避免快速操作留下半透明面板。
       cancelClose();
       return;
     }
-    closeMenu();
+    closeMenu(false, instant);
   });
 
   const finishAnimatedClose = (event: AnimationEvent) => {
@@ -68,7 +75,7 @@ function initMobileNav(header: HTMLElement) {
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape' || !mobileNav.open) return;
     event.preventDefault();
-    closeMenu(true);
+    closeMenu(true, true);
   });
 
   desktopViewport.addEventListener('change', (event) => {

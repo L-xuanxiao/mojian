@@ -558,7 +558,11 @@ const heroStyle = `--hero-paper: url("${heroArtwork.src}")`;
   }
   .sketchbook__arrow:hover:not(:disabled) {
     color: var(--ink);
-    transform: scale(1.08);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .sketchbook__arrow:hover:not(:disabled) {
+      transform: scale(1.08);
+    }
   }
   .sketchbook__arrow:disabled,
   .sketchbook__zoom button:disabled {
